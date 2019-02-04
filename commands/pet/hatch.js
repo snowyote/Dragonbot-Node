@@ -79,7 +79,7 @@ module.exports = class HatchCommand extends Command {
 			}
 			return msg.embed(embedMsg);
 		} else {
-			embedMsg.addField("Notice", "You don't have any pets, use `hod?adopt` to get one!");
+			embedMsg.addField("Notice", "You don't have any pets, use `!adopt` to get one!");
 			return msg.embed(embedMsg);
 		}
     };

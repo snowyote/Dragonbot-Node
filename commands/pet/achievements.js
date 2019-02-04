@@ -35,7 +35,7 @@ module.exports = class SlotsCommand extends Command {
         var achKeys = Object.keys(achProgress[0]);
         var unlocked = JSON.parse(userRes[0].achievements);
         if (page == 1) {
-            embedMsg.setFooter("Page 1/3 - Use hod?achievements 2 for the next page!");
+            embedMsg.setFooter("Page 1/3 - Use !achievements 2 for the next page!");
             for (var i = 0; i < 24; i++) {
                 var varToCheck = parseInt(achievements[i].varToCheck);
                 var varRequired = parseInt(achievements[i].varRequired);
@@ -46,7 +46,7 @@ module.exports = class SlotsCommand extends Command {
                 }
             }
         } else if (page == 2) {
-            embedMsg.setFooter("Page 2/3 - Use hod?achievements 3 for the next page!");
+            embedMsg.setFooter("Page 2/3 - Use !achievements 3 for the next page!");
             for (var i = 25; i < 49; i++) {
                 var varToCheck = parseInt(achievements[i].varToCheck);
                 var varRequired = parseInt(achievements[i].varRequired);
@@ -57,7 +57,7 @@ module.exports = class SlotsCommand extends Command {
                 }
             }
         } else if (page == 3) {
-            embedMsg.setFooter("Page 3/3 - Use hod?achievements 1 for the first page!");
+            embedMsg.setFooter("Page 3/3 - Use !achievements 1 for the first page!");
             for (var i = 49; i < achievements.length; i++) {
                 var varToCheck = parseInt(achievements[i].varToCheck);
                 var varRequired = parseInt(achievements[i].varRequired);

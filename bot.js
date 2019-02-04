@@ -3,7 +3,7 @@ const path = require('path');
 const config = require("./config.json");
 
 const client = new CommandoClient({
-    commandPrefix: 'hod?',
+    commandPrefix: '!',
     unknownCommandResponse: true,
     owner: '194534206217388032',
     disableEveryone: true

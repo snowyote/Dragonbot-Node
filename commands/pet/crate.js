@@ -30,7 +30,7 @@ module.exports = class CrateCommand extends Command {
     async run(msg, {type,amount}) {
         const embedMsg = new Discord.RichEmbed()
             .setAuthor("House of Dragons Notice", "https://i.imgur.com/CyAb3mV.png")
-            .setFooter("hod?crate <type> <all> - Use 'all' to open all crates at once!")
+            .setFooter("!crate <type> <all> - Use 'all' to open all crates at once!")
 
         let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
         console.log("DB: Selected user ID " + msg.author.id);
@@ -47,7 +47,7 @@ module.exports = class CrateCommand extends Command {
 			for(var i = 0; i < crateRes.length; i++) {
 				embedMsg.addField("["+(i+1)+"] "+crateRes[i].name+" ("+crate[crateRes[i].index]+")", crateRes[i].description+"\n**Cost: **"+crateRes[i].keyCost+" keys");
 			}
-			embedMsg.addField("Choose a crate!", "Use `hod?crate <type> <all>` to open a type of crate!");
+			embedMsg.addField("Choose a crate!", "Use `!crate <type> <all>` to open a type of crate!");
             return msg.embed(embedMsg);
 		} else {
 			type -= 1;
@@ -122,7 +122,7 @@ module.exports = class CrateCommand extends Command {
 						await Utils.queryDB("UPDATE pets SET exp=" + newXP + ", level=" + newLvl + ", skillPoints=skillPoints+" + newSP + " WHERE id=" + active);
 						return msg.embed(embedMsg);
 					} else {
-						embedMsg.addField("Cannot Open Crate", "You don't have enough keys! Find some with `hod?explore` or `hod?slots`!", true);
+						embedMsg.addField("Cannot Open Crate", "You don't have enough keys! Find some with `!explore` or `!slots`!", true);
 						return msg.embed(embedMsg);
 					}
 				} else {

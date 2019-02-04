@@ -2,7 +2,7 @@ const {Command} = require('discord.js-commando');
 const Utils = require('../../core/utils.js');
 const Discord = require('discord.js');
 
-module.exports = class SwitchCommand extends Command {
+module.exports = class EquipCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'equip',
@@ -108,7 +108,7 @@ module.exports = class SwitchCommand extends Command {
                             .setAuthor("Equipment Center (" + hasItems + "/" + itemCount + ") [" + itemPercent + "%]", "https://i.imgur.com/CyAb3mV.png")
 							.setDescription("<@"+msg.author.id+">")
                             .setColor("#FDF018")
-                            .setFooter("hod?equip <number> - to equip an item!")
+                            .setFooter("!equip <number> - to equip an item!")
 
                         embedMsg2.addField("Headgear (" + hasHG + ")", strings[0]);
                         embedMsg2.addField("Trinkets (" + hasTR + ")", strings[1]);
@@ -165,11 +165,11 @@ module.exports = class SwitchCommand extends Command {
                     return msg.embed(embedMsg);
                 }
             } else {
-                embedMsg.addField("Not Ready", "This pet hasn't been hatched yet, use `hod?hatch` to check up on it!");
+                embedMsg.addField("Not Ready", "This pet hasn't been hatched yet, use `!hatch` to check up on it!");
                 return msg.embed(embedMsg);
             }
         } else {
-            embedMsg.addField("No Pet", "You don't have a pet, get one using `hod?adopt`!");
+            embedMsg.addField("No Pet", "You don't have a pet, get one using `!adopt`!");
             return msg.embed(embedMsg);
         }
     };

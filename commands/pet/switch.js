@@ -33,7 +33,7 @@ module.exports = class SwitchCommand extends Command {
 		var aPet = petIDs[0].activePet;
 		if (petIDs.length > 0) {
 			if (!pet) {
-				embedMsg.setFooter("hod?switch <number> - to switch your active pet!");
+				embedMsg.setFooter("!switch <number> - to switch your active pet!");
 				for (var index = 0; index < petID.length; index++) {
 					let i = index;
 					let petList = petID;
@@ -76,7 +76,7 @@ module.exports = class SwitchCommand extends Command {
 				}
 			}
 		} else {
-			embedMsg.addField("Notice", "You don't have any pets! Get one with `hod?adopt`!");
+			embedMsg.addField("Notice", "You don't have any pets! Get one with `!adopt`!");
 			return msg.embed(embedMsg);
 		}
 		

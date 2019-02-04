@@ -383,11 +383,11 @@ module.exports = class PetCommand extends Command {
 					files: [buffer]
 				});
             } else {
-                embedMsg.addField("Not Ready", "This pet hasn't been hatched yet, use `hod?hatch` to check up on it!");
+                embedMsg.addField("Not Ready", "This pet hasn't been hatched yet, use `!hatch` to check up on it!");
 				msg.embed(embedMsg);
             }
         } else {
-            embedMsg.addField("No Pet", "You don't have a pet, get one using `hod?adopt`!");
+            embedMsg.addField("No Pet", "You don't have a pet, get one using `!adopt`!");
 			msg.embed(embedMsg);
         }
     };

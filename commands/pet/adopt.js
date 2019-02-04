@@ -31,7 +31,7 @@ module.exports = class AdoptCommand extends Command {
                 var currentTime = new Date().getTime();
                 var hatchTime = new Date().getTime() + (300000 * ((petNum + 1) * 3));
                 var formattedTime = Utils.formatTimeUntil(hatchTime);
-                embedMsg.addField("Notice", "You adopted your " + stringified + " pet! As it's your " + stringified + ", you've been charged **" + cost + "** coins!\nIt will hatch in **" + formattedTime + "**, use `hod?hatch` to check progress!");
+                embedMsg.addField("Notice", "You adopted your " + stringified + " pet! As it's your " + stringified + ", you've been charged **" + cost + "** coins!\nIt will hatch in **" + formattedTime + "**, use `!hatch` to check progress!");
                 const addPet = await Utils.queryDB("INSERT INTO pets(hatchTime, ownerName) VALUES (" + hatchTime + ", '" + msg.author.id + "'); ")
                 var newPetID = addPet.insertId;
                 activePet = [newPetID];

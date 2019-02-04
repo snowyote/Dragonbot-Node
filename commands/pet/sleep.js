@@ -39,7 +39,7 @@ module.exports = class SleepCommand extends Command {
                 }
             }
         } else {
-            embedMsg.addField("Can't sleep!", "You don't own a pet, to get one use `hod?adopt`!");
+            embedMsg.addField("Can't sleep!", "You don't own a pet, to get one use `!adopt`!");
 			return msg.embed(embedMsg);
         }
     };
