@@ -4,7 +4,7 @@ const {
 const Utils = require('../../core/utils.js');
 const Discord = require('discord.js');
 
-module.exports = class RefineCommand extends Command {
+module.exports = class SharpenCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'sharpen',
