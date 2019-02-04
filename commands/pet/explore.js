@@ -11,7 +11,11 @@ module.exports = class ExploreCommand extends Command {
             group: 'pet',
             memberName: 'explore',
             description: 'Explore to gain resources',
-            examples: ['explore']
+            examples: ['explore'],
+			throttling: {
+				usages: 1,
+				duration: 10
+			}
         });
     }
 
