@@ -2,7 +2,7 @@ const {Command} = require('discord.js-commando');
 const Utils = require('../../core/utils.js');
 const Discord = require('discord.js');
 
-module.exports = class AdoptCommand extends Command {
+module.exports = class RecycleCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'recycle',
