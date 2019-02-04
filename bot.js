@@ -1,6 +1,7 @@
 // --------------------------------
 // Important requires and constants
 // --------------------------------
+
 const {
     CommandoClient
 } = require('discord.js-commando');
