@@ -64,7 +64,7 @@ function newDay() {
 // ----------------------------
 
 async function petUpdates() {
-	setTimeout(() => {
+		await Utils.delay(10000);
         let petSQL = await Utils.queryDB("SELECT * FROM pets");
 
         if (petSQL.length > 0) {
@@ -118,7 +118,6 @@ async function petUpdates() {
             }
         }
 		await petUpdates();
-		},10000);
 }
 
 // -------------------------------
@@ -129,7 +128,7 @@ client.on('ready', () => {
 	console.log("Bot has started, with "+client.users.size+" users!"); 
 	client.user.setActivity("with dragon butts");
 	newDay();
-	await petUpdates();
+	petUpdates();
 });
 
 client.login(config.token);
