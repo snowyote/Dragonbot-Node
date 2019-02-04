@@ -56,7 +56,69 @@ function newDay() {
 			client.channels.get('541042784396640257').send(newDayMsg);
 			// do kicking stuff here, not implemented
 			newDay();
-		},timeUntilMidnight); // Check this every second
+		},timeUntilMidnight);
+}
+
+// ----------------------------
+// Set up the timed pet updates
+// ----------------------------
+
+async function petUpdates() {
+	setTimeout(() => {
+        let petSQL = await Utils.queryDB("SELECT * FROM pets");
+
+        if (petSQL.length > 0) {
+            var currentTime = new Date().getTime();
+            for (var i = 0; i < petSQL.length; i++) {
+                if (petSQL[i].isSleeping == 1) {
+                    var sleepTime = petSQL[i].sleepTime;
+                    if (currentTime > sleepTime) {
+                        await Utils.queryDB("UPDATE pets SET isSleeping = 0 WHERE id=" + petSQL[i].id);
+                        console.log("DB: Waking up pet");
+                        client.users.get(petSQL[i].ownerName).send("Your active pet **"+petSQL[i].name+"** has woken up!");
+                    }
+                }
+                if (petSQL[i].isEgg == 1) {
+                    var hatchTime = petSQL[i].hatchTime;
+                    if (currentTime > hatchTime) {
+                        console.log("DB: Updated pet ID " + petSQL[i].id + " to egg status 0!");
+                        let petType = await Utils.queryDB("SELECT id, name, rarity FROM pet_types");
+                        var pets = new Array();
+                        var petsWeight = new Array();
+                        for (var pi = 0; pi < petType.length; pi++) {
+                            pets.push(petType[pi].id);
+                            petsWeight.push(petType[pi].rarity);
+                        }
+                        var totalweight = eval(petsWeight.join("+"));
+                        var weighedpets = new Array();
+                        var currPet = 0;
+                        while (currPet < pets.length) {
+                            for (var pw = 0; pw < petsWeight[currPet]; pw++)
+                                weighedpets[weighedpets.length] = pets[currPet];
+                            currPet++;
+                        }
+
+                        var randomnumber = Math.floor(Math.random() * totalweight);
+                        var rarity = Utils.petTypeString(petType[pi].rarity);
+						
+                        var randomPetID = weighedpets[randomnumber];
+                        var petName = petType[randomPetID - 1].name;
+
+                        let bgType = await Utils.queryDB("SELECT id, name FROM backgrounds");
+                        var randomBG = Math.floor(Math.random() * bgType.length);
+                        var bgName = bgType[randomBG].name;
+                        var bgID = bgType[randomBG].id;
+
+                        await Utils.queryDB("UPDATE pets SET petType=" + randomPetID + ", bgType=" + bgID + " WHERE id=" + petSQL[i].id);
+                        await Utils.queryDB("UPDATE pets SET isEgg=0 WHERE id=" + petSQL[i].id);
+                        console.log("DB: Hatching pet!");
+                        client.users.get(petSQL[i].ownerName).send("Your pet has hatched into a **"+petName+"** (**"+rarity+"**)!");
+                    }
+                }
+            }
+        }
+		await petUpdates();
+		},10000);
 }
 
 // -------------------------------
@@ -67,6 +129,7 @@ client.on('ready', () => {
 	console.log("Bot has started, with "+client.users.size+" users!"); 
 	client.user.setActivity("with dragon butts");
 	newDay();
+	await petUpdates();
 });
 
 client.login(config.token);
