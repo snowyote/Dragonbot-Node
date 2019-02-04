@@ -1,0 +1,762 @@
+{
+  "exploration": {
+    "cosmetic": {
+      "1": {
+        "icon": "👑",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 1
+      },
+      "2": {
+        "icon": "🏆",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 2
+      },
+      "3": {
+        "icon": "💍",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 3
+      },
+      "4": {
+        "icon": "💍",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 4
+      },
+      "5": {
+        "icon": "💍",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 5
+      },
+      "6": {
+        "icon": "💍",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 6
+      },
+      "7": {
+        "icon": "⭐",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 7
+      },
+      "8": {
+        "icon": "⭐",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 8
+      },
+      "9": {
+        "icon": "⭐",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 9
+      },
+      "10": {
+        "icon": "💍",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 10
+      },
+      "11": {
+        "icon": "💍",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 11
+      },
+      "12": {
+        "icon": "🍀",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 12
+      },
+      "13": {
+        "icon": "🎩",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 14
+      },
+      "14": {
+        "icon": "🐦",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 15
+      },
+      "15": {
+        "icon": "👮",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 16
+      },
+      "16": {
+        "icon": "✨",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 17
+      },
+      "17": {
+        "icon": "📦",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 18
+      },
+      "18": {
+        "icon": "📕",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 19
+      },
+      "19": {
+        "icon": "✨",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 20
+      },
+      "20": {
+        "icon": "✨",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 21
+      },
+      "21": {
+        "icon": "✨",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 22
+      },
+      "22": {
+        "icon": "🌈",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 23
+      },
+      "23": {
+        "icon": "⭐",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 24
+      },
+      "24": {
+        "icon": "⭐",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 25
+      },
+      "25": {
+        "icon": "☘️",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 26
+      },
+      "26": {
+        "icon": "🧙‍♀️",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 27
+      },
+      "27": {
+        "icon": "🎩",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 28
+      },
+      "28": {
+        "icon": "😇",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 29
+      },
+      "29": {
+        "icon": "⛩",
+        "reward": "Cosmetic",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": true,
+        "equipID": 30
+      }
+    },
+    "nothing": {
+      "1": {
+        "icon": "🤦‍",
+        "reward": "Nothing",
+        "memberVar": "",
+        "amountMin": 0,
+        "amountMax": 0,
+        "isEquip": false,
+        "equipID": 0
+      }
+    },
+    "battle": {
+      "1": {
+        "icon": "⚔️",
+        "reward": "Battle",
+        "memberVar": "",
+        "amountMin": 1,
+        "amountMax": 40,
+        "isEquip": false,
+        "equipID": 0
+      }
+    },
+    "food": {
+      "1": {
+        "icon": "🐟",
+        "reward": "Food (Very Small)",
+        "memberVar": "food",
+        "amountMin": 10,
+        "amountMax": 20,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "2": {
+        "icon": "🥩",
+        "reward": "Food (Small)",
+        "memberVar": "food",
+        "amountMin": 20,
+        "amountMax": 50,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "3": {
+        "icon": "🥓",
+        "reward": "Food (Medium)",
+        "memberVar": "food",
+        "amountMin": 50,
+        "amountMax": 100,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "4": {
+        "icon": "🦈",
+        "reward": "Food (Large)",
+        "memberVar": "food",
+        "amountMin": 100,
+        "amountMax": 150,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "5": {
+        "icon": "🍫",
+        "reward": "Food (Very Large)",
+        "memberVar": "food",
+        "amountMin": 150,
+        "amountMax": 200,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "6": {
+        "icon": "🎂",
+        "reward": "Food (Huge)",
+        "memberVar": "food",
+        "amountMin": 200,
+        "amountMax": 250,
+        "isEquip": false,
+        "equipID": 0
+      }
+    },
+    "trash": {
+      "1": {
+        "icon": "🔋",
+        "reward": "Trash (Very Small)",
+        "memberVar": "trash",
+        "amountMin": 5,
+        "amountMax": 10,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "2": {
+        "icon": "👢",
+        "reward": "Trash (Small)",
+        "memberVar": "trash",
+        "amountMin": 10,
+        "amountMax": 20,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "3": {
+        "icon": "🛍️",
+        "reward": "Trash (Medium)",
+        "memberVar": "trash",
+        "amountMin": 20,
+        "amountMax": 30,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "4": {
+        "icon": "🛢️",
+        "reward": "Trash (Large)",
+        "memberVar": "trash",
+        "amountMin": 30,
+        "amountMax": 50,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "5": {
+        "icon": "🗄️",
+        "reward": "Trash (Very Large)",
+        "memberVar": "trash",
+        "amountMin": 50,
+        "amountMax": 100,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "6": {
+        "icon": "🛁",
+        "reward": "Trash (Huge)",
+        "memberVar": "trash",
+        "amountMin": 100,
+        "amountMax": 200,
+        "isEquip": false,
+        "equipID": 0
+      }
+    },
+    "berries": {
+      "1": {
+        "icon": "🍇️",
+        "reward": "Stamina (Very Small)",
+        "memberVar": "stamina",
+        "amountMin": 5,
+        "amountMax": 5,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "2": {
+        "icon": "🍉️",
+        "reward": "Stamina (Small)",
+        "memberVar": "stamina",
+        "amountMin": 10,
+        "amountMax": 10,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "3": {
+        "icon": "🍏️",
+        "reward": "Stamina (Medium)",
+        "memberVar": "stamina",
+        "amountMin": 15,
+        "amountMax": 15,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "4": {
+        "icon": "🍍️",
+        "reward": "Stamina (Large)",
+        "memberVar": "stamina",
+        "amountMin": 20,
+        "amountMax": 20,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "5": {
+        "icon": "🍓️",
+        "reward": "Stamina (Very Large)",
+        "memberVar": "stamina",
+        "amountMin": 30,
+        "amountMax": 30,
+        "isEquip": false,
+        "equipID": 0
+      }
+    },
+    "keys": {
+      "1": {
+        "icon": "🗝️",
+        "reward": "Single Key",
+        "memberVar": "crateKeys",
+        "amountMin": 1,
+        "amountMax": 1,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "2": {
+        "icon": "🗝️",
+        "reward": "Ring of Keys (Small)",
+        "memberVar": "crateKeys",
+        "amountMin": 2,
+        "amountMax": 3,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "3": {
+        "icon": "🗝️",
+        "reward": "Ring of Keys (Medium)",
+        "memberVar": "crateKeys",
+        "amountMin": 3,
+        "amountMax": 4,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "4": {
+        "icon": "🗝️",
+        "reward": "Ring of Keys (Large)",
+        "memberVar": "crateKeys",
+        "amountMin": 4,
+        "amountMax": 5,
+        "isEquip": false,
+        "equipID": 0
+      }
+    },
+    "crates": {
+      "1": {
+        "icon": "📦",
+        "reward": "Crate (Small)",
+        "memberVar": "crates",
+        "amountMin": 1,
+        "amountMax": 1,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "2": {
+        "icon": "📦",
+        "reward": "Crate (Medium)",
+        "memberVar": "crates",
+        "amountMin": 2,
+        "amountMax": 3,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "3": {
+        "icon": "📦",
+        "reward": "Crate (Large)",
+        "memberVar": "crates",
+        "amountMin": 3,
+        "amountMax": 4,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "4": {
+        "icon": "📦",
+        "reward": "Crate (Very Large)",
+        "memberVar": "crates",
+        "amountMin": 4,
+        "amountMax": 5,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "5": {
+        "icon": "📦",
+        "reward": "Crate (Huge)",
+        "memberVar": "crates",
+        "amountMin": 5,
+        "amountMax": 6,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "6": {
+        "icon": "🔮",
+        "reward": "Mystic Orb (Small)",
+        "memberVar": "mysticOrbs",
+        "amountMin": 1,
+        "amountMax": 1,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "7": {
+        "icon": "🔮",
+        "reward": "Mystic Orb (Medium)",
+        "memberVar": "mysticOrbs",
+        "amountMin": 2,
+        "amountMax": 2,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "8": {
+        "icon": "🔮",
+        "reward": "Mystic Orb (Large)",
+        "memberVar": "mysticOrbs",
+        "amountMin": 3,
+        "amountMax": 3,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "9": {
+        "icon": "🌟📦🌟",
+        "reward": "Crate (Golden)",
+        "memberVar": "goldenCrates",
+        "amountMin": 1,
+        "amountMax": 1,
+        "isEquip": false,
+        "equipID": 0
+      }
+    },
+    "mining": {
+      "1": {
+        "icon": "⛏️ Mined a",
+        "reward": "Chipped Gem",
+        "memberVar": "gems",
+        "amountMin": 1,
+        "amountMax": 1,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "2": {
+        "icon": "⛏️ Mined a",
+        "reward": "Flawed Gem",
+        "memberVar": "gems",
+        "amountMin": 2,
+        "amountMax": 2,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "3": {
+        "icon": "⛏️ Mined a",
+        "reward": "Gem",
+        "memberVar": "gems",
+        "amountMin": 3,
+        "amountMax": 3,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "4": {
+        "icon": "⛏️ Mined a",
+        "reward": "Flawless Gem",
+        "memberVar": "gems",
+        "amountMin": 5,
+        "amountMax": 5,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "5": {
+        "icon": "⛏️ Mined a",
+        "reward": "Perfect Gem",
+        "memberVar": "gems",
+        "amountMin": 5,
+        "amountMax": 15,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "6": {
+        "icon": "⛏️ Mined a",
+        "reward": "Sparkling Gem",
+        "memberVar": "gems",
+        "amountMin": 15,
+        "amountMax": 20,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "7": {
+        "icon": "⛏️ Mined a",
+        "reward": "Royal Gem",
+        "memberVar": "gems",
+        "amountMin": 20,
+        "amountMax": 30,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "8": {
+        "icon": "⛏️ Mined a",
+        "reward": "Flawless Royal Gem",
+        "memberVar": "gems",
+        "amountMin": 30,
+        "amountMax": 50,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "9": {
+        "icon": "⛏️ Mined a",
+        "reward": "Perfect Royal Gem",
+        "memberVar": "gems",
+        "amountMin": 50,
+        "amountMax": 100,
+        "isEquip": false,
+        "equipID": 0
+      }
+    },
+	"lumber": {
+      "1": {
+        "icon": "🌳 Chopped down a",
+        "reward": "Small Tree",
+        "memberVar": "logs",
+        "amountMin": 3,
+        "amountMax": 5,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "2": {
+        "icon": "🌳 Chopped down a",
+        "reward": "Medium Tree",
+        "memberVar": "logs",
+        "amountMin": 5,
+        "amountMax": 10,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "3": {
+        "icon": "🌳 Chopped down a",
+        "reward": "Large Tree",
+        "memberVar": "logs",
+        "amountMin": 10,
+        "amountMax": 20,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "4": {
+        "icon": "🌳 Chopped down a",
+        "reward": "Very Large Tree",
+        "memberVar": "logs",
+        "amountMin": 20,
+        "amountMax": 30,
+        "isEquip": false,
+        "equipID": 0
+      }
+    },
+	"coins": {
+      "1": {
+        "icon": "👛",
+        "reward": "Coins (Small)",
+        "memberVar": "coins",
+        "amountMin": 10,
+        "amountMax": 50,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "2": {
+        "icon": "🎁",
+        "reward": "Coins (Medium)",
+        "memberVar": "coins",
+        "amountMin": 50,
+        "amountMax": 100,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "3": {
+        "icon": "💰",
+        "reward": "Coins (Large)",
+        "memberVar": "coins",
+        "amountMin": 100,
+        "amountMax": 200,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "4": {
+        "icon": "💸",
+        "reward": "Coins (Very Large)",
+        "memberVar": "coins",
+        "amountMin": 200,
+        "amountMax": 250,
+        "isEquip": false,
+        "equipID": 0
+      },
+      "5": {
+        "icon": "💸",
+        "reward": "Coins (Huge)",
+        "memberVar": "coins",
+        "amountMin": 250,
+        "amountMax": 500,
+        "isEquip": false,
+        "equipID": 0
+      }
+    }
+  },
+  "messages": {
+    "exploration_actions": [
+      "exploring",
+      "hunting",
+      "wandering",
+      "gathering",
+      "fishing",
+      "traversing",
+      "adventuring",
+      "camping",
+      "sleeping",
+      "eating",
+      "scouting"
+    ],
+    "nothing_found": [
+      "Absolutely nothing, your pet looks disappointed!",
+      "Absolutely nothing, your pet looks sad!",
+      "Nothing, your pet fell asleep during the exploration!",
+      "It looks like your pet found a crate, but the broken pieces of wood its carrying tell a sad story.",
+      "A big bag of money, but your pet fell over and lost it!",
+      "A crate- oh, nevermind, it's actually nothing!",
+      "Nothing, your pet looks like its about to cry!",
+      "Nothing, your pet sighs loudly."
+    ]
+  }
+}
