@@ -216,7 +216,7 @@ async function updateUser(member, message) {
 }
 
 // --------------------------
-// Let's deal with the guests
+// THE PURGE COMMENCES REEEEE
 // --------------------------
 
 async function kickGuests() {
