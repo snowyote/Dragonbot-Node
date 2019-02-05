@@ -144,18 +144,20 @@ async function updateUser(member, message) {
         console.log("DB: Added 1 XP to " + member);
         var urCount = 0;
         var rCount = 0;
-        for (var pi = 0; pi < petID.length; pi++) {
-            let newPetRes = await Utils.queryDB("SELECT * FROM pets WHERE id=" + petID[pi]);
-            var type = newPetRes[0].petType;
-            let petTypeRes = await Utils.queryDB("SELECT * FROM pet_types WHERE id=" + type);
-            var rarity = petTypeRes[0].rarity;
-            if (rarity == 1) urCount++;
-            if (rarity == 3) rCount++;
-        }
-        console.log("DB: Found " + urCount + " ultra rares!");
+		if(active > 0) {
+			for (var pi = 0; pi < petID.length; pi++) {
+				let newPetRes = await Utils.queryDB("SELECT * FROM pets WHERE id=" + petID[pi]);
+				var type = newPetRes[0].petType;
+				let petTypeRes = await Utils.queryDB("SELECT * FROM pet_types WHERE id=" + type);
+				var rarity = petTypeRes[0].rarity;
+				if (rarity == 1) urCount++;
+				if (rarity == 3) rCount++;
+			}
+			console.log("DB: Found " + urCount + " ultra rares!");
+			console.log("DB: Selected pet ID " + active);
+		}
         var equipmentList = JSON.parse(queryRes[0].equipmentList);
         const itemRes = await Utils.queryDB("SELECT * FROM items");
-        console.log("DB: Selected pet ID " + active);
         if (equipmentList.length > 0) {
             var hasHG = 0;
             var hasTR = 0;

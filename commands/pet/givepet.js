@@ -49,13 +49,8 @@ module.exports = class SwitchCommand extends Command {
 					await Utils.queryDB("UPDATE users SET activePet=0, petID='[]' WHERE discordID="+msg.author.id);
 				}
 				
-				if(mentionedPetList.length > 1) {
-					console.log("DB: Mentioned user has other pets");
-					await Utils.queryDB("UPDATE users SET activePet="+newPets[0]+", petID='"+JSON.stringify(mentionedPetList)+"' WHERE discordID="+user.id);
-				} else {
-					console.log("DB: Mentioned user has no other pets");
-					await Utils.queryDB("UPDATE users SET activePet="+mentionedPetList[0]+", petID='"+JSON.stringify(mentionedPetList)+"' WHERE discordID="+user.id);
-				}
+				console.log("DB: Mentioned user has other pets");
+				await Utils.queryDB("UPDATE users SET activePet="+mentionedPetList[0]+", petID='"+JSON.stringify(mentionedPetList)+"' WHERE discordID="+user.id);
 				await Utils.queryDB("UPDATE pets SET ownerName="+user.id+" WHERE id="+active);
 				embedMsg.addField("Pet Given", "<@"+msg.author.id+"> has given a pet to <@"+user.id+">!");
 				return msg.embed(embedMsg);
