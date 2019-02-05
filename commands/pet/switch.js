@@ -31,7 +31,7 @@ module.exports = class SwitchCommand extends Command {
         var userID = petIDs[0].id;
         var petID = JSON.parse(petIDs[0].petID);
 		var aPet = petIDs[0].activePet;
-		if (petIDs.length > 0) {
+		if (aPet > 0) {
 			if (!pet) {
 				embedMsg.setFooter("!switch <number> - to switch your active pet!");
 				for (var index = 0; index < petID.length; index++) {

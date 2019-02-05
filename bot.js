@@ -27,6 +27,7 @@ client.registry
         ['economy', 'Economy Commands'],
         ['profile', 'Profile Commands'],
         ['server', 'Server Commands'],
+        ['fun', 'Fun Commands'],
         ['pet', 'Pet Commands']
     ])
     .registerDefaultGroups()
@@ -179,7 +180,7 @@ async function updateUser(member, message) {
 
         var equipCount = hasHG + hasTR + hasPW + hasMI;
 
-        await Utils.queryDB("UPDATE achievement_progress SET hgNumber=" + hasHG + ", trNumber=" + hasTR + ", pwNumber=" + hasPW + ", petLevel=" + petLvl + ", ultraRareOwned=" + urCount + ", rareOwned=" + rCount + ", postCount=" + postCount + ", achUnlocked=" + AchJSON.length + ", foodStored=" + foodStored + ", equipCount=" + equipCount + " WHERE id=" + userID);
+        await Utils.queryDB("UPDATE achievement_progress SET hgNumber=" + hasHG + ", trNumber=" + hasTR + ", pwNumber=" + hasPW + ", petLevel=" + petLvl + ", ultraRareOwned=" + urCount + ", rareOwned=" + rCount + ", achUnlocked=" + AchJSON.length + ", foodStored=" + foodStored + ", equipCount=" + equipCount + " WHERE id=" + userID);
 
         console.log("DB: Updated achievement_progress for user ID " + userID);
 
