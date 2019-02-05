@@ -33,7 +33,7 @@ module.exports = class CrateCommand extends Command {
             .setFooter("!crate <type> <all> - Use 'all' to open all crates at once!")
 
         let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
-        console.log("DB: Selected user ID " + msg.author.id);
+        Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
         var userID = queryRes[0].id;
         var crateKeys = queryRes[0].crateKeys;
         var crate = JSON.parse(queryRes[0].crate);
@@ -54,7 +54,7 @@ module.exports = class CrateCommand extends Command {
 			if(type >= 0 && type < crateRes.length) {
 				if(crate[crateRes[type].index] > 0) {
 					var cost = crateRes[type].keyCost;
-					console.log("DB: Chose crate type "+(crateRes[type].index)+", cost is "+cost);
+					Utils.log("\x1b[36m%s\x1b[0m", "DB: Chose crate type "+(crateRes[type].index)+", cost is "+cost);
 					if(crateKeys >= cost) {
 						var expRange = JSON.parse(crateRes[type].exp);
 						var coinRange = JSON.parse(crateRes[type].coins);

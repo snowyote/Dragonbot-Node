@@ -26,7 +26,7 @@ module.exports = class MineCommand extends Command {
 
         let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
 
-        console.log("DB: Selected user ID " + msg.author.id);
+        Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
 		var userID = queryRes[0].id;
 		var active = queryRes[0].activePet;
 		if(msg.channel.id == "539219267409674240") {
@@ -55,7 +55,7 @@ module.exports = class MineCommand extends Command {
 							if(food >= foodUsed) {
 								await Utils.queryDB("UPDATE pets SET stamina=stamina-"+staminaUsed+" WHERE id="+active);
 								await Utils.queryDB("UPDATE users SET food=food-"+foodUsed+" WHERE discordID="+msg.author.id);
-								console.log("DB: Used "+staminaUsed+" stamina and "+foodUsed+" food!");
+								Utils.log("\x1b[36m%s\x1b[0m", "DB: Used "+staminaUsed+" stamina and "+foodUsed+" food!");
 								let achRes = await Utils.queryDB("SELECT * FROM achievement_progress WHERE id="+userID);
 								let petRes = await Utils.queryDB("SELECT * FROM pets WHERE id="+active);
 								let userRes = await Utils.queryDB("SELECT * FROM users WHERE discordID="+msg.author.id);
@@ -101,7 +101,7 @@ module.exports = class MineCommand extends Command {
 								var probability = 2.6-(Math.floor(luck/10));
 								if(probability < 1.1) probability = 1.1;
 								var amountOfMines = Utils.biasedRandom(1,3,(4-Math.floor(luck/10)));
-								console.log("DB: Luck random: "+probability);
+								Utils.log("\x1b[36m%s\x1b[0m", "DB: Luck random: "+probability);
 								var randomCheck = Utils.biasedRandom(1,4,probability);
 								let rewardCheck, rewardType, rewardName, rewardMsg;
 								var totalXPGain = 0;
@@ -114,7 +114,7 @@ module.exports = class MineCommand extends Command {
 									//var randomCheck = Math.floor(Math.random() * 101);
 									randomCheck = Utils.biasedRandom(1,4,probability);
 									if(petRes[0].caveDepth >= 20000) randomCheck = Utils.biasedRandom(2,4,probability);
-									console.log("DB: Dig");
+									Utils.log("\x1b[36m%s\x1b[0m", "DB: Dig");
 									const explores = await Utils.queryDB("SELECT * FROM mining WHERE type = 'Dig'");
 									rewardCheck = Utils.biasedRandom(0,explores.length-1,(8-(luck/10)));
 									randomAmount = Utils.randomIntIn(explores[rewardCheck].amountMin+((mining+1)/10), (explores[rewardCheck].amountMax*(mining*dexterity[0]))+1);
@@ -127,7 +127,7 @@ module.exports = class MineCommand extends Command {
 									var geyserChance = Math.floor((Math.floor(petRes[0].caveDepth/2000))-(mining/10));
 									if(geyserChance < 0) geyserChance = 0;
 									if(geyserChance > 100) geyserChance = 100;
-									console.log("DB: Geyser random: "+geyserRandom+", Geyser chance: "+geyserChance);
+									Utils.log("\x1b[36m%s\x1b[0m", "DB: Geyser random: "+geyserRandom+", Geyser chance: "+geyserChance);
 									embedMsg.setDescription("💚 ("+petStamina+"/"+petMaxStamina+") 🍖 ("+food+")"
 										+"\n🌋 Geyser: **"+geyserChance+"%**"
 										+"\n🕳️ Cave: **"+luck+"%**"
@@ -169,7 +169,7 @@ module.exports = class MineCommand extends Command {
 									}
 									
 									if(randomCheck == 1) {
-										console.log("DB: Trash");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Trash");
 										const explores = await Utils.queryDB("SELECT * FROM mining WHERE type = 'Trash'");
 										rewardCheck = Utils.biasedRandom(start,explores.length-1,(8-(luck/10)));
 										if(explores[rewardCheck].depthReq <= petRes[0].caveDepth) {
@@ -192,7 +192,7 @@ module.exports = class MineCommand extends Command {
 									}
 									if(petRes[0].caveDepth >= 200) {
 										if(randomCheck == 2) {
-											console.log("DB: Gem");
+											Utils.log("\x1b[36m%s\x1b[0m", "DB: Gem");
 											const explores = await Utils.queryDB("SELECT * FROM mining WHERE type = 'Gem'");
 											rewardCheck = Utils.biasedRandom(start,explores.length-1,(8-(luck/10)));
 											if(explores[rewardCheck].depthReq <= petRes[0].caveDepth) {
@@ -237,7 +237,7 @@ module.exports = class MineCommand extends Command {
 											}
 										}
 										else if(randomCheck == 3) {
-											console.log("DB: Artifacts");
+											Utils.log("\x1b[36m%s\x1b[0m", "DB: Artifacts");
 											const explores = await Utils.queryDB("SELECT * FROM mining WHERE type = 'Artifact'");
 											rewardCheck = Utils.biasedRandom(start,explores.length-1,(8-(luck/10)));
 											if(explores[rewardCheck].depthReq <= petRes[0].caveDepth) {
@@ -254,7 +254,7 @@ module.exports = class MineCommand extends Command {
 											}
 										}
 										else if(randomCheck == 4) {
-											console.log("DB: Treasure");
+											Utils.log("\x1b[36m%s\x1b[0m", "DB: Treasure");
 											const explores = await Utils.queryDB("SELECT * FROM mining WHERE type = 'Treasure'");
 											rewardCheck = Utils.biasedRandom(0,explores.length-1,(8-(luck/10)));
 											if(explores[rewardCheck].depthReq <= petRes[0].caveDepth) {

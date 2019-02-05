@@ -38,13 +38,13 @@ module.exports = class UpgradeCommand extends Command {
             .setDescription("<@" + msg.author.id + ">")
 
         let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
-        console.log("DB: Selected user ID " + msg.author.id);
+        Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
 
         var active = queryRes[0].activePet;
 
         if (active > 0) {
             const petRes = await Utils.queryDB("SELECT * FROM pets WHERE id=" + active);
-            console.log("DB: Selected pet ID " + active);
+            Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected pet ID " + active);
             var currentSkillPoints = petRes[0].skillPoints;
             var currentMaxStamina = petRes[0].maxStamina;
             var currentLuck = petRes[0].luck;
@@ -110,7 +110,7 @@ module.exports = class UpgradeCommand extends Command {
                                 break;
                         }
                         if (skillToUpgrade !== "none") {
-                            console.log("DB: Upgrade check: " + upgradeName + ", max: " + upgradeMax + ", current: " + current + ", amount: " + (amount * upgradeMultiplier));
+                            Utils.log("\x1b[36m%s\x1b[0m", "DB: Upgrade check: " + upgradeName + ", max: " + upgradeMax + ", current: " + current + ", amount: " + (amount * upgradeMultiplier));
                             if (petRes[0].skillPoints - (amount) < 0) {
                                 embedMsg.addField("Can't Upgrade", "You don't have enough affection points for that!");
                                 return msg.embed(embedMsg);

@@ -35,11 +35,11 @@ module.exports = class MysticCommand extends Command {
 
         let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
 		var userID = queryRes[0].id;
-        console.log("DB: Selected user ID " + msg.author.id);
+        Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
         var active = queryRes[0].activePet;
         if (active > 0) {
             const petRes = await Utils.queryDB("SELECT * FROM pets WHERE id=" + active);
-            console.log("DB: Selected pet ID " + active);
+            Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected pet ID " + active);
             if (petRes[0].isEgg == 0) {
                 if (queryRes[0].mysticOrbs > 0) {
                     if (!id) {
@@ -69,7 +69,7 @@ module.exports = class MysticCommand extends Command {
                                         petsWeight.push(parseInt(petType[pi].rarity));
                                     }
                                     var totalweight = petsWeight.reduce(getSum);
-									console.log("DB: Total weight is "+totalweight);
+									Utils.log("\x1b[36m%s\x1b[0m", "DB: Total weight is "+totalweight);
                                     var weighedpets = new Array();
                                     var currPet = 0;
                                     while (currPet < pets.length) {
@@ -79,7 +79,7 @@ module.exports = class MysticCommand extends Command {
                                         currPet++;
                                     }
                                     var randomnumber = Math.floor(Math.random() * totalweight);
-									console.log("DB: Pet number "+randomnumber+" selected!");
+									Utils.log("\x1b[36m%s\x1b[0m", "DB: Pet number "+randomnumber+" selected!");
                                     var rarity = "";
                                     if (petType[weighedpets[randomnumber] - 1].rarity == 6) rarity = "Common";
                                     else if (petType[weighedpets[randomnumber] - 1].rarity == 4) rarity = "Uncommon";

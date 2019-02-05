@@ -36,12 +36,12 @@ module.exports = class DyeCommand extends Command {
 
         let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
 		var coins = queryRes[0].coins;
-        console.log("DB: Selected user ID " + msg.author.id);
+        Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
 		var userID = queryRes[0].id;
         var active = queryRes[0].activePet;
         if (active > 0) {
             const petRes = await Utils.queryDB("SELECT * FROM pets WHERE id=" + active);
-            console.log("DB: Selected pet ID " + active);
+            Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected pet ID " + active);
             if (petRes[0].isEgg == 0) {
 				const dyeRes = await Utils.queryDB("SELECT * FROM dyes");
 				if(!id) {
@@ -94,12 +94,12 @@ module.exports = class DyeCommand extends Command {
 								if(coins >= dyeRes[selectedDye].cost) {
 									await Utils.queryDB("UPDATE pets SET dyeType="+selectedDye+" WHERE id="+active);
 									await Utils.queryDB("UPDATE users SET coins=coins-"+dyeRes[selectedDye].cost+" WHERE discordID="+msg.author.id);
-									console.log("DB: Successfully dyed pet!");
+									Utils.log("\x1b[36m%s\x1b[0m", "DB: Successfully dyed pet!");
 									embedMsg.addField("Pet Dyed", "You successfully dyed your pet **"+dyeRes[selectedDye].name+"**!");
 									await Utils.queryDB("UPDATE achievement_progress SET petDyed=petDyed+1 WHERE id="+userID);
 									return msg.embed(embedMsg);
 								} else {
-									console.log("DB: Needs "+dyeRes[selectedDye].cost+" coins, has "+coins);
+									Utils.log("\x1b[36m%s\x1b[0m", "DB: Needs "+dyeRes[selectedDye].cost+" coins, has "+coins);
 									embedMsg.addField("Can't Dye", "You don't have the **"+dyeRes[selectedDye].cost+"** coins needed!");
 									return msg.embed(embedMsg);
 								}

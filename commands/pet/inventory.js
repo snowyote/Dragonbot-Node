@@ -15,7 +15,7 @@ module.exports = class InventoryCommand extends Command {
 
     async run(msg) {
         let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
-        console.log("DB: Selected user ID " + msg.author.id);
+        Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
 		var coins = queryRes[0].coins;
 		var mysticOrbs = queryRes[0].mysticOrbs;
 		var crateKeys = queryRes[0].crateKeys;

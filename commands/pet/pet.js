@@ -19,7 +19,7 @@ module.exports = class PetCommand extends Command {
                   .setAuthor("House of Dragons Notice", "https://i.imgur.com/CyAb3mV.png")
 
         let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
-        console.log("DB: Selected user ID " + msg.author.id);
+        Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
         var active = queryRes[0].activePet;
         var equipmentList = JSON.parse(queryRes[0].equipmentList);
         var userAch = JSON.parse(queryRes[0].achievements);
@@ -28,7 +28,7 @@ module.exports = class PetCommand extends Command {
 		
         if (active > 0) {
             const petRes = await Utils.queryDB("SELECT * FROM pets WHERE id=" + active);
-            console.log("DB: Selected pet ID " + active);
+            Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected pet ID " + active);
             if (petRes[0].isEgg == 0) {
                 // Necessary variables
                 var bgType = petRes[0].bgType;
@@ -79,7 +79,7 @@ module.exports = class PetCommand extends Command {
                 var statPointsGained = newlvl - level;
 
                 const updateRes = await Utils.queryDB("UPDATE pets SET exp=" + newxp + ", level=" + newlvl + ", skillPoints=skillPoints+" + statPointsGained + " WHERE id=" + activePet);
-                console.log("DB: Updated level/xp of pet ID " + activePet + " successfully!");
+                Utils.log("\x1b[36m%s\x1b[0m", "DB: Updated level/xp of pet ID " + activePet + " successfully!");
                 level = newlvl;
                 skillPoints += statPointsGained;
                 exp = newxp;
@@ -102,7 +102,7 @@ module.exports = class PetCommand extends Command {
 
                 let headX = queryRes[0].headX;
                 let headY = queryRes[0].headY;
-                console.log("DB: Selected pet_type " + petType + " with coordinates " + headX + "," + headY);
+                Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected pet_type " + petType + " with coordinates " + headX + "," + headY);
 
                 // Get equipment
                 let equipRes = await Utils.queryDB("SELECT * FROM items");
@@ -114,28 +114,28 @@ module.exports = class PetCommand extends Command {
 				if(toolList.includes(4)) hasSharpener = 1;
                 var itemImgList = new Array();
                 var hgImgList = new Array();
-                console.log("DB: Executing equippedList loop: " + equippedList.length);
+                Utils.log("\x1b[36m%s\x1b[0m", "DB: Executing equippedList loop: " + equippedList.length);
                 if (equippedList.length > 0) {
                     for (var i = 0; i < equippedList.length; i++) {
-                        console.log("DB: Loop " + i + " value: " + equippedList[i] + " (" + equipRes[equippedList[i] - 1].type + ")");
+                        Utils.log("\x1b[36m%s\x1b[0m", "DB: Loop " + i + " value: " + equippedList[i] + " (" + equipRes[equippedList[i] - 1].type + ")");
                         if (equipRes[equippedList[i] - 1].type == "Headgear") {
                             hgImgList.push(equippedList[i] + "-" + headX + "-" + headY);
-                            console.log("DB: Added headgear " + equippedList[i] + " at " + headX + "," + headY);
+                            Utils.log("\x1b[36m%s\x1b[0m", "DB: Added headgear " + equippedList[i] + " at " + headX + "," + headY);
                         } else if (equipRes[equippedList[i] - 1].type == "Power") {
                             var txx = 587;
                             var tyy = 285;
                             itemImgList.push(equippedList[i] + "-" + txx + "-" + tyy);
-                            console.log("DB: Added power " + equippedList[i] + " at " + txx + "," + tyy);
+                            Utils.log("\x1b[36m%s\x1b[0m", "DB: Added power " + equippedList[i] + " at " + txx + "," + tyy);
                         } else if (equipRes[equippedList[i] - 1].type == "Trinket") {
                             var txx = 616;
                             var tyy = 315;
-                            console.log("DB: Added trinket " + equippedList[i] + " at " + txx + "," + tyy);
+                            Utils.log("\x1b[36m%s\x1b[0m", "DB: Added trinket " + equippedList[i] + " at " + txx + "," + tyy);
                             itemImgList.push(equippedList[i] + "-" + txx + "-" + tyy);
 						} else {
                             var txx = 98;
                             var tyy = 184;
                             itemImgList.push(equippedList[i] + "-" + txx + "-" + tyy);
-                            console.log("DB: Added misc " + equippedList[i] + " at " + txx + "," + tyy);
+                            Utils.log("\x1b[36m%s\x1b[0m", "DB: Added misc " + equippedList[i] + " at " + txx + "," + tyy);
                         }
                     }
                 }
@@ -143,18 +143,18 @@ module.exports = class PetCommand extends Command {
                 // Get achievements
                 queryRes = await Utils.queryDB("SELECT * FROM achievements");
 
-                console.log("DB: Executing userAch loop: " + userAch.length+"\nDB: userAch contains: "+userAch);
+                Utils.log("\x1b[36m%s\x1b[0m", "DB: Executing userAch loop: " + userAch.length+"\nDB: userAch contains: "+userAch);
                 var trophies = new Array();
                 if (userAch.length > 0) {
                     for (var i = 0; i < userAch.length; i++) {
                         var type = queryRes[userAch[i]-1].type;
                         if (type == "Trophy") {
-							console.log("DB: Pushing trophy "+queryRes[userAch[i]-1].id+", name: "+queryRes[userAch[i]-1].name);
+							Utils.log("\x1b[36m%s\x1b[0m", "DB: Pushing trophy "+queryRes[userAch[i]-1].id+", name: "+queryRes[userAch[i]-1].name);
                             trophies.push(queryRes[userAch[i]-1].id);
                         }
                     }
                 }
-                console.log("DB: Found " + trophies.length + " trophies for discord ID " + msg.author.id);
+                Utils.log("\x1b[36m%s\x1b[0m", "DB: Found " + trophies.length + " trophies for discord ID " + msg.author.id);
 
                 // Get total achievement percentage
                 var achPercent = Math.round((userAch.length / queryRes.length) * 100);
@@ -246,7 +246,7 @@ module.exports = class PetCommand extends Command {
 
                 // Update user's equipment list
                 queryRes = await Utils.queryDB("UPDATE users SET equipmentList='" + JSON.stringify(equipmentList) + "' WHERE discordID=" + msg.author.id);
-                console.log("DB: Updated equipment list for discord ID " + msg.author.id + "!");
+                Utils.log("\x1b[36m%s\x1b[0m", "DB: Updated equipment list for discord ID " + msg.author.id + "!");
                 
                 // Compile everything together
                 let tpl = await Jimp.read(imgRaw);
@@ -298,7 +298,7 @@ module.exports = class PetCommand extends Command {
 				petMask.composite(petMask2,0,0);
 
 				if(dyeType > 0) {
-					console.log("DB: Has dye!");
+					Utils.log("\x1b[36m%s\x1b[0m", "DB: Has dye!");
 					const dyeTpl = await Jimp.read("./img/dyes/"+parseInt(dyeType)+".jpg");
 						await petTpl.composite(dyeTpl,0,0, {
 							mode: Jimp.BLEND_OVERLAY,
@@ -307,7 +307,7 @@ module.exports = class PetCommand extends Command {
 						});
 						await petTpl.mask(petMask,0,0);
 						tpl.composite(petTpl, centerX-(petTpl.bitmap.width * 0.5)-15, centerY-(petTpl.bitmap.height * 0.5)-15, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
-				} else console.log("DB: Doesn't have dye!");
+				} else Utils.log("\x1b[36m%s\x1b[0m", "DB: Doesn't have dye!");
 
                 const guiTpl = await Jimp.read(guiBar);
                 tpl.composite(guiTpl, 0, 296, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
@@ -335,7 +335,7 @@ module.exports = class PetCommand extends Command {
 
                 //add trophy badges
                 for (var index = 0; index < trophies.length; index++) {
-					console.log("DB: Adding trophy images - "+trophies);
+					Utils.log("\x1b[36m%s\x1b[0m", "DB: Adding trophy images - "+trophies);
                     const trophyTpl = await Jimp.read('./img/new/newTrophies/' + parseInt(trophies[index]) + '.png');
                     tpl.composite(trophyTpl, 0, 0, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
                 }

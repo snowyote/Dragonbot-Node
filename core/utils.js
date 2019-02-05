@@ -17,13 +17,18 @@ const config = {
 async function queryDB(sql) {
 	let connection;
 	try {
+		//Utils.log("\x1b[36m%s\x1b[0m", "DB: Running query: "+sql);
 		connection = await mysql.createConnection(config);
 		let result = await connection.query(sql);
 		connection.end();
 		return result;
 	} catch (error) {
-		console.log("Utils: Error in querying database\n"+error.stack);
+		Utils.log("\x1b[31m%s\x1b[0m", "Utils: Error in querying database\n"+error.stack);
 	};
+}
+
+function log(colour, string) {
+	if(configFile.log) console.log(colour, string);
 }
 
 // --
@@ -224,4 +229,4 @@ function delay(ms) {
 // Export functions
 // --
 
-module.exports = {queryDB, isNormalInteger, isNumeric, capitalize, stringifyNumber, formatTimeUntil, formatTimeSince, RSExp, getTimestamp, getSum, randomIntIn, randomIntEx, biasedRandom, drawXPBar, petTypeString, delay, webJson};
+module.exports = {queryDB, isNormalInteger, isNumeric, capitalize, stringifyNumber, formatTimeUntil, formatTimeSince, RSExp, getTimestamp, getSum, randomIntIn, randomIntEx, biasedRandom, drawXPBar, petTypeString, delay, webJson, log};

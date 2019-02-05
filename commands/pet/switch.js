@@ -39,9 +39,9 @@ module.exports = class SwitchCommand extends Command {
 					let petList = petID;
 					let currentPets = JSON.parse(petIDs[0].petID);
 					let currentPet = currentPets[i];
-					console.log("DB: Pet Check\nLength: " + petList.length + "\nIndex: " + i + "\nCurrent Pet: " + currentPet);
+					Utils.log("\x1b[36m%s\x1b[0m", "DB: Pet Check\nLength: " + petList.length + "\nIndex: " + i + "\nCurrent Pet: " + currentPet);
 					let petSelect = await Utils.queryDB("SELECT name, level, isEgg, petType FROM pets WHERE id=" + currentPet + " ORDER BY level DESC")
-					console.log("DB: Pet " + currentPet + " name = " + petSelect[0].name + ", level = " + petSelect[0].level + ", type = " + petSelect[0].petType + ", isEgg = " + petSelect[0].isEgg);
+					Utils.log("\x1b[36m%s\x1b[0m", "DB: Pet " + currentPet + " name = " + petSelect[0].name + ", level = " + petSelect[0].level + ", type = " + petSelect[0].petType + ", isEgg = " + petSelect[0].isEgg);
 					if (petSelect[0].isEgg == 1) {
 						embedMsg.addField(capitalize(stringifyNumber((i + 1))) + " Pet", "Not hatched yet!");
 					} else {
@@ -55,7 +55,7 @@ module.exports = class SwitchCommand extends Command {
 															
 						var petName = petType[0].name;
 						petName = petName.replace(/"/g,"");
-						console.log("DB: "+petID[i]+" = "+aPet+"?");
+						Utils.log("\x1b[36m%s\x1b[0m", "DB: "+petID[i]+" = "+aPet+"?");
 						if(petID[i] == aPet) {
 							embedMsg.addField("🌟 "+petSelect[0].name+" (Active)", "**Level**: "+petSelect[0].level+"\n**Type**: "+petName+" (**"+rarity+"**)");
 						} else {
@@ -67,7 +67,7 @@ module.exports = class SwitchCommand extends Command {
 			} else {
 				if(pet > 0 && pet <= petID.length) {
 					await Utils.queryDB("UPDATE users SET activePet="+petID[pet-1]+" WHERE id="+userID)
-					console.log("DB: Active pet for "+userID+" changed to "+(pet-1));
+					Utils.log("\x1b[36m%s\x1b[0m", "DB: Active pet for "+userID+" changed to "+(pet-1));
 					embedMsg.addField("Active Pet Changed", "Successfully changed your active pet!");
 					return msg.embed(embedMsg);
 				} else {

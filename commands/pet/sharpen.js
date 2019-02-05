@@ -26,7 +26,7 @@ module.exports = class SharpenCommand extends Command {
 		var tools = JSON.parse(queryRes[0].tools);
 		if(tools.length > 0) {
 			var hasSharpener = 0;
-			console.log("DB: Tools includes: "+tools);
+			Utils.log("\x1b[36m%s\x1b[0m", "DB: Tools includes: "+tools);
 			if(tools.includes(4)) hasSharpener = 1;
 			if(hasSharpener) {
 				var userID = queryRes[0].id;

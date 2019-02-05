@@ -28,7 +28,7 @@ module.exports = class EquipCommand extends Command {
 
         let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
 
-        console.log("DB: Selected user ID " + msg.author.id);
+        Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
         var active = queryRes[0].activePet;
         var equipmentList = JSON.parse(queryRes[0].equipmentList);
         var userAch = JSON.parse(queryRes[0].achievements);
@@ -37,7 +37,7 @@ module.exports = class EquipCommand extends Command {
             const petRes = await Utils.queryDB("SELECT * FROM pets WHERE id=" + active);
             const itemRes = await Utils.queryDB("SELECT * FROM items");
             var equippedList = JSON.parse(petRes[0].equippedList);
-            console.log("DB: Selected pet ID " + active);
+            Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected pet ID " + active);
             if (petRes[0].isEgg == 0) {
                 if (equipmentList.length > 0) {
                     if (!id) {
@@ -52,7 +52,7 @@ module.exports = class EquipCommand extends Command {
                         var countPW = 0;
                         var countMI = 0;
                         for (var i = 0; i < equipmentList.length; i++) {
-                            console.log("DB: Equipment list: " + equipmentList + " (" + (equipmentList[i] - 1) + ")");
+                            Utils.log("\x1b[36m%s\x1b[0m", "DB: Equipment list: " + equipmentList + " (" + (equipmentList[i] - 1) + ")");
                             var iType = itemRes[equipmentList[i] - 1].type;
                             if (iType == "Headgear") countHG++;
                             if (iType == "Trinket") countTR++;
@@ -122,30 +122,30 @@ module.exports = class EquipCommand extends Command {
 							var type = itemRes[id-1].type;
 							var statName = itemRes[id-1].statName;
 							var statValue = itemRes[id-1].statValue;
-                            console.log("DB: Has item "+id+", minlevel: "+minLevel+", name: "+name);
+                            Utils.log("\x1b[36m%s\x1b[0m", "DB: Has item "+id+", minlevel: "+minLevel+", name: "+name);
 							if(petRes[0].level >= minLevel) {
 								// Check and remove other equipped items of the same type
 								var newArray = new Array();
 								for(var i = 0; i < equippedList.length; i++) {
 									if(itemRes[equippedList[i]-1].type == type) {
-										console.log("DB: Removing "+(equippedList[i]-1));
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Removing "+(equippedList[i]-1));
 										var statToRemove = itemRes[equippedList[i]-1].statName;
 										var statValueToRemove = itemRes[equippedList[i]-1].statValue;
 										if(statToRemove.length > 0) {
 											await Utils.queryDB("UPDATE pets SET "+statToRemove+"="+statToRemove+"-"+statValueToRemove+" WHERE id="+active);
-											console.log("DB: Removed bonuses from "+statToRemove+": "+statValueToRemove);
+											Utils.log("\x1b[36m%s\x1b[0m", "DB: Removed bonuses from "+statToRemove+": "+statValueToRemove);
 										} else {
-											console.log("DB: No stat bonuses to remove!");
+											Utils.log("\x1b[36m%s\x1b[0m", "DB: No stat bonuses to remove!");
 										}
 									} else {
-										console.log("DB: Pushing "+(equippedList[i]));
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Pushing "+(equippedList[i]));
 										newArray.push((equippedList[i]));
 									}
 								}
 								// Put in the new equipped item
 								if(statName.length > 0) {
 									await Utils.queryDB("UPDATE pets SET "+statName+"="+statName+"+"+statValue+" WHERE id="+active)
-									console.log("DB: Equipped item "+name+", added "+statValue+" to "+statName+"!");
+									Utils.log("\x1b[36m%s\x1b[0m", "DB: Equipped item "+name+", added "+statValue+" to "+statName+"!");
 								}
 								newArray.push(id);
 								await Utils.queryDB("UPDATE pets SET equippedList='"+JSON.stringify(newArray)+"' WHERE id="+active);

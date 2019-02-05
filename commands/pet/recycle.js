@@ -22,11 +22,11 @@ module.exports = class RecycleCommand extends Command {
 		var tools = JSON.parse(queryRes[0].tools);
 		if(tools.length > 0) {
 			var hasRecycler = 0;
-			console.log("DB: Tools includes: "+tools);
+			Utils.log("\x1b[36m%s\x1b[0m", "DB: Tools includes: "+tools);
 			if(tools.includes(3)) hasRecycler = 1;
 			if(hasRecycler) {
 				var userID = queryRes[0].id;
-				console.log("DB: Selected user ID " + msg.author.id);
+				Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
 				if(trash > 0) {
 					var coinsGained = Math.floor(trash*0.75);
 					await Utils.queryDB("UPDATE users SET trash=0, coins=coins+"+coinsGained+" WHERE discordID="+msg.author.id);

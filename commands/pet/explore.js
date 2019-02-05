@@ -28,7 +28,7 @@ module.exports = class ExploreCommand extends Command {
 
         let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
 
-        console.log("DB: Selected user ID " + msg.author.id);
+        Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
 		var userID = queryRes[0].id;
 		var active = queryRes[0].activePet;
 		if(msg.channel.id == "533381330675957766") {
@@ -59,7 +59,7 @@ module.exports = class ExploreCommand extends Command {
 							if(food >= foodUsed) {
 								await Utils.queryDB("UPDATE pets SET stamina=stamina-"+staminaUsed+" WHERE id="+active);
 								await Utils.queryDB("UPDATE users SET food=food-"+foodUsed+" WHERE discordID="+msg.author.id);
-								console.log("DB: Used "+staminaUsed+" stamina and "+foodUsed+" food!");
+								Utils.log("\x1b[36m%s\x1b[0m", "DB: Used "+staminaUsed+" stamina and "+foodUsed+" food!");
 								let achRes = await Utils.queryDB("SELECT * FROM achievement_progress WHERE id="+userID);
 								let petRes = await Utils.queryDB("SELECT * FROM pets WHERE id="+active);
 								let userRes = await Utils.queryDB("SELECT * FROM users WHERE discordID="+msg.author.id);
@@ -106,7 +106,7 @@ module.exports = class ExploreCommand extends Command {
 								if(survivalBonus > 3) survivalBonus = 3;
 								if(exploreBoost == 1) amountOfExplores = 5;
 								amountOfExplores += survivalBonus;
-								console.log("DB: Luck random: "+probability);
+								Utils.log("\x1b[36m%s\x1b[0m", "DB: Luck random: "+probability);
 								var randomCheck = Utils.biasedRandom(1,13,probability);
 								let rewardCheck, rewardType, rewardName, rewardMsg;
 								var totalXPGain = 0;
@@ -122,14 +122,14 @@ module.exports = class ExploreCommand extends Command {
 									if(randomCheck == 1) randomCheck = Utils.biasedRandom(1,4,probability-0.25);
 									if(randomCheck == 4 && petStamina > (petMaxStamina / 5)) {
 										randomCheck = Utils.biasedRandom(1,3,probability-0.25);
-										console.log("DB: Stamina above "+(petMaxStamina/5)+", rolling to "+randomCheck);
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Stamina above "+(petMaxStamina/5)+", rolling to "+randomCheck);
 									} else {
-										console.log("DB: Stamina of "+petStamina+" is NOT above "+(petMaxStamina/5)+"!");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Stamina of "+petStamina+" is NOT above "+(petMaxStamina/5)+"!");
 									}
 									if(randomCheck < 4 && alchemyPower == 1) randomCheck = 5;
 									
 									if(randomCheck == 1) {
-										console.log("DB: Nothing");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Nothing");
 										const explores = await Utils.queryDB("SELECT * FROM exploration WHERE type = 'Nothing'");
 										findMsg = findMsg + explores[0].icon+" ...found nothing!\n";
 										rewardType = "nothing";
@@ -138,7 +138,7 @@ module.exports = class ExploreCommand extends Command {
 										valueToAdd.push(0);
 									}
 									else if(randomCheck == 2) {
-										console.log("DB: Trash");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Trash");
 										const explores = await Utils.queryDB("SELECT * FROM exploration WHERE type = 'Trash'");
 										rewardCheck = Utils.biasedRandom(0,explores.length-1,(8-(luck/10)));
 										randomAmount = Utils.randomIntIn(explores[rewardCheck].amountMin, explores[rewardCheck].amountMax);
@@ -149,7 +149,7 @@ module.exports = class ExploreCommand extends Command {
 										valueToAdd.push(randomAmount);
 									}
 									else if(randomCheck == 3) {
-										console.log("DB: Food");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Food");
 										const explores = await Utils.queryDB("SELECT * FROM exploration WHERE type = 'Food'");
 										rewardCheck = Utils.biasedRandom(0,explores.length-1,(8-(luck/10)));
 										randomAmount = Utils.randomIntIn(explores[rewardCheck].amountMin, explores[rewardCheck].amountMax);
@@ -161,7 +161,7 @@ module.exports = class ExploreCommand extends Command {
 										valueToAdd.push(randomAmount);
 									}
 									else if(randomCheck == 4) {
-										console.log("DB: Stamina");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Stamina");
 										const explores = await Utils.queryDB("SELECT * FROM exploration WHERE type = 'Stamina'");
 										if(petStamina < (petStamina/10)) {
 											rewardCheck = Utils.biasedRandom(0,explores.length-1,(8-(luck/10)));
@@ -178,7 +178,7 @@ module.exports = class ExploreCommand extends Command {
 										}
 									}
 									else if(randomCheck == 5) {
-										console.log("DB: Coins");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Coins");
 										const explores = await Utils.queryDB("SELECT * FROM exploration WHERE type = 'Coins'");
 										rewardCheck = Utils.biasedRandom(0,explores.length-1,(8-(luck/10)));
 										randomAmount = Utils.randomIntIn(explores[rewardCheck].amountMin, explores[rewardCheck].amountMax)*(avarice+1);
@@ -191,13 +191,13 @@ module.exports = class ExploreCommand extends Command {
 										valueToAdd.push(randomAmount);
 									}
 									else if(randomCheck == 6) {
-										console.log("DB: Item");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Item");
 										const items = await Utils.queryDB("SELECT * FROM items WHERE canFind = 1");
 										rewardCheck = Utils.randomIntEx(0, items.length);
 										let rewardLvl = items[rewardCheck].minLevel;
 										while(petLvl < rewardLvl) {
 											rewardCheck = Utils.randomIntEx(0, items.length);
-											console.log("DB: Re-rolling item reward.. "+rewardCheck);
+											Utils.log("\x1b[36m%s\x1b[0m", "DB: Re-rolling item reward.. "+rewardCheck);
 											rewardLvl = items[rewardCheck].minLevel;
 										}
 										if(equipList.includes(items[rewardCheck].id)) {
@@ -218,7 +218,7 @@ module.exports = class ExploreCommand extends Command {
 										rewardType = "item";
 									}
 									else if(randomCheck == 7) {
-										console.log("DB: Battle");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Battle");
 										const explores = await Utils.queryDB("SELECT * FROM exploration WHERE type = 'Battle'");
 										const monsters = await Utils.queryDB("SELECT * FROM monsters");
 										rewardCheck = Utils.biasedRandom(0,explores.length-1,(8-(luck/10)));
@@ -245,7 +245,7 @@ module.exports = class ExploreCommand extends Command {
 										valueToAdd.push(0);
 									}
 									else if(randomCheck == 8) {
-										console.log("DB: Keys");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Keys");
 										const explores = await Utils.queryDB("SELECT * FROM exploration WHERE type = 'Key'");
 										rewardCheck = Utils.biasedRandom(0,explores.length-1,(8-(luck/10)));
 										randomAmount = Utils.randomIntIn(explores[rewardCheck].amountMin, explores[rewardCheck].amountMax);
@@ -254,7 +254,7 @@ module.exports = class ExploreCommand extends Command {
 										valueToAdd.push(randomAmount);
 									}
 									else if(randomCheck == 9) {
-										console.log("DB: Crates");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Crates");
 										const explores = await Utils.queryDB("SELECT * FROM exploration WHERE type = 'Crate'");
 										rewardCheck = Utils.biasedRandom(0,explores.length-1,(8-(luck/10)));
 										randomAmount = Utils.randomIntIn(explores[rewardCheck].amountMin, explores[rewardCheck].amountMax);
@@ -266,7 +266,7 @@ module.exports = class ExploreCommand extends Command {
 										valueToAdd.push(0);
 									}
 									else if(randomCheck == 10) {
-										console.log("DB: Artifact");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Artifact");
 										const explores = await Utils.queryDB("SELECT * FROM exploration WHERE type = 'Artifact'");
 										rewardCheck = Utils.biasedRandom(0,explores.length-1,(8-(luck/10)));
 										randomAmount = Utils.randomIntIn(explores[rewardCheck].amountMin, explores[rewardCheck].amountMax);
@@ -276,7 +276,7 @@ module.exports = class ExploreCommand extends Command {
 										valueToAdd.push(randomAmount);
 									}
 									else if(randomCheck == 11) {
-										console.log("DB: Caving");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Caving");
 										const explores = await Utils.queryDB("SELECT * FROM exploration WHERE type = 'Caving'");
 										rewardCheck = Utils.biasedRandom(0,explores.length-1,(8-(luck/10)));
 										randomAmount = Utils.randomIntIn(explores[rewardCheck].amountMin, explores[rewardCheck].amountMax);
@@ -299,7 +299,7 @@ module.exports = class ExploreCommand extends Command {
 										hasRuins = 1;
 									}
 									else if(randomCheck == 12) {
-										console.log("DB: Mystic Orbs");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Mystic Orbs");
 										var orbCheck = Utils.randomIntIn(1,100)
 										const explores = await Utils.queryDB("SELECT * FROM exploration WHERE type = 'Mystic Orb'");
 										if(orbCheck <= 25) {
@@ -317,7 +317,7 @@ module.exports = class ExploreCommand extends Command {
 										}
 									}
 									else if(randomCheck == 13) {
-										console.log("DB: Golden Crates");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Golden Crates");
 										var gcrateCheck = Utils.randomIntIn(1,100);
 										const explores = await Utils.queryDB("SELECT * FROM exploration WHERE type = 'Golden Crate'");
 										rewardCheck = Utils.biasedRandom(0,explores.length-1,(8-(luck/10)));

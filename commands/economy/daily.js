@@ -30,7 +30,7 @@ module.exports = class DailyCommand extends Command {
 				timeVar = parseInt(newTime - currentTime);
 				formattedTime = Utils.formatTimeUntil(newTime);
 				await Utils.queryDB("UPDATE users SET timeSinceDaily="+newTime+", coins=coins+"+randomCoins+" WHERE discordID="+authorID);
-				console.log("DB: Successfully claimed Daily Bonus for "+memID+"!");
+				Utils.log("\x1b[36m%s\x1b[0m", "DB: Successfully claimed Daily Bonus for "+memID+"!");
 				embedMsg.addField("Claimed!","You claimed your daily bonus and got awarded **"+randomCoins+" coins**!");
 				return msg.embed(embedMsg);
 			} else {

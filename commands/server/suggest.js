@@ -31,7 +31,7 @@ module.exports = class SuggestCommand extends Command {
 				.then(function(message) {message.react("👎"); return message;})
 				.then(function(message) {message.react("👋"); return message;})
 				.catch(function(err) {
-					console.log(err);
+					Utils.log(err);
 				});
 		}
 };

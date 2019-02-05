@@ -26,16 +26,16 @@ module.exports = class HatchCommand extends Command {
 			for(let i = 0; i < petID.length; i++) {
 				let currentPets = JSON.parse(petIDs[0].petID);
 				let currentPet = currentPets[i];
-				console.log("DB: Hatch Check\nLength: "+petID.length+"\nIndex: "+i+"\nCurrent Pet: "+currentPet);
+				Utils.log("\x1b[36m%s\x1b[0m", "DB: Hatch Check\nLength: "+petID.length+"\nIndex: "+i+"\nCurrent Pet: "+currentPet);
 				let petSelect = await Utils.queryDB("SELECT isEgg, hatchTime FROM pets WHERE id="+currentPet);
-				console.log("DB: Pet "+currentPet+" isEgg = "+petSelect[0].isEgg+", hatchTime = "+petSelect[0].hatchTime);
+				Utils.log("\x1b[36m%s\x1b[0m", "DB: Pet "+currentPet+" isEgg = "+petSelect[0].isEgg+", hatchTime = "+petSelect[0].hatchTime);
 				let currentTime = new Date().getTime();
 				let hatchTime = petSelect[0].hatchTime;
 				let formattedTime = Utils.formatTimeUntil(hatchTime);
 				if(petSelect[0].isEgg == 1) {
 					if(currentTime > hatchTime) {
 						await Utils.queryDB("UPDATE pets SET isEgg=0 WHERE id="+currentPet);
-						console.log("DB: Updated pet ID "+currentPet+" to egg status 0!");
+						Utils.log("\x1b[36m%s\x1b[0m", "DB: Updated pet ID "+currentPet+" to egg status 0!");
 						let petType = await Utils.queryDB("SELECT id, name, rarity FROM pet_types");
 						let pets = new Array();
 						let petsWeight = new Array();

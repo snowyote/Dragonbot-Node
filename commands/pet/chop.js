@@ -26,7 +26,7 @@ module.exports = class ChopCommand extends Command {
 
         let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
 
-        console.log("DB: Selected user ID " + msg.author.id);
+        Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
 		var userID = queryRes[0].id;
 		var active = queryRes[0].activePet;
 		if(msg.channel.id == "540716356782522402") {
@@ -50,11 +50,11 @@ module.exports = class ChopCommand extends Command {
 							
 							if(food >= foodUsed) {
 								var sharpness = petRes[0].axeSharpness;
-								console.log("DB: Sharpness is "+sharpness+"\nDB: Check: "+(sharpness > 0));
+								Utils.log("\x1b[36m%s\x1b[0m", "DB: Sharpness is "+sharpness+"\nDB: Check: "+(sharpness > 0));
 								if(sharpness > 0) {
 									await Utils.queryDB("UPDATE pets SET stamina=stamina-"+staminaUsed+" WHERE id="+active);
 									await Utils.queryDB("UPDATE users SET food=food-"+foodUsed+" WHERE discordID="+msg.author.id);
-									console.log("DB: Used "+staminaUsed+" stamina and "+foodUsed+" food!");
+									Utils.log("\x1b[36m%s\x1b[0m", "DB: Used "+staminaUsed+" stamina and "+foodUsed+" food!");
 									let achRes = await Utils.queryDB("SELECT * FROM achievement_progress WHERE id="+userID);
 									let petRes = await Utils.queryDB("SELECT * FROM pets WHERE id="+active);
 									let userRes = await Utils.queryDB("SELECT * FROM users WHERE discordID="+msg.author.id);
@@ -98,7 +98,7 @@ module.exports = class ChopCommand extends Command {
 									var probability = 2.6-(Math.floor(luck/10));
 									if(probability < 1.1) probability = 1.1;
 									var amountOfTrees = Utils.biasedRandom(1,3,(4-Math.floor(luck/10)));
-									console.log("DB: Luck random: "+probability);
+									Utils.log("\x1b[36m%s\x1b[0m", "DB: Luck random: "+probability);
 									var randomCheck = Utils.biasedRandom(1,4,probability);
 									let rewardCheck, rewardType, rewardName, rewardMsg;
 									var totalXPGain = 0;
@@ -112,7 +112,7 @@ module.exports = class ChopCommand extends Command {
 									for(var ex = 0; ex < amountOfTrees; ex++) {
 										//var randomCheck = Math.floor(Math.random() * 101);
 										randomCheck = Utils.biasedRandom(1,4,probability);
-										console.log("DB: Chop");
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Chop");
 										const explores = await Utils.queryDB("SELECT * FROM woodcutting WHERE type = 'log'");
 										const logTypes = await Utils.queryDB("SELECT * FROM log_types");
 										rewardCheck = Utils.biasedRandom(0,explores.length-1,(6-(luck/10)));
@@ -120,7 +120,7 @@ module.exports = class ChopCommand extends Command {
 										rewardType = "log";
 										logsCut += randomAmount;
 										logs[explores[rewardCheck].logID] += randomAmount;
-										console.log("DB: Index = "+explores[rewardCheck].logID);
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Index = "+explores[rewardCheck].logID);
 										findMsg = findMsg + explores[rewardCheck].icon+" ...chopped down 1 "+logTypes[explores[rewardCheck].logID].name+" Tree, collecting **"+randomAmount+"** "+logTypes[explores[rewardCheck].logID].name+" Logs!\n";
 										varToChange.push("food");
 										valueToAdd.push(0);
@@ -128,7 +128,7 @@ module.exports = class ChopCommand extends Command {
 										var birdNestRandom = Utils.randomIntIn(1,100);
 										var nestChance = strength[0]+luck;
 										if(nestChance > 5) nestChance = 5;
-										console.log("DB: Bird nest random: "+birdNestRandom+", chance: "+nestChance);
+										Utils.log("\x1b[36m%s\x1b[0m", "DB: Bird nest random: "+birdNestRandom+", chance: "+nestChance);
 										if(birdNestRandom <= nestChance) {
 											const nest = await Utils.queryDB("SELECT * FROM woodcutting WHERE type = 'nest'");
 											rewardCheck = Utils.biasedRandom(0,nest.length-1,(6-(luck/10)));

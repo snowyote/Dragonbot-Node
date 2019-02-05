@@ -27,16 +27,16 @@ module.exports = class RefineCommand extends Command {
 
         let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
         var gems = JSON.parse(queryRes[0].gems);
-        console.log("DB: Gems: " + JSON.stringify(gems) + "\n0: " + gems[0] + "\n1: " + gems[1] + "\n2: " + gems[2] + "\n3: " + gems[3] + "\n4: " + gems[4]);
+        Utils.log("\x1b[36m%s\x1b[0m", "DB: Gems: " + JSON.stringify(gems) + "\n0: " + gems[0] + "\n1: " + gems[1] + "\n2: " + gems[2] + "\n3: " + gems[3] + "\n4: " + gems[4]);
         var tools = JSON.parse(queryRes[0].tools);
         if (tools.length > 0) {
             var hasRefiner = 0;
-            console.log("DB: Tools includes: " + tools);
+            Utils.log("\x1b[36m%s\x1b[0m", "DB: Tools includes: " + tools);
             if (tools.includes(1)) hasRefiner = 1;
             if (hasRefiner) {
                 if (id > 0) {
                     var userID = queryRes[0].id;
-                    console.log("DB: Selected user ID " + msg.author.id);
+                    Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
                     if (id == 1) {
                         if (gems[0] >= 4) {
                             var randomLoss = Utils.randomIntIn(0, gems[0] / 10);

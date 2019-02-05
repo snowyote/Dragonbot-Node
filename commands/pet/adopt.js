@@ -37,11 +37,11 @@ module.exports = class AdoptCommand extends Command {
                 activePet = [newPetID];
                 petJSON.push(newPetID);
                 var petsString = JSON.stringify(petJSON);
-                console.log("DB: " + msg.author.id + " successfully adopted pet ID " + newPetID + "!");
+                Utils.log("\x1b[36m%s\x1b[0m", "DB: " + msg.author.id + " successfully adopted pet ID " + newPetID + "!");
                 const updatePets = await Utils.queryDB("UPDATE users SET petID='" + petsString + "', activePet='" + activePet + "', coins=coins-" + cost + " WHERE id=" + userRes[0].id);
-                console.log("DB: " + newPetID + " has been added to user " + userRes[0].id + "!");
-                console.log("DB: " + newPetID + " has been set as active for user " + userRes[0].id + "!");
-                console.log("DB: " + msg.author.id + " has been charged " + cost + " coins!");
+                Utils.log("\x1b[36m%s\x1b[0m", "DB: " + newPetID + " has been added to user " + userRes[0].id + "!");
+                Utils.log("\x1b[36m%s\x1b[0m", "DB: " + newPetID + " has been set as active for user " + userRes[0].id + "!");
+                Utils.log("\x1b[36m%s\x1b[0m", "DB: " + msg.author.id + " has been charged " + cost + " coins!");
                 await Utils.queryDB("UPDATE achievement_progress SET petsAdopted=petsAdopted+1 WHERE id=" + userRes[0].id);
                 return msg.embed(embedMsg);
             } else {

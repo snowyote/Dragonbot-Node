@@ -41,7 +41,7 @@ module.exports = class MarketCommand extends Command {
 		var active = queryRes[0].activePet;
         let petRes = await Utils.queryDB("SELECT * FROM pets WHERE id="+active);
 		var tools = JSON.parse(queryRes[0].tools);
-        console.log("DB: Selected user ID " + msg.author.id);
+        Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
         const marketRes = await Utils.queryDB("SELECT * FROM market");
         if (!id) {
             var str = "";
@@ -78,7 +78,7 @@ module.exports = class MarketCommand extends Command {
 							return msg.embed(embedMsg);
 						}
 					} else if(userVar == "tools") {
-						console.log("DB: Tools: "+tools);
+						Utils.log("\x1b[36m%s\x1b[0m", "DB: Tools: "+tools);
 						var hasTool = 0;
 						for(var i = 0; i < tools.length; i++) {
 							if(parseInt(tools[i]) == quantity) {
@@ -93,7 +93,7 @@ module.exports = class MarketCommand extends Command {
 							if(coins >= cost) {
 								tools.push(quantity);
 								await Utils.queryDB("UPDATE users SET tools='"+JSON.stringify(tools)+"', coins=coins-"+cost+" WHERE discordID=" + msg.author.id);
-								console.log("DB: Successfully bought tool!");
+								Utils.log("\x1b[36m%s\x1b[0m", "DB: Successfully bought tool!");
 								embedMsg.addField("Bought Item", "You successfully bought a **"+name+"** for **"+cost+"** coins!");
 								var achVar = "woodworkerOwned";
 								if(quantity == 1) achVar = "gemcrusherOwned";
@@ -103,7 +103,7 @@ module.exports = class MarketCommand extends Command {
 								await Utils.queryDB("UPDATE achievement_progress SET "+achVar+"=1 WHERE id="+userID);
 								return msg.embed(embedMsg);
 							} else {
-							console.log("DB: Needs " + cost + " coins, has " + coins);
+							Utils.log("\x1b[36m%s\x1b[0m", "DB: Needs " + cost + " coins, has " + coins);
 							embedMsg.addField("Can't Buy", "You don't have the **" + cost + "** coins needed!");
 							return msg.embed(embedMsg);
 							}
@@ -115,12 +115,12 @@ module.exports = class MarketCommand extends Command {
 						}
 						if (coins >= cost) {
 							await Utils.queryDB("UPDATE users SET "+userVar+"="+userVar+"+"+quantity+", coins=coins-"+cost+" WHERE discordID=" + msg.author.id);
-							console.log("DB: Successfully bought item!");
+							Utils.log("\x1b[36m%s\x1b[0m", "DB: Successfully bought item!");
 							embedMsg.addField("Bought Item", "You successfully bought "+amount+" lot(s) of **"+name+"** for **"+cost+"** coins!");
 							await Utils.queryDB("UPDATE achievement_progress SET marketBought=marketBought+"+amount+" WHERE id="+userID);
 							return msg.embed(embedMsg);
 						} else {
-							console.log("DB: Needs " + cost + " coins, has " + coins);
+							Utils.log("\x1b[36m%s\x1b[0m", "DB: Needs " + cost + " coins, has " + coins);
 							embedMsg.addField("Can't Buy", "You don't have the **" + cost + "** coins needed!");
 							return msg.embed(embedMsg);
 						}

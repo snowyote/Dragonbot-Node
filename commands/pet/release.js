@@ -45,20 +45,20 @@ module.exports = class ReleaseCommand extends Command {
 				
 				for(var pi = 0; pi < pets.length; pi++) {
 					if(pets[pi] == active) {
-						console.log("DB: Found active pet!");
+						Utils.log("\x1b[36m%s\x1b[0m", "DB: Found active pet!");
 					} else {
 						newPets.push(pets[pi]);
 					}
 				}
 				
 				if(pets.length > 1) {
-					console.log("DB: Has other pets");
+					Utils.log("\x1b[36m%s\x1b[0m", "DB: Has other pets");
 					await Utils.queryDB("UPDATE users SET activePet="+newPets[0]+", petID='"+JSON.stringify(newPets)+"' WHERE discordID="+msg.author.id);
 				} else {
-					console.log("DB: Has no other pets");
+					Utils.log("\x1b[36m%s\x1b[0m", "DB: Has no other pets");
 					await Utils.queryDB("UPDATE users SET activePet=0, petID='[]' WHERE discordID="+msg.author.id);
 				}
-				console.log("DB: Deleting pet ID "+active);
+				Utils.log("\x1b[36m%s\x1b[0m", "DB: Deleting pet ID "+active);
 				await Utils.queryDB("INSERT pets_graveyard SELECT * FROM pets WHERE id="+active);
 				await Utils.queryDB("DELETE FROM pets WHERE id="+active);
 				return msg.embed(embedMsg);

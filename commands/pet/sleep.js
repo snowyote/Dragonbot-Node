@@ -31,7 +31,7 @@ module.exports = class SleepCommand extends Command {
                     var maxStamina = petRes[0].maxStamina;
                     embedMsg.addField("Sleeping!", "Your pet **" + petRes[0].name + "** is now sleeping, and will wake up in **" + Utils.formatTimeUntil(currentTime + randomTime) + "**!");
                     await Utils.queryDB("UPDATE pets SET sleepTime=" + (currentTime + randomTime) + ", stamina=" + maxStamina + ", isSleeping=1 WHERE id=" + active)
-                    console.log("DB: Pet id " + active + " is now sleeping!");
+                    Utils.log("\x1b[36m%s\x1b[0m", "DB: Pet id " + active + " is now sleeping!");
 					return msg.embed(embedMsg);
                 } else {
                     embedMsg.addField("Can't sleep!", "Your pet **" + petRes[0].name + "** is already well rested!\n(" + petRes[0].stamina + "/" + petRes[0].maxStamina + " Stamina)");
