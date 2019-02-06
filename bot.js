@@ -102,10 +102,10 @@ async function petUpdates() {
                     }
 
                     var randomnumber = Math.floor(Math.random() * totalweight);
-                    var rarity = Utils.petTypeString(petType[pi].rarity);
 
                     var randomPetID = weighedpets[randomnumber];
                     var petName = petType[randomPetID - 1].name;
+                    var rarity = Utils.petTypeString(petType[randomPetID - 1].rarity);
 
                     let bgType = await Utils.queryDB("SELECT id, name FROM backgrounds");
                     var randomBG = Math.floor(Math.random() * bgType.length);

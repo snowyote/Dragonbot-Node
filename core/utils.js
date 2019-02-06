@@ -203,6 +203,13 @@ async function addQuestItem(userID, item) {
 	}
 }
 
+async function addLogs(userID, logID, amount) {
+	const userRes = await queryDB("SELECT logs FROM users WHERE discordID="+userID);
+	let logList = JSON.parse(userRes[0].logs);
+	logList[logID] += amount;
+	await queryDB("UPDATE users SET logs='"+JSON.stringify(logList)+"' WHERE discordID="+userID);
+}
+
 // --
 // Check if string is numeric
 // --
@@ -273,6 +280,13 @@ async function getLocType(user) {
 	const locationRes = await queryDB("SELECT * FROM locations WHERE coords='"+JSON.stringify(locations)+"'");
 	let type = locationRes[0].type;
 	return type;
+}
+
+async function getLocBiome(user) {
+	const locations = await getLocation(user);
+	const locationRes = await queryDB("SELECT * FROM locations WHERE coords='"+JSON.stringify(locations)+"'");
+	let biome = locationRes[0].biome;
+	return biome;
 }
 
 async function getUserID(user, isID) {
@@ -576,4 +590,4 @@ function delay(ms) {
 // Export functions
 // --
 
-module.exports = {queryDB, isNormalInteger, isNumeric, capitalize, stringifyNumber, formatTimeUntil, formatTimeSince, RSExp, getTimestamp, getSum, randomIntIn, randomIntEx, biasedRandom, drawXPBar, petTypeString, delay, webJson, log, takeCoins, giveCoins, makeTile, generateMap, generateWorldMap, RPGOptions, getLocation, getLocType, getLocName, hasItem, removeItem, addItem, hasQuestItem, addQuestItem, removeQuestItem, isInQuest, completeQuest, makeRPGEmbed, getQuestItem, getQuestsCompleted, hasCompletedQuest};
+module.exports = {queryDB, isNormalInteger, isNumeric, capitalize, stringifyNumber, formatTimeUntil, formatTimeSince, RSExp, getTimestamp, getSum, randomIntIn, randomIntEx, biasedRandom, drawXPBar, petTypeString, delay, webJson, log, takeCoins, giveCoins, makeTile, generateMap, generateWorldMap, RPGOptions, getLocation, getLocType, getLocName, hasItem, removeItem, addItem, hasQuestItem, addQuestItem, removeQuestItem, isInQuest, completeQuest, makeRPGEmbed, getQuestItem, getQuestsCompleted, hasCompletedQuest, getLocBiome, addLogs};
