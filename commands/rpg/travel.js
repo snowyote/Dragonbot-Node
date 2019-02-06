@@ -22,8 +22,6 @@ module.exports = class TravelCommand extends Command {
     }
 
     async run(msg, {direction}) {
-		const embedMsg = new Discord.RichEmbed()
-                  .setAuthor("World of the House of Dragons", "https://i.imgur.com/CyAb3mV.png")
 				  
 		const userRes = await Utils.queryDB("SELECT * FROM users WHERE discordID="+msg.author.id);
 		let coords = JSON.parse(userRes[0].location);
@@ -42,6 +40,9 @@ module.exports = class TravelCommand extends Command {
 				movement[0]--;
 				break;
 		}
+		
+		const embedMsg = new Discord.RichEmbed()
+                  .setAuthor("World of the House of Dragons ["+movement[0]+","+movement[1]+"]", "https://i.imgur.com/CyAb3mV.png")
 		
 		const tiles = await Utils.queryDB("SELECT * FROM locations WHERE coords='"+JSON.stringify(movement)+"'");
 		if(tiles && tiles.length) {

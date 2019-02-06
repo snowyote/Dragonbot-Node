@@ -18,7 +18,7 @@ const config = {
 async function queryDB(sql) {
 	let connection;
 	try {
-		//Utils.log("\x1b[36m%s\x1b[0m", "DB: Running query: "+sql);
+		//log("\x1b[36m%s\x1b[0m", "DB: Running query: "+sql);
 		connection = await mysql.createConnection(config);
 		let result = await connection.query(sql);
 		connection.end();
@@ -90,6 +90,41 @@ async function addItem(userID, item) {
 	}
 }
 
+async function hasQuestItem(userID, item) {
+	const userRes = await queryDB("SELECT questItems FROM users WHERE discordID="+userID);
+	let itemList = JSON.parse(userRes[0].questItems);
+	if(itemList.includes(item)) return true;
+	else return false;
+}
+
+async function removeQuestItem(userID, item) {
+	const userRes = await queryDB("SELECT questItems FROM users WHERE discordID="+userID);
+	let itemList = JSON.parse(userRes[0].questItems);
+	let newItems = new Array();
+	if(itemList.includes(item)) {
+		for(var i = 0; i < itemList.length; i++) {
+			if(itemList[i] !== item) {
+				newItems.push(itemList[i]);
+			} else log("DB: Removed item ID "+item);
+		}
+		await queryDB("UPDATE users SET questItems='"+JSON.stringify(newItems)+"' WHERE discordID="+userID);
+		return true;
+	}
+	else return false;
+}
+
+async function addQuestItem(userID, item) {
+	const userRes = await queryDB("SELECT questItems FROM users WHERE discordID="+userID);
+	let itemList = JSON.parse(userRes[0].questItems);
+	if(itemList.includes(item)) return false;
+	else {
+		itemList.push(item);
+		await queryDB("UPDATE users SET questItems='"+JSON.stringify(itemList)+"' WHERE discordID="+userID);
+		log("DB: Added item ID "+item);
+		return true;
+	}
+}
+
 // --
 // Check if string is numeric
 // --
@@ -111,10 +146,25 @@ function RPGOptions(type) {
 			opt = opt+'**Explore** (*!explore*)\n';
 			opt = opt+'**Talk** (*!talk*)\n';
 			break;
+		case 'plains':
+			opt = opt+'**Explore** (*!explore*)\n';
+			break;
+		case 'beach':
+			opt = opt+'**Explore** (*!explore*)\n';
+			break;
+		case 'desert':
+			opt = opt+'**Explore** (*!explore*)\n';
+			break;
+		case 'ashen':
+			opt = opt+'**Explore** (*!explore*)\n';
+			break;
 		case 'water':
 			opt = opt+'**Explore** (*!explore*)\n';
 			opt = opt+'**Fish** (*!fish*)\n';
 			opt = opt+'**Rest** (*!rest*)\n';
+			break;
+		case 'dungeon':
+			opt = opt+'**Explore** (*!explore*)\n';
 			break;
 		case 'forest':
 			opt = opt+'**Explore** (*!explore*)\n';
@@ -129,6 +179,31 @@ function RPGOptions(type) {
 async function getLocation(user) {
 	const locations = await queryDB("SELECT location FROM users WHERE discordID="+user.id);
 	return JSON.parse(locations[0].location);
+}
+
+async function getLocType(user) {
+	const locations = await getLocation(user);
+	const locationRes = await queryDB("SELECT * FROM locations WHERE coords='"+JSON.stringify(locations)+"'");
+	let type = locationRes[0].type;
+	return type;
+}
+
+async function getUserID(user) {
+	const userRes = await queryDB("SELECT id FROM users WHERE discordID="+user.id);
+	let id = userRes[0].id;
+	return id;
+}
+
+async function isInQuest(user) {
+	let userID = await getUserID(user);
+	const rpgRes = await queryDB("SELECT quest_in_progress FROM rpg_flags WHERE userID="+userID);
+	return rpgRes[0].quest_in_progress;
+}
+
+async function getLocName(user) {
+	const locations = await getLocation(user);
+	const locationRes = await queryDB("SELECT * FROM locations WHERE coords='"+JSON.stringify(locations)+"'");
+	return locationRes[0].name;
 }
 
 // --
@@ -167,7 +242,7 @@ async function makeTile(x,y) {
 		var centerY = tpl.bitmap.height * 0.5;
 		tpl.composite(markerTpl, centerX-(markerTpl.bitmap.width * 0.5), centerY-(markerTpl.bitmap.height * 0.5), [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
 	}
-	log("\x1b[32m%s\x1b[0m", "DB: Made tile at x"+x+" y"+y);
+	//log("\x1b[32m%s\x1b[0m", "DB: Made tile at x"+x+" y"+y);
 	return tpl;
 }
 
@@ -202,6 +277,31 @@ async function generateMap(x,y,user) {
 	avatar.mask(avatarMask, 0, 0);
 	marker.composite(avatar, 4, 4);
 	map.composite(marker, 127, 80);
+	
+	const buffer = await map.filterType(0).getBufferAsync('image/png');
+	return buffer;
+}
+
+async function generateWorldMap() {
+	let map = await new Jimp(1100,1100);
+	var worldX = 7;
+	var worldY = 7;
+	var xOffset = 0;
+	var yOffset = 0;
+	for(let i = -5; i < worldY; i++) {
+		//Each Y
+		for(let i2 = -5; i2 < worldX; i2++) {
+			//Each X
+			let tile = await makeTile(i2, i);
+			let font = await Jimp.loadFont('./fonts/beleren15.fnt');
+            tile.print(font, 5, 5, '['+i2+','+i+']', 500, 500);
+			log("\x1b[32m%s\x1b[0m", "DB: Place world map tile at x"+xOffset+" y"+yOffset);
+			map.composite(tile, xOffset, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+			xOffset += 100;
+		}
+		yOffset += 100;
+		xOffset = 0;
+	}
 	
 	const buffer = await map.filterType(0).getBufferAsync('image/png');
 	return buffer;
@@ -384,4 +484,4 @@ function delay(ms) {
 // Export functions
 // --
 
-module.exports = {queryDB, isNormalInteger, isNumeric, capitalize, stringifyNumber, formatTimeUntil, formatTimeSince, RSExp, getTimestamp, getSum, randomIntIn, randomIntEx, biasedRandom, drawXPBar, petTypeString, delay, webJson, log, takeCoins, giveCoins, makeTile, generateMap, RPGOptions, getLocation, hasItem, removeItem, addItem};
+module.exports = {queryDB, isNormalInteger, isNumeric, capitalize, stringifyNumber, formatTimeUntil, formatTimeSince, RSExp, getTimestamp, getSum, randomIntIn, randomIntEx, biasedRandom, drawXPBar, petTypeString, delay, webJson, log, takeCoins, giveCoins, makeTile, generateMap, generateWorldMap, RPGOptions, getLocation, getLocType, getLocName, hasItem, removeItem, addItem, hasQuestItem, addQuestItem, removeQuestItem, isInQuest};

@@ -27,10 +27,10 @@ module.exports = class InventoryCommand extends Command {
 		var gems = JSON.parse(queryRes[0].gems);
 		var logs = JSON.parse(queryRes[0].logs);
 		var seeds = JSON.parse(queryRes[0].seeds);
-        const itemRes = await Utils.queryDB("SELECT * FROM items WHERE type='Quest'");
+        const itemRes = await Utils.queryDB("SELECT * FROM quest_items");
 		var questItems = "";
 		for(var i = 0; i < itemRes.length; i++) {
-			if(await Utils.hasItem(msg.author.id, itemRes[i].id)) {
+			if(await Utils.hasQuestItem(msg.author.id, itemRes[i].id)) {
 				questItems = questItems + itemRes[i].name + ', ';
 			}
 		}
