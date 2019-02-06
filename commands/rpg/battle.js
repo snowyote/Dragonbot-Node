@@ -42,20 +42,26 @@ module.exports = class BattleCommand extends Command {
 			while (!battle.winner) {
 				const choice = await battle.attacker.chooseAction(msg);
 				if (choice === 'attack') {
+					let atkBonus = await Utils.calculateProwess(battle.attacker.user.id);
+					let preBonus = await Utils.calculatePrecision(battle.attacker.user.id);
+					let impBonus = await Utils.calculateImpact(battle.attacker.user.id);
+					let aglBonus = await Utils.calculateAgility(battle.defender.user.id);
+					let defBonus = await Utils.calculateFortitude(battle.defender.user.id);
+					
 					let multiplier = 1;
 					let missed = 0;
 					let stunned = 0;
 					
 					let random = Utils.randomIntIn(1,100);
-					if(random <= Math.floor(battle.attacker.agl/2))
+					if(random <= Math.floor(aglBonus/2))
 						missed = 1;
 					
 					random = Utils.randomIntIn(1,100);
-					if(random <= Math.floor(battle.attacker.pre/2))
+					if(random <= Math.floor(preBonus/2))
 						multiplier = 2;
 					
 					random = Utils.randomIntIn(1,100);
-					if(random <= Math.floor(battle.attacker.imp/2))
+					if(random <= Math.floor(impBonus/2))
 						stunned = 1;
 					
 					let dmgMin = 20 + (Math.floor(atkBonus/2) - Math.floor(defBonus/2))*multiplier;
@@ -71,13 +77,13 @@ module.exports = class BattleCommand extends Command {
 						await msg.say(`${battle.attacker} missed!`);
 						battle.reset();
 					} else if(stunned) {
-						await msg.say(`${battle.attacker} deals **${damage}** impact damage, causing ${battle.opponent} to miss a turn!`);
+						await msg.say(`${battle.attacker} deals **${damage}** impact damage, causing ${battle.defender} to miss a turn!`);
 						battle.defender.dealDamage(damage);
 						battle.reset();
 						battle.reset();
 					} else {
-						if(multiplier == 2) await msg.say(`${battle.attacker} deals **${damage}** damage!`);
-						else await msg.say(`${battle.attacker} ***critically hit***, dealing **${damage}** damage!`);
+						if(multiplier == 2) await msg.say(`${battle.attacker} ***critically hit***, dealing **${damage}** damage!`);
+						else await msg.say(`${battle.attacker} deals **${damage}** damage!`);
 						battle.defender.dealDamage(damage);
 						battle.reset();
 					}

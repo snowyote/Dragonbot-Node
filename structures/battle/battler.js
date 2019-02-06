@@ -8,11 +8,6 @@ module.exports = class Battler {
 		this.bot = user.bot;
 		this.hp = 100;
 		this.guard = false;
-		this.atk = await Utils.calculateProwess(user.id);
-		this.def = await Utils.calculateFortitude(user.id);
-		this.agl = await Utils.calculateAgility(user.id);
-		this.pre = await Utils.calculatePrecision(user.id);
-		this.imp = await Utils.calculateImpact(user.id);
 	}
 
 	async chooseAction(msg) {
