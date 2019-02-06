@@ -51,8 +51,12 @@ module.exports = class TravelCommand extends Command {
 			} else {
 				let buffer = await Utils.generateMap(movement[0], movement[1], msg.author);
 				embedMsg.attachFiles(buffer);
-				embedMsg.addField(tiles[0].name, tiles[0].lore);
-				embedMsg.addField("Options", Utils.RPGOptions(tiles[0].type));
+				if(tiles[0].lore.length > 0) {
+					embedMsg.addField(tiles[0].name, tiles[0].lore);
+					embedMsg.addField("Options", Utils.RPGOptions(tiles[0].type));
+				} else {
+					embedMsg.addField(tiles[0].name, Utils.RPGOptions(tiles[0].type));
+				}
 				await Utils.queryDB("UPDATE users SET location='"+JSON.stringify(movement)+"' WHERE discordID="+msg.author.id);
 				return msg.embed(embedMsg);
 			}

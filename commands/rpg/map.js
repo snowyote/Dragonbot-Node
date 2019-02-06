@@ -25,8 +25,12 @@ module.exports = class MapCommand extends Command {
                   .setAuthor("World of the House of Dragons ["+coords[0]+","+coords[1]+"]", "https://i.imgur.com/CyAb3mV.png")
 				  
 		embedMsg.attachFiles(buffer);
-		embedMsg.addField(tiles[0].name, tiles[0].lore);
-		embedMsg.addField("Options", Utils.RPGOptions(tiles[0].type));
+		if(tiles[0].lore.length > 0) {
+				embedMsg.addField(tiles[0].name, tiles[0].lore);
+				embedMsg.addField("Options", Utils.RPGOptions(tiles[0].type));
+			} else {
+				embedMsg.addField(tiles[0].name, Utils.RPGOptions(tiles[0].type));
+		}
 		return msg.embed(embedMsg);
     };
 }

@@ -41,6 +41,11 @@ module.exports = class QuestCommand extends Command {
 				return msg.embed(embedMsg);
 			}
 			
+			if(await Utils.hasCompletedQuest(msg.author.id, id)) {
+				embedMsg.addField("Already Completed", "You have already completed this quest!");
+				return msg.embed(embedMsg);
+			}
+			
 			if(flagRes[0][questRes[0].requiredFlag] >= questRes[0].requiredNum) {
 				if(flagRes[0].quest_in_progress == 0) {
 					embedMsg.addField("Accepted Quest", "You've accepted the quest **"+questRes[0].name+"**!\n*"+questRes[0].description+"*");

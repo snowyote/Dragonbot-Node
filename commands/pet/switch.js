@@ -43,7 +43,7 @@ module.exports = class SwitchCommand extends Command {
 					let petSelect = await Utils.queryDB("SELECT name, level, isEgg, petType FROM pets WHERE id=" + currentPet + " ORDER BY level DESC")
 					Utils.log("\x1b[36m%s\x1b[0m", "DB: Pet " + currentPet + " name = " + petSelect[0].name + ", level = " + petSelect[0].level + ", type = " + petSelect[0].petType + ", isEgg = " + petSelect[0].isEgg);
 					if (petSelect[0].isEgg == 1) {
-						embedMsg.addField(capitalize(stringifyNumber((i + 1))) + " Pet", "Not hatched yet!");
+						embedMsg.addField(Utils.capitalize(Utils.stringifyNumber((i + 1))) + " Pet", "Not hatched yet!");
 					} else {
 						let petType = await Utils.queryDB("SELECT name, rarity FROM pet_types WHERE id="+petSelect[0].petType);
 						var rarity = "None?";

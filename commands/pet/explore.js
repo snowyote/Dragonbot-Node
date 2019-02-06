@@ -245,7 +245,7 @@ module.exports = class ExploreCommand extends Command {
 													}
 												}
 											} else {
-												findMsg = findMsg + itemsQuest[rewardCheck].icon+" ...couldn't find anything useful!\n";
+												findMsg = findMsg + "🤦 ...couldn't find anything useful!\n";
 											}
 										}
 										else if(possibleRewards[randomCheck] == 'battle') {

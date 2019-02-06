@@ -1,5 +1,6 @@
 const mysql = require( 'promise-mysql' );
 const Jimp = require( 'jimp' );
+const Discord = require( 'discord.js' );
 const request = require( 'request-promise' );
 const configFile = require("../config.json");
 
@@ -18,7 +19,7 @@ const config = {
 async function queryDB(sql) {
 	let connection;
 	try {
-		//log("\x1b[36m%s\x1b[0m", "DB: Running query: "+sql);
+		log("\x1b[36m%s\x1b[0m", "DB: Running query: "+sql);
 		connection = await mysql.createConnection(config);
 		let result = await connection.query(sql);
 		connection.end();
@@ -26,6 +27,14 @@ async function queryDB(sql) {
 	} catch (error) {
 		log("\x1b[31m%s\x1b[0m", "Utils: Error in querying database\n"+error.stack);
 	};
+}
+
+function makeRPGEmbed(fieldTitle, fieldValue) {
+	const embedMsg = new Discord.RichEmbed()
+        .setAuthor("World of the House of Dragons", "https://i.imgur.com/CyAb3mV.png")
+		.addField(fieldTitle, fieldValue);
+		
+	return embedMsg;
 }
 
 async function takeCoins(userID, coins) {
@@ -95,6 +104,75 @@ async function hasQuestItem(userID, item) {
 	let itemList = JSON.parse(userRes[0].questItems);
 	if(itemList.includes(item)) return true;
 	else return false;
+}
+
+async function getItem(item, description) {
+	const itemRes = await queryDB("SELECT * from items WHERE id="+item);
+	if(description) return itemRes[0].name+' (*'+itemRes[0].description+'*)';
+	else return itemRes[0].name;
+}
+
+async function getQuestItem(item, description) {
+	const itemRes = await queryDB("SELECT * from quest_items WHERE id="+item);
+	if(description) return itemRes[0].name+' (*'+itemRes[0].description+'*)';
+	else return itemRes[0].name;
+}
+
+async function getQuestsCompleted(userID) {
+	let dbUserID = await getUserID(userID, true);
+	const questRes = await queryDB("SELECT quests_completed FROM rpg_flags WHERE userID="+dbUserID);
+	let completedList = JSON.parse(questRes[0].quests_completed);
+	return completedList;
+}
+
+async function hasCompletedQuest(userID, quest) {
+	let completedList = await getQuestsCompleted(userID);
+	if(completedList.includes(quest)) return true;
+	else return false;
+}
+
+async function completeQuest(userID, quest) {
+	const questRes = await queryDB("SELECT * FROM quests WHERE id="+quest);
+	
+	let description = questRes[0].description;
+	let questFlag = questRes[0].questFlag;
+	let name = questRes[0].name;
+	
+	let reward = questRes[0].reward;
+	
+	// This can be the ID if it's an item, or amount if it's a resource!
+	let rewardAmount = questRes[0].rewardAmount;
+	
+	let itemNeeded = questRes[0].itemNeeded;
+	
+	await removeQuestItem(userID, itemNeeded);
+	
+	let rewardStr = "";
+	
+	switch(reward) {
+		case 'quest_item':
+			await addQuestItem(userID, rewardAmount);
+			rewardStr = rewardStr + await getQuestItem(rewardAmount, true);
+			break;
+		case 'coins':
+			await giveCoins(userID, rewardAmount);
+			rewardStr = rewardStr + '**'+rewardAmount+'** coins';
+			break;
+		case 'item':
+			await addItem(userID, rewardAmount);
+			rewardStr = rewardStr + await getItem(rewardAmount, true);
+			break;
+	}
+	
+	let dbUserID = await getUserID(userID, true);
+	
+	let completedList = await getQuestsCompleted(userID, quest);
+	completedList.push(quest);
+	
+	await queryDB("UPDATE rpg_flags SET quest_in_progress=0, "+questFlag+"="+questFlag+"+1, quests_completed='"+JSON.stringify(completedList)+"' WHERE userID="+dbUserID);
+	
+	const questMsg = makeRPGEmbed("Completed Quest: "+name, '*'+description+'*\n\n**Reward:** '+rewardStr);
+	return questMsg;
 }
 
 async function removeQuestItem(userID, item) {
@@ -171,6 +249,15 @@ function RPGOptions(type) {
 			opt = opt+'**Chop Trees** (*!chop*)\n';
 			opt = opt+'**Rest** (*!rest*)\n';
 			break;
+		case 'quarry':
+			opt = opt+'**Explore** (*!explore*)\n';
+			opt = opt+'**Mine** (*!mine*)\n';
+			opt = opt+'**Talk** (*!talk*)\n';
+			break;
+		case 'goblin':
+			opt = opt+'**Battle** (*!battle*)\n';
+			opt = opt+'**Talk** (*!talk*)\n';
+			break;
 	}
 	opt = opt.slice(0,-1);
 	return opt;
@@ -188,14 +275,19 @@ async function getLocType(user) {
 	return type;
 }
 
-async function getUserID(user) {
-	const userRes = await queryDB("SELECT id FROM users WHERE discordID="+user.id);
+async function getUserID(user, isID) {
+	let userRes;
+	if(isID) 
+		userRes = await queryDB("SELECT id FROM users WHERE discordID="+user);
+	else
+		userRes = await queryDB("SELECT id FROM users WHERE discordID="+user.id);
+	
 	let id = userRes[0].id;
 	return id;
 }
 
 async function isInQuest(user) {
-	let userID = await getUserID(user);
+	let userID = await getUserID(user, false);
 	const rpgRes = await queryDB("SELECT quest_in_progress FROM rpg_flags WHERE userID="+userID);
 	return rpgRes[0].quest_in_progress;
 }
@@ -484,4 +576,4 @@ function delay(ms) {
 // Export functions
 // --
 
-module.exports = {queryDB, isNormalInteger, isNumeric, capitalize, stringifyNumber, formatTimeUntil, formatTimeSince, RSExp, getTimestamp, getSum, randomIntIn, randomIntEx, biasedRandom, drawXPBar, petTypeString, delay, webJson, log, takeCoins, giveCoins, makeTile, generateMap, generateWorldMap, RPGOptions, getLocation, getLocType, getLocName, hasItem, removeItem, addItem, hasQuestItem, addQuestItem, removeQuestItem, isInQuest};
+module.exports = {queryDB, isNormalInteger, isNumeric, capitalize, stringifyNumber, formatTimeUntil, formatTimeSince, RSExp, getTimestamp, getSum, randomIntIn, randomIntEx, biasedRandom, drawXPBar, petTypeString, delay, webJson, log, takeCoins, giveCoins, makeTile, generateMap, generateWorldMap, RPGOptions, getLocation, getLocType, getLocName, hasItem, removeItem, addItem, hasQuestItem, addQuestItem, removeQuestItem, isInQuest, completeQuest, makeRPGEmbed, getQuestItem, getQuestsCompleted, hasCompletedQuest};
