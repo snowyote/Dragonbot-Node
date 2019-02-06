@@ -8,6 +8,7 @@ module.exports = class LeaderboardCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'leaderboard',
+			aliases: ['top', 'leader', 'board'],
             group: 'pet',
             memberName: 'leaderboard',
             description: 'View pet leaderboards',

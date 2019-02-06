@@ -6,6 +6,7 @@ module.exports = class InventoryCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'inventory',
+			aliases: ['inv'],
             group: 'pet',
             memberName: 'inventory',
             description: 'View your inventory',
@@ -26,6 +27,16 @@ module.exports = class InventoryCommand extends Command {
 		var gems = JSON.parse(queryRes[0].gems);
 		var logs = JSON.parse(queryRes[0].logs);
 		var seeds = JSON.parse(queryRes[0].seeds);
+        const itemRes = await Utils.queryDB("SELECT * FROM items WHERE type='Quest'");
+		var questItems = "";
+		for(var i = 0; i < itemRes.length; i++) {
+			if(await Utils.hasItem(msg.author.id, itemRes[i].id)) {
+				questItems = questItems + itemRes[i].name + ', ';
+			}
+		}
+		
+		if(questItems == "") questItems = "None";
+		else questItems = questItems.slice(0, -2);
 		
         const embedMsg = new Discord.RichEmbed()
             .setAuthor(msg.author.username+"'s Inventory", "https://i.imgur.com/CyAb3mV.png")
@@ -51,6 +62,7 @@ module.exports = class InventoryCommand extends Command {
 									"Golden: **"+crates[2]+"**\n"+
 									"Ancient: **"+crates[3]+"**\n"+
 									"Celestial: **"+crates[4]+"**", true);
+		embedMsg.addField("🌟 Quest Items", "**"+questItems+"**", true);
 		return msg.embed(embedMsg);
     };
 }

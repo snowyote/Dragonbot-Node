@@ -8,6 +8,7 @@ module.exports = class SlotsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'achievements',
+			aliases: ['ach', 'achieve', 'achievement'],
             group: 'pet',
             memberName: 'achievements',
             description: 'View achievements',

@@ -1,4 +1,5 @@
 const mysql = require( 'promise-mysql' );
+const Jimp = require( 'jimp' );
 const request = require( 'request-promise' );
 const configFile = require("../config.json");
 
@@ -23,8 +24,18 @@ async function queryDB(sql) {
 		connection.end();
 		return result;
 	} catch (error) {
-		Utils.log("\x1b[31m%s\x1b[0m", "Utils: Error in querying database\n"+error.stack);
+		log("\x1b[31m%s\x1b[0m", "Utils: Error in querying database\n"+error.stack);
 	};
+}
+
+async function takeCoins(userID, coins) {
+	await queryDB("UPDATE users SET coins=coins-"+coins+" WHERE discordID="+userID);
+	log("\x1b[32m%s\x1b[0m", "Utils: Took "+coins+" coins from "+userID);
+}
+
+async function giveCoins(userID, coins) {
+	await queryDB("UPDATE users SET coins=coins+"+coins+" WHERE discordID="+userID);
+	log("\x1b[32m%s\x1b[0m", "Utils: Gave "+coins+" coins to "+userID);
 }
 
 function log(colour, string) {
@@ -44,12 +55,156 @@ function getTimestamp() {
 	return new Date().getTime();
 }
 
+async function hasItem(userID, item) {
+	const userRes = await queryDB("SELECT equipmentList FROM users WHERE discordID="+userID);
+	let itemList = JSON.parse(userRes[0].equipmentList);
+	if(itemList.includes(item)) return true;
+	else return false;
+}
+
+async function removeItem(userID, item) {
+	const userRes = await queryDB("SELECT equipmentList FROM users WHERE discordID="+userID);
+	let itemList = JSON.parse(userRes[0].equipmentList);
+	let newItems = new Array();
+	if(itemList.includes(item)) {
+		for(var i = 0; i < itemList.length; i++) {
+			if(itemList[i] !== item) {
+				newItems.push(itemList[i]);
+			} else log("DB: Removed item ID "+item);
+		}
+		await queryDB("UPDATE users SET equipmentList='"+JSON.stringify(newItems)+"' WHERE discordID="+userID);
+		return true;
+	}
+	else return false;
+}
+
+async function addItem(userID, item) {
+	const userRes = await queryDB("SELECT equipmentList FROM users WHERE discordID="+userID);
+	let itemList = JSON.parse(userRes[0].equipmentList);
+	if(itemList.includes(item)) return false;
+	else {
+		itemList.push(item);
+		await queryDB("UPDATE users SET equipmentList='"+JSON.stringify(itemList)+"' WHERE discordID="+userID);
+		log("DB: Added item ID "+item);
+		return true;
+	}
+}
+
 // --
 // Check if string is numeric
 // --
 
 function isNumeric(num) {
     return !isNaN(num)
+}
+
+function RPGOptions(type) {
+	var opt = "";
+	switch(type) {
+		case 'town':
+			opt = opt+'**Market** (*!market*)\n';
+			opt = opt+'**Explore** (*!explore*)\n';
+			opt = opt+'**Talk** (*!talk*)\n';
+			opt = opt+'**Rest** (*!rest*)\n';
+			break;
+		case 'temple':
+			opt = opt+'**Explore** (*!explore*)\n';
+			opt = opt+'**Talk** (*!talk*)\n';
+			break;
+		case 'water':
+			opt = opt+'**Explore** (*!explore*)\n';
+			opt = opt+'**Fish** (*!fish*)\n';
+			opt = opt+'**Rest** (*!rest*)\n';
+			break;
+		case 'forest':
+			opt = opt+'**Explore** (*!explore*)\n';
+			opt = opt+'**Chop Trees** (*!chop*)\n';
+			opt = opt+'**Rest** (*!rest*)\n';
+			break;
+	}
+	opt = opt.slice(0,-1);
+	return opt;
+}
+
+async function getLocation(user) {
+	const locations = await queryDB("SELECT location FROM users WHERE discordID="+user.id);
+	return JSON.parse(locations[0].location);
+}
+
+// --
+// Generate a world tile
+//
+
+async function makeTile(x,y) {
+	var coords = new Array();
+	coords.push(x);
+	coords.push(y);
+	const tiles = await queryDB("SELECT * FROM locations WHERE coords='"+JSON.stringify(coords)+"'");
+	var marker;
+	var biome;
+	
+	if(tiles && tiles.length) {
+		var marker = tiles[0].marker;
+		var biome = tiles[0].biome;
+	} else {
+		log("\x1b[31m%s\x1b[0m", "DB: Couldn't find tile at x"+x+" y"+y);
+		marker = '';
+		biome = 'ocean';
+	}
+	
+	let imgRaw = './img/tiles/'+biome+'.png';
+	let imgMarker = './img/tiles/'+marker+'.png';
+    let snowflake = new Date().getTime();
+    let imgBG = './img/temp/active_' + snowflake + '.png';
+	
+	let tpl = await Jimp.read(imgRaw);
+    let clone = await tpl.clone().writeAsync(imgBG);
+    tpl = await Jimp.read(imgBG);
+	
+	if(marker.length > 0) {
+		const markerTpl = await Jimp.read(imgMarker);
+		var centerX = tpl.bitmap.width * 0.5;
+		var centerY = tpl.bitmap.height * 0.5;
+		tpl.composite(markerTpl, centerX-(markerTpl.bitmap.width * 0.5), centerY-(markerTpl.bitmap.height * 0.5), [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+	}
+	log("\x1b[32m%s\x1b[0m", "DB: Made tile at x"+x+" y"+y);
+	return tpl;
+}
+
+async function generateMap(x,y,user) {
+	let center = await makeTile(x,y);
+	let west = await makeTile(x-1,y);
+	let northWest = await makeTile(x-1,y-1);
+	let north = await makeTile(x,y-1);
+	let northEast = await makeTile(x+1,y-1);
+	let east = await makeTile(x+1,y);
+	let southEast = await makeTile(x+1,y+1);
+	let south = await makeTile(x,y+1);
+	let southWest = await makeTile(x-1,y+1);
+	
+	let map = await new Jimp(300,300);
+	map.composite(northWest, 0, 0, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+	map.composite(north, 100, 0, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+	map.composite(northEast, 200, 0, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+	map.composite(west, 0, 100, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+	map.composite(center, 100, 100, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+	map.composite(east, 200, 100, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+	map.composite(southWest, 0, 200, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+	map.composite(south, 100, 200, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+	map.composite(southEast, 200, 200, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+	
+	// Generate player marker
+	const avatar = await Jimp.read(user.displayAvatarURL);
+	avatar.resize(38,38);
+	const avatarMask = await Jimp.read('./img/tiles/youMask.png');
+	const marker = await Jimp.read('./img/tiles/you.png');
+	marker.opacity(0.5);
+	avatar.mask(avatarMask, 0, 0);
+	marker.composite(avatar, 4, 4);
+	map.composite(marker, 127, 80);
+	
+	const buffer = await map.filterType(0).getBufferAsync('image/png');
+	return buffer;
 }
 
 // --
@@ -229,4 +384,4 @@ function delay(ms) {
 // Export functions
 // --
 
-module.exports = {queryDB, isNormalInteger, isNumeric, capitalize, stringifyNumber, formatTimeUntil, formatTimeSince, RSExp, getTimestamp, getSum, randomIntIn, randomIntEx, biasedRandom, drawXPBar, petTypeString, delay, webJson, log};
+module.exports = {queryDB, isNormalInteger, isNumeric, capitalize, stringifyNumber, formatTimeUntil, formatTimeSince, RSExp, getTimestamp, getSum, randomIntIn, randomIntEx, biasedRandom, drawXPBar, petTypeString, delay, webJson, log, takeCoins, giveCoins, makeTile, generateMap, RPGOptions, getLocation, hasItem, removeItem, addItem};

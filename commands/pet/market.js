@@ -10,7 +10,7 @@ module.exports = class MarketCommand extends Command {
             name: 'market',
             group: 'pet',
             memberName: 'market',
-            description: 'Release your active pet',
+            description: 'Buy items or services',
             examples: ['market'],
             args: [
 			{
@@ -38,6 +38,7 @@ module.exports = class MarketCommand extends Command {
         let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
         var coins = queryRes[0].coins;
 		var userID = queryRes[0].id;
+		var income = queryRes[0].income;
 		var active = queryRes[0].activePet;
         let petRes = await Utils.queryDB("SELECT * FROM pets WHERE id="+active);
 		var tools = JSON.parse(queryRes[0].tools);
@@ -48,6 +49,9 @@ module.exports = class MarketCommand extends Command {
             for (var i = 0; i < marketRes.length; i++) {
 				if(marketRes[i].userVar == "coffee") {
 					str = str + "[**" + (i+1) + "**] " + marketRes[i].icon + " " + marketRes[i].name + " - (" + (marketRes[i].cost+(petRes[0].timesDrankCoffee*10000)) + " coins)\n";
+				}
+				else if(marketRes[i].userVar == "income") {
+					str = str + "[**" + (i+1) + "**] " + marketRes[i].icon + " " + marketRes[i].name + " - (" + (marketRes[i].cost*income) + " coins)\n";
 				} else {
 					str = str + "[**" + (i+1) + "**] " + marketRes[i].icon + " " + marketRes[i].name + " - (" + marketRes[i].cost + " coins)\n";
 				}
@@ -72,6 +76,19 @@ module.exports = class MarketCommand extends Command {
 							var maxStamina = petRes[0].maxStamina;
 							await Utils.queryDB("UPDATE pets SET isSleeping=0, sleepTime=0, stamina="+maxStamina+", timesDrankCoffee=timesDrankCoffee+1 WHERE id="+active);
 							embedMsg.addField("Bought Coffee", "Your active pet has been returned to full stamina and woken up for **"+cost+"** coins!");
+							await Utils.takeCoins(msg.author.id, cost);
+							return msg.embed(embedMsg);
+						} else {
+							embedMsg.addField("Can't Buy", "You don't have the **" + cost + "** coins needed!");
+							return msg.embed(embedMsg);
+						}
+					} else if(userVar == "income") {
+						cost = (marketRes[selectedBuy].cost*income);
+						if(coins >= cost) {
+							var maxStamina = petRes[0].maxStamina;
+							await Utils.queryDB("UPDATE users SET income=income+1 WHERE discordID="+msg.author.id);
+							embedMsg.addField("Increased Income", "You have multiplied your daily coin bonus by **x"+(income+1)+"**!");
+							await Utils.takeCoins(msg.author.id, cost);
 							return msg.embed(embedMsg);
 						} else {
 							embedMsg.addField("Can't Buy", "You don't have the **" + cost + "** coins needed!");
@@ -92,7 +109,7 @@ module.exports = class MarketCommand extends Command {
 						} else {
 							if(coins >= cost) {
 								tools.push(quantity);
-								await Utils.queryDB("UPDATE users SET tools='"+JSON.stringify(tools)+"', coins=coins-"+cost+" WHERE discordID=" + msg.author.id);
+								await Utils.queryDB("UPDATE users SET tools='"+JSON.stringify(tools)+"' WHERE discordID=" + msg.author.id);
 								Utils.log("\x1b[36m%s\x1b[0m", "DB: Successfully bought tool!");
 								embedMsg.addField("Bought Item", "You successfully bought a **"+name+"** for **"+cost+"** coins!");
 								var achVar = "woodworkerOwned";
@@ -101,6 +118,7 @@ module.exports = class MarketCommand extends Command {
 								else if(quantity == 3) achVar = "recyclerOwned";
 								else if(quantity == 4) achVar = "sharpenerOwned";
 								await Utils.queryDB("UPDATE achievement_progress SET "+achVar+"=1 WHERE id="+userID);
+								await Utils.takeCoins(msg.author.id, cost);
 								return msg.embed(embedMsg);
 							} else {
 							Utils.log("\x1b[36m%s\x1b[0m", "DB: Needs " + cost + " coins, has " + coins);
@@ -114,10 +132,11 @@ module.exports = class MarketCommand extends Command {
 							cost = (marketRes[selectedBuy].cost)*amount;
 						}
 						if (coins >= cost) {
-							await Utils.queryDB("UPDATE users SET "+userVar+"="+userVar+"+"+quantity+", coins=coins-"+cost+" WHERE discordID=" + msg.author.id);
+							await Utils.queryDB("UPDATE users SET "+userVar+"="+userVar+"+"+quantity+" WHERE discordID=" + msg.author.id);
 							Utils.log("\x1b[36m%s\x1b[0m", "DB: Successfully bought item!");
 							embedMsg.addField("Bought Item", "You successfully bought "+amount+" lot(s) of **"+name+"** for **"+cost+"** coins!");
 							await Utils.queryDB("UPDATE achievement_progress SET marketBought=marketBought+"+amount+" WHERE id="+userID);
+							await Utils.takeCoins(msg.author.id, cost);
 							return msg.embed(embedMsg);
 						} else {
 							Utils.log("\x1b[36m%s\x1b[0m", "DB: Needs " + cost + " coins, has " + coins);

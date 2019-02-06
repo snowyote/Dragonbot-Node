@@ -3,6 +3,7 @@ const {
 } = require('discord.js-commando');
 const Utils = require('../../core/utils.js');
 const Discord = require('discord.js');
+const {JSONPath} = require('jsonpath-plus');
 
 module.exports = class MemeCommand extends Command {
     constructor(client) {
@@ -17,10 +18,11 @@ module.exports = class MemeCommand extends Command {
 
     async run(msg) {
         var jsonObj = await Utils.webJson('https://www.reddit.com/r/memes/random/.json');
-		const imgUrl = jsonObj['0']['data']['children']['0']['data']['url'];
-		const imgTitle = jsonObj['0']['data']['children']['0']['data']['title'];
-		const nsfw = jsonObj['0']['data']['children']['0']['data']['over_18'];
-		const source = jsonObj['0']['data']['children']['0']['data']['permalink'];
+		console.log(jsonObj);
+		const imgUrl = JSONPath({path: '$.["data"].["children"].["data"].url', json: jsonObj});
+		const imgTitle = JSONPath({path: '$.0.["children"].["data"].title', json: jsonObj});
+		const nsfw = JSONPath({path: '$.0.["children"].["data"].over_18', json: jsonObj});
+		const source = JSONPath({path: '$.0.["children"].["data"].permalink', json: jsonObj});
 		
 		let embedMsg = new Discord.RichEmbed()
 			.setTitle(imgTitle)
