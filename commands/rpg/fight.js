@@ -1,7 +1,7 @@
 const {
     Command
 } = require('discord.js-commando');
-const Battle = require('../../structures/battle/battle.js');
+const Battle = require('../../structures/fight/battle.js');
 const Utils = require('../../core/utils.js');
 
 module.exports = class FightCommand extends Command {
