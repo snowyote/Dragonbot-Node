@@ -1,5 +1,4 @@
 const Battler = require('./Battler');
-const monsterBattler = require('./monsterBattler');
 
 module.exports = class Battle {
 	constructor(user, opponent) {

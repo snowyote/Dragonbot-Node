@@ -49,11 +49,11 @@ module.exports = class SharpenCommand extends Command {
 					return msg.embed(embedMsg);
 				}
 			} else {
-				embedMsg.addField("Can't Sharpen", "You don't have an axe sharpener! Buy one in the `hod?market`!");
+				embedMsg.addField("Can't Sharpen", "You don't have an axe sharpener! Buy one in the `!market`!");
 				return msg.embed(embedMsg);
 			}
 		} else {
-			embedMsg.addField("Can't Sharpen", "You don't have an axe sharpener! Buy one in the `hod?market`!");
+			embedMsg.addField("Can't Sharpen", "You don't have an axe sharpener! Buy one in the `!market`!");
 			return msg.embed(embedMsg);
 		}
     };

@@ -87,7 +87,7 @@ module.exports = class FightCommand extends Command {
 						battle.reset();
 					}
 				} else if (choice === 'defend') {
-					await msg.say(`${battle.attacker} defends!`);
+					await msg.say(`${battle.attacker} is now on guard!`);
 					battle.attacker.changeGuard();
 					battle.reset(false);
 				} else if (choice === 'heal') {

@@ -58,7 +58,7 @@ async function newDay() {
 			"The purge is commencing! Any guests who have not accepted the rules will now be kicked!\n\n" +
 			"As of now, there are **" + client.users.size + "** members of the House of Dragons, including bots!")
 	await kickGuests();
-    client.channels.get('541042784396640257').send(newDayMsg);
+    client.channels.get('498945652114587651').send(newDayMsg);
     newDay();
 }
 
@@ -257,6 +257,14 @@ client.on('ready', () => {
     client.user.setActivity("with dragon butts");
     newDay();
     petUpdates();
+});
+
+client.on('guildMemberAdd', (member) => {
+	client.channels.get('510012571953397762').send(`🚪👉 <@${member.id}> has joined the server.`);
+});
+
+client.on('guildMemberRemove', (member) => {
+	client.channels.get('510012571953397762').send(`🚪👈 ${member.displayName} has left the server.`);
 });
 
 client.login(config.token);

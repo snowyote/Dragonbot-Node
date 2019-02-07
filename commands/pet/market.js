@@ -58,7 +58,7 @@ module.exports = class MarketCommand extends Command {
             }
             str = str.slice(0, -1);
             embedMsg.addField("Marketplace", str);
-            embedMsg.setFooter("hod?market <number> [amount] - to buy an item!");
+            embedMsg.setFooter("!market <number> [amount] - to buy an item!");
             return msg.embed(embedMsg);
         } else {
                 var selectedBuy = id;
@@ -145,7 +145,7 @@ module.exports = class MarketCommand extends Command {
 						}
 					}
                 } else {
-                    embedMsg.addField("Can't Buy", "That's not a valid item to buy! Please check the `hod?market` list!");
+                    embedMsg.addField("Can't Buy", "That's not a valid item to buy! Please check the `!market` list!");
                     return msg.embed(embedMsg);
                 }
         }

@@ -38,7 +38,7 @@ module.exports = class RenameCommand extends Command {
             await Utils.queryDB("UPDATE pets SET name='" + name + "' WHERE id=" + aPet);
 			return msg.embed(embedMsg);
         } else {
-            embedMsg.addField("Notice", "You don't have any pets! Get one with `hod?adopt`!");
+            embedMsg.addField("Notice", "You don't have any pets! Get one with `!adopt`!");
 			return msg.embed(embedMsg);
         }
     };

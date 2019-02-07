@@ -48,7 +48,7 @@ module.exports = class MysticCommand extends Command {
                         embedMsg.addField("2: Transform", "Randomize your active pet!");
                         embedMsg.addField("3: Change Home", "Randomize the background of your pet!");
                         embedMsg.addField("4: Love Arrow", "Level up your pet's affection by one!");
-                        embedMsg.setFooter("hod?mystic <number> [amount] - to use a mystic orb!")
+                        embedMsg.setFooter("!mystic <number> [amount] - to use a mystic orb!")
                         return msg.embed(embedMsg);
                     } else {
                             var currentLevel = petRes[0].level;
@@ -132,11 +132,11 @@ module.exports = class MysticCommand extends Command {
                 }
 
             } else {
-                embedMsg.addField("Not Ready", "This pet hasn't been hatched yet, use `hod?hatch` to check up on it!");
+                embedMsg.addField("Not Ready", "This pet hasn't been hatched yet, use `!hatch` to check up on it!");
                 return msg.embed(embedMsg);
             }
         } else {
-            embedMsg.addField("No Pet", "You don't have a pet, get one using `hod?adopt`!");
+            embedMsg.addField("No Pet", "You don't have a pet, get one using `!adopt`!");
             return msg.embed(embedMsg);
 		}
     };

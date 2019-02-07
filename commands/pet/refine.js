@@ -97,11 +97,11 @@ module.exports = class RefineCommand extends Command {
                 await Utils.queryDB("UPDATE users SET gems='" + JSON.stringify(gems) + "' WHERE discordID=" + msg.author.id);
                 return msg.embed(embedMsg);
             } else {
-                embedMsg.addField("Can't Refine", "You don't have a gem refiner! Buy one in the `hod?market`!");
+                embedMsg.addField("Can't Refine", "You don't have a gem refiner! Buy one in the `!market`!");
                 return msg.embed(embedMsg);
             }
         } else {
-            embedMsg.addField("Can't Refine", "You don't have a gem refiner! Buy one in the `hod?market`!");
+            embedMsg.addField("Can't Refine", "You don't have a gem refiner! Buy one in the `!market`!");
             return msg.embed(embedMsg);
         }
     };

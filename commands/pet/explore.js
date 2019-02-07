@@ -456,7 +456,7 @@ module.exports = class ExploreCommand extends Command {
 									return msg.embed(noticeMsg);
 								}
 							} else {
-								noticeMsg.addField("Can't Explore", "Your pet is begging for food and won't explore, buy some more with `hod?market`!");
+								noticeMsg.addField("Can't Explore", "Your pet is begging for food and won't explore, buy some more with `!market`!");
 								return msg.embed(noticeMsg);
 							}
 						} else {
@@ -464,15 +464,15 @@ module.exports = class ExploreCommand extends Command {
 							return msg.embed(noticeMsg);
 						}
 					} else {
-						noticeMsg.addField("Can't Explore", "No stamina, use `hod?sleep` to recover!");
+						noticeMsg.addField("Can't Explore", "No stamina, use `!sleep` to recover!");
 						return msg.embed(noticeMsg);
 					}
 				} else {
-					noticeMsg.addField("Can't Explore", "Your current pet's not hatched yet, use `hod?hatch` to check up on it!");
+					noticeMsg.addField("Can't Explore", "Your current pet's not hatched yet, use `!hatch` to check up on it!");
 					return msg.embed(noticeMsg);
 				}			
 			} else {
-				noticeMsg.addField("Can't Explore", "You don't have any pets to explore with, use `hod?adopt` to get one!");
+				noticeMsg.addField("Can't Explore", "You don't have any pets to explore with, use `!adopt` to get one!");
 				return msg.embed(noticeMsg);
 			}
 		} else {

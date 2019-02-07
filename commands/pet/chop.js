@@ -240,11 +240,11 @@ module.exports = class ChopCommand extends Command {
 											return msg.embed(embedMsg);
 
 										} else {
-											noticeMsg.addField("Can't Cut Trees", "Your axe is too dull to chop trees! Sharpen it with `hod?sharpen`!");
+											noticeMsg.addField("Can't Cut Trees", "Your axe is too dull to chop trees! Sharpen it with `!sharpen`!");
 											return msg.embed(noticeMsg);
 										}
 									} else {
-										noticeMsg.addField("Can't Cut Trees", "Your pet is begging for food and won't chop trees, buy some more with `hod?market`!");
+										noticeMsg.addField("Can't Cut Trees", "Your pet is begging for food and won't chop trees, buy some more with `!market`!");
 										return msg.embed(noticeMsg);
 									}
 								} else {
@@ -252,11 +252,11 @@ module.exports = class ChopCommand extends Command {
 									return msg.embed(noticeMsg);
 								}
 							} else {
-								noticeMsg.addField("Can't Cut Trees", "No stamina, use `hod?sleep` to recover!");
+								noticeMsg.addField("Can't Cut Trees", "No stamina, use `!sleep` to recover!");
 								return msg.embed(noticeMsg);
 							}
 						} else {
-							noticeMsg.addField("Can't Cut Trees", "Your current pet's not hatched yet, use `hod?hatch` to check up on it!");
+							noticeMsg.addField("Can't Cut Trees", "Your current pet's not hatched yet, use `!hatch` to check up on it!");
 							return msg.embed(noticeMsg);
 						}
 					} else {
@@ -264,7 +264,7 @@ module.exports = class ChopCommand extends Command {
 						return msg.embed(noticeMsg);
 					}
                 } else {
-                    noticeMsg.addField("Can't Cut Trees", "You don't have any pets to cut trees with, use `hod?adopt` to get one!");
+                    noticeMsg.addField("Can't Cut Trees", "You don't have any pets to cut trees with, use `!adopt` to get one!");
                     return msg.embed(noticeMsg);
                 }
             } else {

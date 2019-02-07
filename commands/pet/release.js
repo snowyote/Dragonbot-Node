@@ -64,7 +64,7 @@ module.exports = class ReleaseCommand extends Command {
 				return msg.embed(embedMsg);
 			}
 		} else {
-			embedMsg.addField("Can't Release Pet", "You don't have a pet to release, get one with `hod?adopt`!");
+			embedMsg.addField("Can't Release Pet", "You don't have a pet to release, get one with `!adopt`!");
 			return msg.embed(embedMsg);
 		}
 	};

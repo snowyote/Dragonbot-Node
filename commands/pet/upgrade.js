@@ -62,7 +62,7 @@ module.exports = class UpgradeCommand extends Command {
                         embedMsg.addField("4: Intelligence (" + currentIntel + "/100)", "Increases experience points gained (5% per point)");
                         embedMsg.addField("5: Hunting (" + currentHunting + "/10)", "Increases food gained by exploring (100% per point)");
                         embedMsg.addField("6: Mining (" + currentMining + "/100)", "Increases depth you can mine");
-                        embedMsg.setFooter("hod?upgrade <perk number> <amount> - upgrade a perk by a certain number of points!")
+                        embedMsg.setFooter("!upgrade <perk number> <amount> - upgrade a perk by a certain number of points!")
                         return msg.embed(embedMsg);
                     } else {
                         var upgradeMultiplier = 1;
@@ -71,38 +71,38 @@ module.exports = class UpgradeCommand extends Command {
                         var current = 0;
                         var skillToUpgrade = "none";
                         switch (id) {
-                            case '1':
+                            case 1:
                                 skillToUpgrade = "maxStamina";
                                 upgradeName = "Max Stamina";
                                 upgradeMax = 500;
                                 current = currentMaxStamina;
                                 upgradeMultiplier = 5;
                                 break;
-                            case '2':
+                            case 2:
                                 skillToUpgrade = "luck";
                                 upgradeName = "Luck";
                                 upgradeMax = 10;
                                 current = currentLuck;
                                 break;
-                            case '3':
+                            case 3:
                                 skillToUpgrade = "avarice";
                                 upgradeName = "Avarice";
                                 upgradeMax = 100;
                                 current = currentAvarice;
                                 break;
-                            case '4':
+                            case 4:
                                 skillToUpgrade = "intelligence";
                                 upgradeName = "Intelligence";
                                 upgradeMax = 100;
                                 current = currentIntel;
                                 break;
-                            case '5':
+                            case 5:
                                 skillToUpgrade = "hunting";
                                 upgradeName = "Hunting";
                                 upgradeMax = 10;
                                 current = currentHunting;
                                 break;
-                            case '6':
+                            case 6:
                                 skillToUpgrade = "mining";
                                 upgradeName = "Mining";
                                 upgradeMax = 100;
@@ -136,11 +136,11 @@ module.exports = class UpgradeCommand extends Command {
                 }
 
             } else {
-                embedMsg.addField("Not Ready", "This pet hasn't been hatched yet, use `hod?hatch` to check up on it!");
+                embedMsg.addField("Not Ready", "This pet hasn't been hatched yet, use `!hatch` to check up on it!");
                 return msg.embed(embedMsg);
             }
         } else {
-            embedMsg.addField("No Pet", "You don't have a pet, get one using `hod?adopt`!");
+            embedMsg.addField("No Pet", "You don't have a pet, get one using `!adopt`!");
             return msg.embed(embedMsg);
         }
     };

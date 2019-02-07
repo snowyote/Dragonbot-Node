@@ -38,11 +38,11 @@ module.exports = class RecycleCommand extends Command {
 					return msg.embed(embedMsg);
 				}
 			} else {
-				embedMsg.addField("Can't Recycle", "You don't have a recycler! Buy one in the `hod?market`!");
+				embedMsg.addField("Can't Recycle", "You don't have a recycler! Buy one in the `!market`!");
 				return msg.embed(embedMsg);
 			}
 		} else {
-			embedMsg.addField("Can't Recycle", "You don't have a recycler! Buy one in the `hod?market`!");
+			embedMsg.addField("Can't Recycle", "You don't have a recycler! Buy one in the `!market`!");
 			return msg.embed(embedMsg);
 		}
     };
