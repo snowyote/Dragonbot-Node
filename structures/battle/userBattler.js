@@ -5,6 +5,7 @@ module.exports.UserBattler = class UserBattler {
 	constructor(battle, user) {
 		this.battle = battle;
 		this.user = user;
+		this.name = user.username;
 		this.hp = 100;
 		this.guard = false;
 		this.prBonus = 0;
@@ -15,7 +16,7 @@ module.exports.UserBattler = class UserBattler {
 	}
 
 	async chooseAction(msg) {
-		let content = `${this}, do you ${Utils.list(choices.map(choice => `**${choice}**`), 'or')}?\n**${this.battle.user.user.tag}:** ${this.battle.user.hp} HP\n**${this.battle.opponent.user.tag}:** ${this.battle.opponent.hp} HP`;
+		let content = `${this.name}, do you ${Utils.list(choices.map(choice => `**${choice}**`), 'or')}?\n**${this.battle.user.name}:** ${this.battle.user.hp} HP\n**${this.battle.opponent.name}:** ${this.battle.opponent.hp} HP`;
 		
 		await msg.say(content);
 		const filter = res => {

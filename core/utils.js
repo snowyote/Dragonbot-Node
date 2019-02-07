@@ -3,7 +3,6 @@ const Jimp = require('jimp');
 const Discord = require('discord.js');
 const request = require('request-promise');
 const configFile = require("../config.json");
-const monsterBattle = require('../structures/battle/monsterBattle.js');
 
 const config = {
     host: configFile.host,
@@ -20,7 +19,7 @@ const config = {
 async function queryDB(sql) {
     let connection;
     try {
-        //log("\x1b[36m%s\x1b[0m", "DB: Running query: " + sql);
+        log("\x1b[36m%s\x1b[0m", "DB: Running query: " + sql);
         connection = await mysql.createConnection(config);
         let result = await connection.query(sql);
         connection.end();
@@ -339,6 +338,18 @@ async function isInQuest(user) {
     let userID = await getUserID(user, false);
     const rpgRes = await queryDB("SELECT quest_in_progress FROM rpg_flags WHERE userID=" + userID);
     return rpgRes[0].quest_in_progress;
+}
+
+async function isInBattle(user) {
+    let userID = await getUserID(user, false);
+    const rpgRes = await queryDB("SELECT in_battle FROM rpg_flags WHERE userID=" + userID);
+	if(rpgRes[0].in_battle == 0) return false;
+	else return true;
+}
+
+async function setInBattle(user, inBattle) {
+    let userID = await getUserID(user, false);
+    await queryDB("UPDATE rpg_flags SET in_battle="+inBattle+" WHERE userID="+userID);
 }
 
 async function getLocName(user) {
@@ -676,98 +687,6 @@ async function verify(channel, user, time = 30000) {
     return false;
 }
 
-async function battle(msg, monsterID) {
-	this.battles = new Map();
-    if (this.battles.has(msg.channel.id)) return msg.reply('Only one battle may be occurring per channel.');
-    this.battles.set(msg.channel.id, new monsterBattle(msg.author, monsterID));
-    const battle = this.battles.get(msg.channel.id);
-
-    // User stuff
-    battle.user.prBonus = await calculateProwess(user.id);
-    battle.user.preBonus = await calculatePrecision(user.id);
-    battle.user.impBonus = await calculateImpact(user.id);
-    battle.user.agiBonus = await calculateAgility(user.id);
-    battle.user.forBonus = await calculateFortitude(user.id);
-
-    // Monster stuff
-    battle.opponent.hp = await getMonsterHP(opponent);
-
-    let monsterStats = await getMonsterStats(opponent);
-    battle.opponent.prBonus = await calculateProwess(monsterStats[0]);
-    battle.opponent.forBonus = await calculateFortitude(monsterStats[1]);
-    battle.opponent.agiBonus = await calculateAgility(monsterStats[2]);
-    battle.opponent.impBonus = await calculateImpact(monsterStats[3]);
-    battle.opponent.preBonus = await calculatePrecision(monsterStats[4]);
-
-    while (!battle.winner) {
-        const choice = await battle.attacker.chooseAction(msg);
-        if (choice === 'attack') {
-            let multiplier = 1;
-            let missed = 0;
-            let stunned = 0;
-
-            let random = Utils.randomIntIn(1, 100);
-            if (random <= Math.floor(battle.defender.agiBonus))
-                missed = 1;
-
-            random = Utils.randomIntIn(1, 100);
-            if (random <= Math.floor(battle.attacker.preBonus/2))
-                multiplier = 2;
-
-            random = Utils.randomIntIn(1, 100);
-            if (random <= Math.floor(battle.attacker.impBonus/1.5))
-                stunned = 1;
-
-            let dmgMin = 10 + (Math.floor(battle.attacker.prBonus / 2) - Math.floor(battle.defender.forBonus / 2)) * multiplier;
-            let dmgMinGuard = 5 + (Math.floor(battle.attacker.prBonus / 2) - Math.floor(battle.defender.forBonus)) * multiplier;
-            let dmgMax = 30 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus / 2)) * multiplier;
-            let dmgMaxGuard = 15 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus)) * multiplier;
-
-            let damage = Utils.randomIntIn(battle.defender.guard ? dmgMinGuard : dmgMin, battle.defender.guard ? dmgMaxGuard : dmgMax);
-
-            if (damage < 0) damage = 0;
-
-            if (missed) {
-                await msg.say(`${battle.attacker} missed!`);
-                battle.reset();
-            } else if (stunned) {
-                await msg.say(`${battle.attacker} deals **${damage}** impact damage, causing ${battle.defender} to miss a turn!`);
-                battle.defender.dealDamage(damage);
-                battle.reset();
-                battle.reset();
-            } else {
-                if (multiplier == 2) await msg.say(`${battle.attacker} ***critically hit***, dealing **${damage}** damage!`);
-                else await msg.say(`${battle.attacker} deals **${damage}** damage!`);
-                battle.defender.dealDamage(damage);
-                battle.reset();
-            }
-        } else if (choice === 'defend') {
-            await msg.say(`${battle.attacker} is now on guard!`);
-            battle.attacker.changeGuard();
-            battle.reset(false);
-        } else if (choice === 'heal') {
-            const amount = Utils.randomIntIn(0, 100 - battle.attacker.hp);
-            await msg.say(`${battle.attacker} heals **${amount}** HP!`);
-            battle.attacker.heal(amount);
-            battle.attacker.useMP(battle.attacker.mp);
-            battle.reset();
-        } else if (choice === 'run') {
-            await msg.say(`${battle.attacker} flees!`);
-            battle.attacker.forfeit();
-        } else if (choice === 'failed:time') {
-            await msg.say(`Time's up, ${battle.attacker}!`);
-            battle.reset();
-        } else {
-            await msg.say('I do not understand what you want to do.');
-        }
-    }
-    const {
-        winner
-    } = battle;
-    this.battles.delete(msg.channel.id);
-    return msg.say(`The match is over! ${winner} is the victor!`);
-}
-
 // --
 // Export functions
 // --
@@ -824,5 +743,6 @@ module.exports = {
     calculatePrecision,
     calculateProwess,
     canUseAction,
-	battle
+	setInBattle,
+	isInBattle
 };

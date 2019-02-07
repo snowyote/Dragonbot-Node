@@ -1,9 +1,10 @@
 const Utils = require('../../core/utils.js');
 
-module.exports = class monsterBattler {
+module.exports.MonsterBattler = class MonsterBattler {
 	constructor(battle, monsterID) {
 		this.monster = monsterID;
 		this.hp = 100;
+		this.name = "";
 		this.guard = false;
 		this.prBonus = 0;
 		this.preBonus = 0;
@@ -13,8 +14,8 @@ module.exports = class monsterBattler {
 	}
 
 	async chooseAction(msg) {
-		const monsterChoices = ['attack', 'attack', 'defend'];
-		if (this.canHeal && this.hp < 100) monsterChoices.push('heal');
+		const monsterChoices = ['attack', 'defend'];
+		//if (this.canHeal && this.hp < 100) monsterChoices.push('heal');
 		return monsterChoices[Math.floor(Math.random() * monsterChoices.length)];
 	}
 	

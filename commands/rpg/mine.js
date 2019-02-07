@@ -107,6 +107,7 @@ module.exports = class MineCommand extends Command {
 											var randomCheck = Utils.biasedRandom(1,4,probability);
 											let rewardCheck, rewardType, rewardName, rewardMsg;
 											var totalXPGain = 0;
+											var gemAmount = 0;
 											var varToChange = new Array();
 											var valueToAdd = new Array();
 											var staminaAdd = 0;

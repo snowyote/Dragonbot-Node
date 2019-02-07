@@ -1,11 +1,11 @@
-const monsterBattler = require('./monsterBattler');
-const userBattler = require('./monsterBattlerUser');
+const {MonsterBattler} = require('./monsterBattler');
+const {UserBattler} = require('./userBattler');
 
-module.exports = class MonsterBattle {
+module.exports.MonsterBattle = class MonsterBattle {
 	constructor(user, monsterID) {
-		this.user = new userBattler(this, user);
-		this.opponent = new monsterBattler(this, monsterID);
-		this.userTurn = false;
+		this.user = new UserBattler(this, user);
+		this.opponent = new MonsterBattler(this, monsterID);
+		this.userTurn = true;
 		this.turn = 1;
 	}
 
@@ -26,8 +26,8 @@ module.exports = class MonsterBattle {
 	}
 
 	get winner() {
-		if (this.user.hp <= 0) return this.opponent;
-		if (this.opponent.hp <= 0) return this.user;
+		if (this.user.hp <= 0) return this.opponent.name;
+		if (this.opponent.hp <= 0) return this.user.name;
 		return null;
 	}
 };
