@@ -4,14 +4,13 @@ const {
 const Battle = require('../../structures/battle/battle.js');
 const Utils = require('../../core/utils.js');
 
-module.exports = class BattleCommand extends Command {
+module.exports = class FightCommand extends Command {
 	constructor(client) {
 		super(client, {
-			name: 'battle',
-			aliases: ['fight', 'death-battle'],
+			name: 'fight',
 			group: 'rpg',
-			memberName: 'battle',
-			description: 'Engage in a battle against another user or a monster',
+			memberName: 'fight',
+			description: 'Engage in a battle against another user',
 			args: [
 				{
 					key: 'opponent',
@@ -26,7 +25,7 @@ module.exports = class BattleCommand extends Command {
 	}
 
 	async run(msg, { opponent }) {
-		if (opponent.id === msg.author.id) return msg.reply(`You can't battle yourself.`);
+		if (opponent.id === msg.author.id) return msg.reply(`You can't fight yourself.`);
 		if (this.battles.has(msg.channel.id)) return msg.reply('Only one battle may be occurring per channel.');
 		this.battles.set(msg.channel.id, new Battle(msg.author, opponent));
 		const battle = this.battles.get(msg.channel.id);
@@ -53,7 +52,7 @@ module.exports = class BattleCommand extends Command {
 					let stunned = 0;
 					
 					let random = Utils.randomIntIn(1,100);
-					if(random <= Math.floor(aglBonus/2))
+					if(random <= Math.floor(aglBonus))
 						missed = 1;
 					
 					random = Utils.randomIntIn(1,100);
@@ -61,13 +60,13 @@ module.exports = class BattleCommand extends Command {
 						multiplier = 2;
 					
 					random = Utils.randomIntIn(1,100);
-					if(random <= Math.floor(impBonus/2))
+					if(random <= Math.floor(impBonus/1.5))
 						stunned = 1;
 					
-					let dmgMin = 20 + (Math.floor(atkBonus/2) - Math.floor(defBonus/2))*multiplier;
+					let dmgMin = 10 + (Math.floor(atkBonus/2) - Math.floor(defBonus/2))*multiplier;
 					let dmgMinGuard = 5 + (Math.floor(atkBonus/2) - Math.floor(defBonus))*multiplier;
-					let dmgMax = 50 + (Math.floor(atkBonus) - Math.floor(defBonus/2))*multiplier;
-					let dmgMaxGuard = 20 + (Math.floor(atkBonus) - Math.floor(defBonus))*multiplier;
+					let dmgMax = 30 + (Math.floor(atkBonus) - Math.floor(defBonus/2))*multiplier;
+					let dmgMaxGuard = 15 + (Math.floor(atkBonus) - Math.floor(defBonus))*multiplier;
 					
 					let damage = Utils.randomIntIn(battle.defender.guard ? dmgMinGuard : dmgMin, battle.defender.guard ? dmgMaxGuard : dmgMax);
 					

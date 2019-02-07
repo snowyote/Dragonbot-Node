@@ -51,6 +51,18 @@ function log(colour, string) {
     if (configFile.log) console.log(colour, string);
 }
 
+async function getMonsterHP(monsterID) {
+	const monsterRes = await queryDB("SELECT health FROM monsters WHERE id="+monsterID);
+	return monsterRes[0].health;
+}
+
+async function getMonsterStats(monsterID) {
+	const monsterRes = await queryDB("SELECT * FROM monsters WHERE id="+monsterID);
+	let monsterStats = new Array();
+	monsterStats.push(monsterRes[0].prowess, monsterRes[0].fortitude, monsterRes[0].agility, monsterRes[0].impact, monsterRes[0].precise);
+	return monsterStats;
+}
+
 // --
 // Stat functions
 //
