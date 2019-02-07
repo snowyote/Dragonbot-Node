@@ -3,6 +3,7 @@ const Jimp = require('jimp');
 const Discord = require('discord.js');
 const request = require('request-promise');
 const configFile = require("../config.json");
+const monsterBattle = require('../structures/battle/monsterBattle.js');
 
 const config = {
     host: configFile.host,
@@ -19,7 +20,7 @@ const config = {
 async function queryDB(sql) {
     let connection;
     try {
-        log("\x1b[36m%s\x1b[0m", "DB: Running query: " + sql);
+        //log("\x1b[36m%s\x1b[0m", "DB: Running query: " + sql);
         connection = await mysql.createConnection(config);
         let result = await connection.query(sql);
         connection.end();
@@ -52,15 +53,15 @@ function log(colour, string) {
 }
 
 async function getMonsterHP(monsterID) {
-	const monsterRes = await queryDB("SELECT health FROM monsters WHERE id="+monsterID);
-	return monsterRes[0].health;
+    const monsterRes = await queryDB("SELECT health FROM monsters WHERE id=" + monsterID);
+    return monsterRes[0].health;
 }
 
 async function getMonsterStats(monsterID) {
-	const monsterRes = await queryDB("SELECT * FROM monsters WHERE id="+monsterID);
-	let monsterStats = new Array();
-	monsterStats.push(monsterRes[0].prowess, monsterRes[0].fortitude, monsterRes[0].agility, monsterRes[0].impact, monsterRes[0].precise);
-	return monsterStats;
+    const monsterRes = await queryDB("SELECT * FROM monsters WHERE id=" + monsterID);
+    let monsterStats = new Array();
+    monsterStats.push(monsterRes[0].prowess, monsterRes[0].fortitude, monsterRes[0].agility, monsterRes[0].impact, monsterRes[0].precise);
+    return monsterStats;
 }
 
 // --
@@ -68,42 +69,42 @@ async function getMonsterStats(monsterID) {
 //
 
 async function calculateProwess(userID) {
-	const skillMultiplier = 5;
+    const skillMultiplier = 5;
     const userRes = await queryDB("SELECT prowess FROM users WHERE discordID=" + userID);
     let prowess = 0;
-	if(userRes && userRes.length) prowess = userRes[0].prowess;
+    if (userRes && userRes.length) prowess = userRes[0].prowess;
     return prowess * skillMultiplier;
 }
 
 async function calculateFortitude(userID) {
-	const skillMultiplier = 5;
+    const skillMultiplier = 5;
     const userRes = await queryDB("SELECT fortitude FROM users WHERE discordID=" + userID);
     let fortitude = 0;
-	if(userRes && userRes.length) fortitude = userRes[0].fortitude;
+    if (userRes && userRes.length) fortitude = userRes[0].fortitude;
     return fortitude * skillMultiplier;
 }
 
 async function calculatePrecision(userID) {
-	const skillMultiplier = 5;
+    const skillMultiplier = 5;
     const userRes = await queryDB("SELECT precise FROM users WHERE discordID=" + userID);
     let precise = 0;
-	if(userRes && userRes.length) precise = userRes[0].precise;
+    if (userRes && userRes.length) precise = userRes[0].precise;
     return precise * skillMultiplier;
 }
 
 async function calculateAgility(userID) {
-	const skillMultiplier = 5;
+    const skillMultiplier = 5;
     const userRes = await queryDB("SELECT agility FROM users WHERE discordID=" + userID);
     let agility = 0;
-	if(userRes && userRes.length) agility = userRes[0].agility;
+    if (userRes && userRes.length) agility = userRes[0].agility;
     return agility * skillMultiplier;
 }
 
 async function calculateImpact(userID) {
-	const skillMultiplier = 5;
+    const skillMultiplier = 5;
     const userRes = await queryDB("SELECT impact FROM users WHERE discordID=" + userID);
     let impact = 0;
-	if(userRes && userRes.length) impact = userRes[0].impact;
+    if (userRes && userRes.length) impact = userRes[0].impact;
     return impact * skillMultiplier;
 }
 
@@ -272,54 +273,21 @@ function isNumeric(num) {
     return !isNaN(num)
 }
 
-function RPGOptions(type) {
+async function RPGOptions(coords) {
+    //log(coords);
+    const locations = await queryDB("SELECT * FROM locations WHERE coords='" + coords + "'");
+    let actions = JSON.parse(locations[0].actions);
+    //log(actions);
     var opt = "";
-    switch (type) {
-        case 'town':
-            opt = opt + '**Market** (*!market*)\n';
-            opt = opt + '**Explore** (*!explore*)\n';
-            opt = opt + '**Talk** (*!talk*)\n';
-            opt = opt + '**Rest** (*!rest*)\n';
-            break;
-        case 'temple':
-            opt = opt + '**Explore** (*!explore*)\n';
-            opt = opt + '**Talk** (*!talk*)\n';
-            break;
-        case 'plains':
-            opt = opt + '**Explore** (*!explore*)\n';
-            break;
-        case 'beach':
-            opt = opt + '**Explore** (*!explore*)\n';
-            break;
-        case 'desert':
-            opt = opt + '**Explore** (*!explore*)\n';
-            break;
-        case 'ashen':
-            opt = opt + '**Explore** (*!explore*)\n';
-            break;
-        case 'water':
-            opt = opt + '**Explore** (*!explore*)\n';
-            opt = opt + '**Fish** (*!fish*)\n';
-            opt = opt + '**Rest** (*!rest*)\n';
-            break;
-        case 'dungeon':
-            opt = opt + '**Explore** (*!explore*)\n';
-            break;
-        case 'forest':
-            opt = opt + '**Explore** (*!explore*)\n';
-            opt = opt + '**Chop Trees** (*!chop*)\n';
-            opt = opt + '**Rest** (*!rest*)\n';
-            break;
-        case 'quarry':
-            opt = opt + '**Explore** (*!explore*)\n';
-            opt = opt + '**Mine** (*!mine*)\n';
-            opt = opt + '**Talk** (*!talk*)\n';
-            break;
-        case 'goblin':
-            opt = opt + '**Battle** (*!battle*)\n';
-            opt = opt + '**Talk** (*!talk*)\n';
-            break;
-    }
+    if (actions.includes('market')) opt = opt + '**Market** (*!market*)\n';
+    if (actions.includes('explore')) opt = opt + '**Explore** (*!explore*)\n';
+    if (actions.includes('talk')) opt = opt + '**Talk** (*!talk*)\n';
+    if (actions.includes('rest')) opt = opt + '**Rest** (*!rest*)\n';
+    if (actions.includes('fish')) opt = opt + '**Fish** (*!fish*)\n';
+    if (actions.includes('chop')) opt = opt + '**Chop Trees** (*!chop*)\n';
+    if (actions.includes('mine')) opt = opt + '**Mine** (*!mine*)\n';
+    if (actions.includes('battle')) opt = opt + '**Battle** (*!battle*)\n';
+
     opt = opt.slice(0, -1);
     return opt;
 }
@@ -334,6 +302,19 @@ async function getLocType(user) {
     const locationRes = await queryDB("SELECT * FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
     let type = locationRes[0].type;
     return type;
+}
+
+async function canUseAction(user, action) {
+    let actions = await getLocActions(user);
+    if (actions.includes(action)) return true;
+    else return false;
+}
+
+async function getLocActions(user) {
+    const locations = await getLocation(user);
+    const locationRes = await queryDB("SELECT actions FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
+    let actions = JSON.parse(locationRes[0].actions);
+    return actions;
 }
 
 async function getLocBiome(user) {
@@ -695,6 +676,98 @@ async function verify(channel, user, time = 30000) {
     return false;
 }
 
+async function battle(msg, monsterID) {
+	this.battles = new Map();
+    if (this.battles.has(msg.channel.id)) return msg.reply('Only one battle may be occurring per channel.');
+    this.battles.set(msg.channel.id, new monsterBattle(msg.author, monsterID));
+    const battle = this.battles.get(msg.channel.id);
+
+    // User stuff
+    battle.user.prBonus = await calculateProwess(user.id);
+    battle.user.preBonus = await calculatePrecision(user.id);
+    battle.user.impBonus = await calculateImpact(user.id);
+    battle.user.agiBonus = await calculateAgility(user.id);
+    battle.user.forBonus = await calculateFortitude(user.id);
+
+    // Monster stuff
+    battle.opponent.hp = await getMonsterHP(opponent);
+
+    let monsterStats = await getMonsterStats(opponent);
+    battle.opponent.prBonus = await calculateProwess(monsterStats[0]);
+    battle.opponent.forBonus = await calculateFortitude(monsterStats[1]);
+    battle.opponent.agiBonus = await calculateAgility(monsterStats[2]);
+    battle.opponent.impBonus = await calculateImpact(monsterStats[3]);
+    battle.opponent.preBonus = await calculatePrecision(monsterStats[4]);
+
+    while (!battle.winner) {
+        const choice = await battle.attacker.chooseAction(msg);
+        if (choice === 'attack') {
+            let multiplier = 1;
+            let missed = 0;
+            let stunned = 0;
+
+            let random = Utils.randomIntIn(1, 100);
+            if (random <= Math.floor(battle.defender.agiBonus))
+                missed = 1;
+
+            random = Utils.randomIntIn(1, 100);
+            if (random <= Math.floor(battle.attacker.preBonus/2))
+                multiplier = 2;
+
+            random = Utils.randomIntIn(1, 100);
+            if (random <= Math.floor(battle.attacker.impBonus/1.5))
+                stunned = 1;
+
+            let dmgMin = 10 + (Math.floor(battle.attacker.prBonus / 2) - Math.floor(battle.defender.forBonus / 2)) * multiplier;
+            let dmgMinGuard = 5 + (Math.floor(battle.attacker.prBonus / 2) - Math.floor(battle.defender.forBonus)) * multiplier;
+            let dmgMax = 30 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus / 2)) * multiplier;
+            let dmgMaxGuard = 15 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus)) * multiplier;
+
+            let damage = Utils.randomIntIn(battle.defender.guard ? dmgMinGuard : dmgMin, battle.defender.guard ? dmgMaxGuard : dmgMax);
+
+            if (damage < 0) damage = 0;
+
+            if (missed) {
+                await msg.say(`${battle.attacker} missed!`);
+                battle.reset();
+            } else if (stunned) {
+                await msg.say(`${battle.attacker} deals **${damage}** impact damage, causing ${battle.defender} to miss a turn!`);
+                battle.defender.dealDamage(damage);
+                battle.reset();
+                battle.reset();
+            } else {
+                if (multiplier == 2) await msg.say(`${battle.attacker} ***critically hit***, dealing **${damage}** damage!`);
+                else await msg.say(`${battle.attacker} deals **${damage}** damage!`);
+                battle.defender.dealDamage(damage);
+                battle.reset();
+            }
+        } else if (choice === 'defend') {
+            await msg.say(`${battle.attacker} is now on guard!`);
+            battle.attacker.changeGuard();
+            battle.reset(false);
+        } else if (choice === 'heal') {
+            const amount = Utils.randomIntIn(0, 100 - battle.attacker.hp);
+            await msg.say(`${battle.attacker} heals **${amount}** HP!`);
+            battle.attacker.heal(amount);
+            battle.attacker.useMP(battle.attacker.mp);
+            battle.reset();
+        } else if (choice === 'run') {
+            await msg.say(`${battle.attacker} flees!`);
+            battle.attacker.forfeit();
+        } else if (choice === 'failed:time') {
+            await msg.say(`Time's up, ${battle.attacker}!`);
+            battle.reset();
+        } else {
+            await msg.say('I do not understand what you want to do.');
+        }
+    }
+    const {
+        winner
+    } = battle;
+    this.battles.delete(msg.channel.id);
+    return msg.say(`The match is over! ${winner} is the victor!`);
+}
+
 // --
 // Export functions
 // --
@@ -740,13 +813,16 @@ module.exports = {
     getQuestsCompleted,
     hasCompletedQuest,
     getLocBiome,
+    getLocActions,
     addLogs,
     list,
-	verify,
-	awaitPlayers,
-	calculateAgility,
-	calculateFortitude,
-	calculateImpact,
-	calculatePrecision,
-	calculateProwess
+    verify,
+    awaitPlayers,
+    calculateAgility,
+    calculateFortitude,
+    calculateImpact,
+    calculatePrecision,
+    calculateProwess,
+    canUseAction,
+	battle
 };

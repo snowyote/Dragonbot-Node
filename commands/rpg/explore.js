@@ -8,7 +8,7 @@ module.exports = class ExploreCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'explore',
-            group: 'pet',
+            group: 'rpg',
             memberName: 'explore',
             description: 'Explore to gain resources',
             examples: ['explore'],
@@ -68,6 +68,10 @@ module.exports = class ExploreCommand extends Command {
 									case 'town':
 										possibleRewards.push('nothing', 'trash', 'coins', 'quest');
 										trashMsg = "looked through some villager's garbage and found";
+										break;
+									case 'desert':
+										possibleRewards.push('nothing', 'trash', 'coins', 'quest');
+										trashMsg = "sifted through some sand and found";
 										break;
 									case 'water':
 										possibleRewards.push('nothing', 'trash', 'battle', 'food', 'coins', 'item', 'crates', 'quest');

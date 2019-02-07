@@ -7,7 +7,7 @@ module.exports = class InventoryCommand extends Command {
         super(client, {
             name: 'inventory',
 			aliases: ['inv'],
-            group: 'pet',
+            group: 'rpg',
             memberName: 'inventory',
             description: 'View your inventory',
             examples: ['inventory']

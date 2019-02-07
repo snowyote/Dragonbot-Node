@@ -4,23 +4,23 @@ const {
 const Utils = require('../../core/utils.js');
 const Discord = require('discord.js');
 
-module.exports = class StatsCommand extends Command {
+module.exports = class SkillCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'stats',
+            name: 'skill',
             group: 'rpg',
-            memberName: 'stats',
-            description: 'Set your stats!',
-            examples: ['stats <id> <amount>'],
+            memberName: 'skill',
+            description: 'Set your skills!',
+            examples: ['skill <id> <amount>'],
             args: [{
                     key: 'id',
-                    prompt: 'Which stat do you want to upgrade?',
+                    prompt: 'Which skill do you want to upgrade?',
                     type: 'integer',
                     default: ''
                 },
                 {
                     key: 'amount',
-                    prompt: 'How many points do you want to upgrade this stat by?',
+                    prompt: 'How many points do you want to upgrade this skill by?',
                     type: 'integer',
                     default: '',
                     min: 1
@@ -48,13 +48,13 @@ module.exports = class StatsCommand extends Command {
 
         var pointsRemaining = 20 - (currentProwess + currentPrecision + currentFortitude + currentAgility + currentImpact);
         if (!id) {
-            embedMsg.addField("Stat Upgrades", "You have **" + pointsRemaining + "** stat points remaining to allocate!");
+            embedMsg.addField("Skill Upgrades", "You have **" + pointsRemaining + "** stat points remaining to allocate!");
             embedMsg.addField("1: Prowess (" + currentProwess + "/8)", "Increases outgoing damage");
             embedMsg.addField("2: Fortitude (" + currentFortitude + "/8)", "Decreases incoming damage");
             embedMsg.addField("3: Precision (" + currentPrecision + "/8)", "Chance of double damage");
             embedMsg.addField("4: Agility (" + currentAgility + "/8)", "Chance of avoiding most damage");
             embedMsg.addField("5: Impact (" + currentImpact + "/8)", "Chance of causing enemies to skip a turn");
-            embedMsg.setFooter("!stats <stat number> <amount> - upgrade a stat by a certain number of points!")
+            embedMsg.setFooter("!skill <stat number> <amount> - upgrade a stat by a certain number of points!")
             return msg.embed(embedMsg);
         } else {
             if (pointsRemaining > 0) {
@@ -108,7 +108,7 @@ module.exports = class StatsCommand extends Command {
                         return msg.embed(embedMsg);
                     } else {
                         await Utils.queryDB("UPDATE users SET " + skillToUpgrade + "=" + skillToUpgrade + "+" + (amount * upgradeMultiplier) + " WHERE discordID=" + msg.author.id);
-                        embedMsg.addField("Upgraded " + upgradeName, upgradeName + " successfully upgraded by **" + amount * upgradeMultiplier + "** affection point(s)!");
+                        embedMsg.addField("Upgraded " + upgradeName, upgradeName + " successfully upgraded by **" + amount * upgradeMultiplier + "** stat point(s)!");
                         return msg.embed(embedMsg);
                     }
                 } else {

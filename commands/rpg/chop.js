@@ -8,7 +8,7 @@ module.exports = class ChopCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'chop',
-            group: 'pet',
+            group: 'rpg',
             memberName: 'chop',
             description: 'Chop down trees for resources',
             examples: ['chop'],

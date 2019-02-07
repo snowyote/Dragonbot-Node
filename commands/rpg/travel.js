@@ -53,9 +53,9 @@ module.exports = class TravelCommand extends Command {
 				embedMsg.attachFiles(buffer);
 				if(tiles[0].lore.length > 0) {
 					embedMsg.addField(tiles[0].name, tiles[0].lore);
-					embedMsg.addField("Options", Utils.RPGOptions(tiles[0].type));
+					embedMsg.addField("Options", await Utils.RPGOptions(JSON.stringify(movement)));
 				} else {
-					embedMsg.addField(tiles[0].name, Utils.RPGOptions(tiles[0].type));
+					embedMsg.addField(tiles[0].name, await Utils.RPGOptions(JSON.stringify(movement)));
 				}
 				await Utils.queryDB("UPDATE users SET location='"+JSON.stringify(movement)+"' WHERE discordID="+msg.author.id);
 				return msg.embed(embedMsg);

@@ -27,9 +27,9 @@ module.exports = class MapCommand extends Command {
 		embedMsg.attachFiles(buffer);
 		if(tiles[0].lore.length > 0) {
 				embedMsg.addField(tiles[0].name, tiles[0].lore);
-				embedMsg.addField("Options", Utils.RPGOptions(tiles[0].type));
+				embedMsg.addField("Options", await Utils.RPGOptions(JSON.stringify(coords)));
 			} else {
-				embedMsg.addField(tiles[0].name, Utils.RPGOptions(tiles[0].type));
+				embedMsg.addField(tiles[0].name, await Utils.RPGOptions(JSON.stringify(coords)));
 		}
 		return msg.embed(embedMsg);
     };
