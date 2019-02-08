@@ -22,15 +22,17 @@ module.exports = class BattleCommand extends Command {
 			.setAuthor("World of the House of Dragons", "https://i.imgur.com/CyAb3mV.png")
 			
 		if(await Utils.canUseAction(msg.author, 'battle')) {
-			let monsterName = await BattleUtils.getMonsterName(48);
-			let battle = await BattleUtils.battle(msg, 48, this.battles);
-			if(battle === monsterName) {
+			let monsterToFight = await Utils.getRandomMonster(msg.author);
+			let monsterName = await BattleUtils.getMonsterName(monsterToFight);
+			msg.embed(Utils.makeRPGEmbed("Battle!", "You encountered a **"+monsterName+"**!"));
+			let battle = await BattleUtils.battle(msg, monsterToFight, this.battles);
+			if(battle == false) {
 				embedMsg.addField("You Lost!", "<@"+msg.author.id+"> was defeated by the **"+monsterName+"**. After some time unconscious, you wake up back in Dragonstone Village...");
 				return msg.embed(embedMsg);
 				await Utils.queryDB("UPDATE users SET location='[0,0]' WHERE discordID="+msg.author.id);
-			} else {
+			} else if(battle == true) {
 				embedMsg.addField("You Won!", "<@"+msg.author.id+"> defeated the **"+monsterName+"**!");
-				let drop = await BattleUtils.randomDrop(msg.author, 48);
+				let drop = await BattleUtils.randomDrop(msg.author, monsterToFight);
 				if(!drop) {
 					embedMsg.addField("Loot", "*No loot!*");
 				} else {

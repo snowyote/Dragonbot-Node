@@ -108,6 +108,7 @@ module.exports = class MineCommand extends Command {
 											let rewardCheck, rewardType, rewardName, rewardMsg;
 											var totalXPGain = 0;
 											var gemAmount = 0;
+											var riseAmount = 0;
 											var varToChange = new Array();
 											var valueToAdd = new Array();
 											var staminaAdd = 0;

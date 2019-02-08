@@ -6,6 +6,11 @@ async function getMonsterHP(monsterID) {
     return monsterRes[0].health;
 }
 
+async function getMonsterMP(monsterID) {
+    const monsterRes = await Utils.queryDB("SELECT magic FROM monsters WHERE id=" + monsterID);
+    return monsterRes[0].magic;
+}
+
 async function getMonsterName(monsterID) {
     const monsterRes = await Utils.queryDB("SELECT name FROM monsters WHERE id=" + monsterID);
     return monsterRes[0].name;
@@ -36,7 +41,6 @@ async function randomDrop(user, monsterID) {
 			if(await Utils.isInQuest(user) == questItemRes[0].questID)
 				return 'quest-'+questDropList[randomDrop];
 			else {
-				Utils.log("Not in the right quest for the drop!");
 				return false;
 			}
 		}
@@ -56,6 +60,9 @@ async function battle(msg, monsterID, battleMap) {
 	await Utils.setInBattle(msg.author, 1);
 	
     // User stuff
+    battle.user.hp = await Utils.calculateHP(msg.author.id);
+    battle.user.mp = await Utils.calculateMP(msg.author.id);
+	
     battle.user.prBonus = await Utils.calculateProwess(msg.author.id);
     battle.user.preBonus = await Utils.calculatePrecision(msg.author.id);
     battle.user.impBonus = await Utils.calculateImpact(msg.author.id);
@@ -64,6 +71,7 @@ async function battle(msg, monsterID, battleMap) {
 
     // Monster stuff
     battle.opponent.hp = await getMonsterHP(monsterID);
+    battle.opponent.mp = await getMonsterMP(monsterID);
     battle.opponent.name = await getMonsterName(monsterID);
 
     let monsterStats = await getMonsterStats(monsterID);
@@ -119,8 +127,19 @@ async function battle(msg, monsterID, battleMap) {
             await msg.say(`${battle.attacker.name} is now on guard!`);
             battle.attacker.changeGuard();
             battle.reset(false);
-        } else if (choice === 'heal') {
-            const amount = Utils.randomIntIn(0, 100 - battle.attacker.hp);
+		} else if (choice === 'magic' && battle.attacker.canMagic) {
+			const miss = Math.floor(Math.random() * 3);
+			if (miss) {
+				await msg.say(`${battle.attacker}'s magic missile missed!`);
+			} else {
+				const damage = Utils.randomIntIn(battle.defender.guard ? 10 : 50, battle.defender.guard ? 50 : 100);
+				await msg.say(`${battle.attacker} deals **${damage}** magic damage!`);
+				battle.defender.dealDamage(damage);
+			}
+				battle.attacker.useMP(50);
+				battle.reset();
+        } else if (choice === 'heal' && battle.attacker.canHeal) {
+            const amount = Math.round(battle.attacker.mp);
             await msg.say(`${battle.attacker.name} heals **${amount}** HP!`);
             battle.attacker.heal(amount);
             battle.attacker.useMP(battle.attacker.mp);
@@ -135,12 +154,11 @@ async function battle(msg, monsterID, battleMap) {
             await msg.say('I do not understand what you want to do.');
         }
     }
-    const {
-        winner
-    } = battle;
+    const { winner } = battle;
 	await Utils.setInBattle(msg.author, 0);
     battleMap.delete(msg.channel.id);
-    return {winner};
+	if(winner == battle.opponent.name) return false;
+	else return true;
 }
 
 // --

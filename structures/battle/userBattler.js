@@ -1,5 +1,5 @@
 const Utils = require('../../core/utils.js');
-const choices = ['attack', 'defend', 'heal', 'run'];
+const choices = ['attack', 'defend', 'magic', 'heal'];
 
 module.exports.UserBattler = class UserBattler {
 	constructor(battle, user) {
@@ -7,6 +7,7 @@ module.exports.UserBattler = class UserBattler {
 		this.user = user;
 		this.name = user.username;
 		this.hp = 100;
+		this.mp = 100;
 		this.guard = false;
 		this.prBonus = 0;
 		this.preBonus = 0;
@@ -15,8 +16,11 @@ module.exports.UserBattler = class UserBattler {
 		this.forBonus = 0;
 	}
 
-	async chooseAction(msg) {
-		let content = `${this.name}, do you ${Utils.list(choices.map(choice => `**${choice}**`), 'or')}?\n**${this.battle.user.name}:** ${this.battle.user.hp} HP\n**${this.battle.opponent.name}:** ${this.battle.opponent.hp} HP`;
+	async chooseAction(msg) {		
+		let content = `${this}, do you ${Utils.list(choices.map(choice => `**${choice}**`), 'or')}? You have **${this.mp}** MP!\n**${this.battle.user.name}:** ${this.battle.user.hp} HP\n**${this.battle.opponent.name}:** ${this.battle.opponent.hp} HP`;
+		if (this.battle.turn === 1 || this.battle.turn === 2) {
+			content += '\n\n*Magic always uses 50 MP and ignores enemy defense. Cure heals you for your remaining MP.*';
+		}
 		
 		await msg.say(content);
 		const filter = res => {
@@ -58,9 +62,13 @@ module.exports.UserBattler = class UserBattler {
 		this.hp = 0;
 		return null;
 	}
-
+	
 	get canHeal() {
-		return true;
+		return this.mp > 0;
+	}
+
+	get canMagic() {
+		return this.mp >= 50;
 	}
 
 	toString() {

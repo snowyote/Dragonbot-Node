@@ -67,6 +67,22 @@ async function getMonsterStats(monsterID) {
 // Stat functions
 //
 
+async function calculateHP(userID) {
+    const skillMultiplier = 25;
+    const userRes = await queryDB("SELECT vitality FROM users WHERE discordID=" + userID);
+	let vitality = userRes[0].vitality;
+    let baseVitality = 100;
+    return baseVitality + (vitality * skillMultiplier);
+}
+
+async function calculateMP(userID) {
+    const skillMultiplier = 25;
+    const userRes = await queryDB("SELECT arcana FROM users WHERE discordID=" + userID);
+	let arcana = userRes[0].arcana;
+    let baseArcana = 100;
+    return baseArcana + (arcana * skillMultiplier);
+}
+
 async function calculateProwess(userID) {
     const skillMultiplier = 5;
     const userRes = await queryDB("SELECT prowess FROM users WHERE discordID=" + userID);
@@ -316,6 +332,19 @@ async function getLocActions(user) {
     return actions;
 }
 
+async function getLocMonsters(user) {
+    const locations = await getLocation(user);
+    const locationRes = await queryDB("SELECT monsterTable FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
+    let monsters = JSON.parse(locationRes[0].monsterTable);
+    return monsters;
+}
+
+async function getRandomMonster(user) {
+    let monsterTable = await getLocMonsters(user);
+	let random = randomIntEx(0, monsterTable.length);
+	return monsterTable[random];
+}
+
 async function getLocBiome(user) {
     const locations = await getLocation(user);
     const locationRes = await queryDB("SELECT * FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
@@ -362,6 +391,34 @@ async function getLocName(user) {
 // Generate a world tile
 //
 
+function isLandTile(x,y,val) {
+  return tileType(x,y) != 'ocean' ? val : 0;
+}
+
+async function tileType(x,y) {
+    var coords = new Array();
+    coords.push(x);
+    coords.push(y);
+    const tiles = await queryDB("SELECT biome FROM locations WHERE coords='" + JSON.stringify(coords) + "'");
+	if(tiles && tiles.length)
+		return tiles[0].biome;
+	else
+		return 'ocean';
+}
+
+async function generateCoasts(x,y) {
+	const topLeft = await isLandTile(x-1,y-1,1);
+	const top = await isLandTile(x,y-1,2);
+	const topRight = await isLandTile(x+1,y-1,4);
+	const midLeft = await isLandTile(x-1,y,8);
+	const midRight = await isLandTile(x+1,y,16);
+	const botLeft = await isLandTile(x-1,y+1,32);
+	const bot = await isLandTile(x,y+1,64);
+	const botRight = await isLandTile(x+1,y+1,128);
+	const oceanIndex = topLeft+top+topRight+midLeft+midRight+botLeft+bot+botRight;
+	return oceanIndex;
+}
+
 async function makeTile(x, y) {
     var coords = new Array();
     coords.push(x);
@@ -378,7 +435,8 @@ async function makeTile(x, y) {
         marker = '';
         biome = 'ocean';
     }
-
+	
+	
     let imgRaw = './img/tiles/' + biome + '.png';
     let imgMarker = './img/tiles/' + marker + '.png';
     let snowflake = new Date().getTime();
@@ -435,9 +493,9 @@ async function generateMap(x, y, user) {
 }
 
 async function generateWorldMap() {
-    let map = await new Jimp(1100, 1100);
-    var worldX = 7;
-    var worldY = 7;
+    let map = await new Jimp(1400, 1400);
+    var worldX = 10;
+    var worldY = 10;
     var xOffset = 0;
     var yOffset = 0;
     for (let i = -5; i < worldY; i++) {
@@ -744,5 +802,9 @@ module.exports = {
     calculateProwess,
     canUseAction,
 	setInBattle,
-	isInBattle
+	isInBattle,
+	calculateHP,
+	calculateMP,
+	getLocMonsters,
+	getRandomMonster
 };

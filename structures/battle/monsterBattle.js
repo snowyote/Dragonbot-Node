@@ -27,7 +27,7 @@ module.exports.MonsterBattle = class MonsterBattle {
 
 	get winner() {
 		if (this.user.hp <= 0) return this.opponent.name;
-		if (this.opponent.hp <= 0) return this.user.name;
+		if (this.opponent.hp <= 0) return this.user;
 		return null;
 	}
 };

@@ -40,13 +40,15 @@ module.exports = class SkillCommand extends Command {
         let userRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
         Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
 
+        var currentVitality = userRes[0].vitality;
+        var currentArcana = userRes[0].arcana;
         var currentProwess = userRes[0].prowess;
         var currentFortitude = userRes[0].fortitude;
         var currentPrecision = userRes[0].precise;
         var currentAgility = userRes[0].agility;
         var currentImpact = userRes[0].impact;
 
-        var pointsRemaining = 20 - (currentProwess + currentPrecision + currentFortitude + currentAgility + currentImpact);
+        var pointsRemaining = 20 - (currentProwess + currentPrecision + currentFortitude + currentAgility + currentImpact + currentVitality + currentArcana);
         if (!id) {
             embedMsg.addField("Skill Upgrades", "You have **" + pointsRemaining + "** stat points remaining to allocate!");
             embedMsg.addField("1: Prowess (" + currentProwess + "/8)", "Increases outgoing damage");
@@ -54,6 +56,8 @@ module.exports = class SkillCommand extends Command {
             embedMsg.addField("3: Precision (" + currentPrecision + "/8)", "Chance of double damage");
             embedMsg.addField("4: Agility (" + currentAgility + "/8)", "Chance of avoiding most damage");
             embedMsg.addField("5: Impact (" + currentImpact + "/8)", "Chance of causing enemies to skip a turn");
+            embedMsg.addField("6: Vitality (" + currentVitality + "/8)", "+25 health points");
+            embedMsg.addField("7: Arcana (" + currentArcana + "/8)", "+25 magic power");
             embedMsg.setFooter("!skill <stat number> <amount> - upgrade a stat by a certain number of points!")
             return msg.embed(embedMsg);
         } else {
@@ -93,6 +97,18 @@ module.exports = class SkillCommand extends Command {
                         upgradeName = "Impact";
                         upgradeMax = 8;
                         current = currentImpact;
+                        break;
+                    case 6:
+                        skillToUpgrade = "vitality";
+                        upgradeName = "Vitality";
+                        upgradeMax = 8;
+                        current = currentVitality;
+                        break;
+                    case 7:
+                        skillToUpgrade = "arcana";
+                        upgradeName = "Arcana";
+                        upgradeMax = 8;
+                        current = currentArcana;
                         break;
                 }
                 if (skillToUpgrade !== "none") {

@@ -4,6 +4,7 @@ module.exports.MonsterBattler = class MonsterBattler {
 	constructor(battle, monsterID) {
 		this.monster = monsterID;
 		this.hp = 100;
+		this.mp = 100;
 		this.name = "";
 		this.guard = false;
 		this.prBonus = 0;
@@ -14,8 +15,9 @@ module.exports.MonsterBattler = class MonsterBattler {
 	}
 
 	async chooseAction(msg) {
-		const monsterChoices = ['attack', 'defend'];
-		//if (this.canHeal && this.hp < 100) monsterChoices.push('heal');
+		const monsterChoices = ['attack', 'attack', 'defend'];
+		if (this.canHeal && this.hp < 50) monsterChoices.push('heal');
+		if (this.canMagic) monsterChoices.push('magic');
 		return monsterChoices[Math.floor(Math.random() * monsterChoices.length)];
 	}
 	
@@ -43,8 +45,12 @@ module.exports.MonsterBattler = class MonsterBattler {
 		this.hp = 0;
 		return null;
 	}
-
+	
 	get canHeal() {
-		return true;
+		return this.mp > 0;
+	}
+
+	get canMagic() {
+		return this.mp >= 50;
 	}
 };

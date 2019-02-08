@@ -38,6 +38,12 @@ module.exports = class FightCommand extends Command {
 					return msg.say('Looks like they declined...');
 				}
 			}
+			
+			battle.user.hp = await Utils.calculateHP(msg.author.id);
+			battle.user.mp = await Utils.calculateMP(msg.author.id);
+			battle.opponent.hp = await Utils.calculateHP(opponent.id);
+			battle.opponent.mp = await Utils.calculateMP(opponent.id);
+			
 			while (!battle.winner) {
 				const choice = await battle.attacker.chooseAction(msg);
 				if (choice === 'attack') {
@@ -90,8 +96,19 @@ module.exports = class FightCommand extends Command {
 					await msg.say(`${battle.attacker} is now on guard!`);
 					battle.attacker.changeGuard();
 					battle.reset(false);
-				} else if (choice === 'heal') {
-					const amount = Utils.randomIntIn(0,100-battle.attacker.hp);
+				} else if (choice === 'magic' && battle.attacker.canMagic) {
+					const miss = Math.floor(Math.random() * 3);
+					if (miss) {
+						await msg.say(`${battle.attacker}'s magic missile missed!`);
+					} else {
+						const damage = Utils.randomIntIn(battle.defender.guard ? 10 : 50, battle.defender.guard ? 50 : 100);
+						await msg.say(`${battle.attacker} deals **${damage}** magic damage!`);
+						battle.defender.dealDamage(damage);
+					}
+					battle.attacker.useMP(50);
+					battle.reset();
+				} else if (choice === 'heal' && battle.attacker.canHeal) {
+					const amount = Math.round(battle.attacker.mp);
 					await msg.say(`${battle.attacker} heals **${amount}** HP!`);
 					battle.attacker.heal(amount);
 					battle.attacker.useMP(battle.attacker.mp);
