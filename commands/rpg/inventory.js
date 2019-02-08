@@ -26,7 +26,6 @@ module.exports = class InventoryCommand extends Command {
 		var trash = queryRes[0].trash;
 		var gems = JSON.parse(queryRes[0].gems);
 		var logs = JSON.parse(queryRes[0].logs);
-		var seeds = JSON.parse(queryRes[0].seeds);
         const itemRes = await Utils.queryDB("SELECT * FROM quest_items");
 		var questItems = "";
 		for(var i = 0; i < itemRes.length; i++) {

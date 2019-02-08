@@ -15,7 +15,7 @@ module.exports.MonsterBattler = class MonsterBattler {
 	}
 
 	async chooseAction(msg) {
-		const monsterChoices = ['attack', 'attack', 'defend'];
+		const monsterChoices = ['attack', 'attack', 'attack', 'defend'];
 		if (this.canHeal && this.hp < 50) monsterChoices.push('heal');
 		if (this.canMagic) monsterChoices.push('magic');
 		return monsterChoices[Math.floor(Math.random() * monsterChoices.length)];

@@ -158,6 +158,18 @@ async function removeItem(userID, item) {
     } else return false;
 }
 
+async function avariceBonus(userID) {
+	let queryRes = await queryDB("SELECT * FROM users WHERE discordID=" + userID);
+	var userID = queryRes[0].id;
+	var active = queryRes[0].activePet;
+	if(active > 0) {
+		let petRes = await queryDB("SELECT * FROM pets WHERE id="+active);
+		var avarice = petRes[0].avarice + petRes[0].avariceBoost;
+		return avarice;
+	} else
+		return 1;
+}
+
 async function addItem(userID, item) {
     const userRes = await queryDB("SELECT equipmentList FROM users WHERE discordID=" + userID);
     let itemList = JSON.parse(userRes[0].equipmentList);
@@ -273,11 +285,56 @@ async function addQuestItem(userID, item) {
     }
 }
 
+async function addOrbs(userID, amount) {
+    await queryDB("UPDATE users SET mysticOrbs=mysticOrbs+"+amount+" WHERE discordID=" + userID);
+}
+
+async function addKeys(userID, amount) {
+    await queryDB("UPDATE users SET crateKeys=crateKeys+"+amount+" WHERE discordID=" + userID);
+}
+
+async function addFood(userID, amount) {
+    await queryDB("UPDATE users SET food=food+"+amount+" WHERE discordID=" + userID);
+}
+
+async function addArtifacts(userID, amount) {
+    await queryDB("UPDATE users SET artifacts=artifacts+"+amount+" WHERE discordID=" + userID);
+}
+
 async function addLogs(userID, logID, amount) {
     const userRes = await queryDB("SELECT logs FROM users WHERE discordID=" + userID);
     let logList = JSON.parse(userRes[0].logs);
     logList[logID] += amount;
     await queryDB("UPDATE users SET logs='" + JSON.stringify(logList) + "' WHERE discordID=" + userID);
+}
+
+async function getLogType(logID) {
+	let logRes = await queryDB("SELECT name, icon FROM log_types WHERE index="+logID);
+	return logRes[0].name;
+}
+
+async function getCrateType(crateID) {
+	let crateRes = await queryDB("SELECT name FROM crate_types WHERE index="+crateID);
+	return crateRes[0].name;
+}
+
+async function getGemType(gemID) {
+	let gemRes = await queryDB("SELECT name, icon FROM gem_types WHERE index="+gemID);
+	return gemRes[0].name;
+}
+
+async function addGems(userID, gemID, amount) {
+    const userRes = await queryDB("SELECT gems FROM users WHERE discordID=" + userID);
+    let gemList = JSON.parse(userRes[0].gems);
+    gemList[gemID] += amount;
+    await queryDB("UPDATE users SET gems='" + JSON.stringify(gemList) + "' WHERE discordID=" + userID);
+}
+
+async function addCrate(userID, crateID, amount) {
+    const userRes = await queryDB("SELECT crate FROM users WHERE discordID=" + userID);
+    let crateList = JSON.parse(userRes[0].crate);
+    crateList[crateID] += amount;
+    await queryDB("UPDATE users SET crate='" + JSON.stringify(crateList) + "' WHERE discordID=" + userID);
 }
 
 // --
@@ -806,5 +863,15 @@ module.exports = {
 	calculateHP,
 	calculateMP,
 	getLocMonsters,
-	getRandomMonster
+	getRandomMonster,
+	addOrbs,
+	addKeys,
+	addCrate,
+	addArtifacts,
+	addFood,
+	addGems,
+	getLogType,
+	getCrateType,
+	getGemType,
+	avariceBonus
 };

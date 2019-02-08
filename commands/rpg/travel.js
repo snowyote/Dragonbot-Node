@@ -1,5 +1,6 @@
 const {Command} = require('discord.js-commando');
 const Utils = require('../../core/utils.js');
+const BattleUtils = require('../../core/battleUtils.js');
 const Discord = require('discord.js');
 
 module.exports = class TravelCommand extends Command {
@@ -19,6 +20,8 @@ module.exports = class TravelCommand extends Command {
 				}
 			]
         });
+		
+		this.battles = new Map();
     }
 
     async run(msg, {direction}) {
@@ -60,7 +63,11 @@ module.exports = class TravelCommand extends Command {
 					embedMsg.addField(tiles[0].name, await Utils.RPGOptions(JSON.stringify(movement)));
 				}
 				await Utils.queryDB("UPDATE users SET location='"+JSON.stringify(movement)+"' WHERE discordID="+msg.author.id);
-				return msg.embed(embedMsg);
+				msg.embed(embedMsg);
+				let encounterChance = Utils.randomIntIn(1,100);
+				let monsterToFight = await Utils.getRandomMonster(msg.author);
+				if(monsterToFight > 0 && encounterChance <= 20)
+					await BattleUtils.battle(msg, monsterToFight, this.battles, true);
 			}
 		} else {
 			return msg.say("You can't move that way, the vast ocean is too treacherous for you to traverse currently!");
