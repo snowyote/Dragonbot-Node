@@ -255,6 +255,7 @@ client.on('message', async message => {
 client.on('ready', () => {
     Utils.log("\x1b[36m%s\x1b[0m", "Bot has started, with " + client.users.size + " users!");
     client.user.setActivity("with dragon butts");
+	Utils.resetBattles();
     newDay();
     petUpdates();
 });

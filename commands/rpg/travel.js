@@ -66,7 +66,7 @@ module.exports = class TravelCommand extends Command {
 				msg.embed(embedMsg);
 				let encounterChance = Utils.randomIntIn(1,100);
 				let monsterToFight = await Utils.getRandomMonster(msg.author);
-				if(monsterToFight > 0 && encounterChance <= 20)
+				if(monsterToFight > 0 && encounterChance <= 50)
 					await BattleUtils.battle(msg, monsterToFight, this.battles, true);
 			}
 		} else {

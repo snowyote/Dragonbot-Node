@@ -53,6 +53,7 @@ async function randomDrops(user, monsterID, min, max) {
     let dropNum = Utils.randomIntIn(min, max);
     let questItems = new Array;
     let normalItems = new Array;
+	let materials = new Array;
     let coins = 0;
     let food = 0;
     let orbs = 0;
@@ -73,6 +74,9 @@ async function randomDrops(user, monsterID, min, max) {
         } else if (dropArray[0] == "item") {
             if (await Utils.hasItem(user.id, dropID) == false && !normalItems.includes(dropID))
                 normalItems.push(dropID);
+            // Is material
+        } else if (dropArray[0] == "material") {
+                materials.push(dropID);
             // Is coins
         } else if (dropArray[0] == "coins") {
 			let avarice = await Utils.avariceBonus(user.id);
@@ -112,6 +116,13 @@ async function randomDrops(user, monsterID, min, max) {
         for (let i = 0; i < questItems.length; i++) {
             dropStr = dropStr + await Utils.getQuestItem(questItems[i], true) + '\n';
             await Utils.addQuestItem(user.id, questItems[i]);
+        }
+    }
+
+    if (materials.length > 0) {
+        for (let i = 0; i < materials.length; i++) {
+            dropStr = dropStr + await Utils.getMaterial(materials[i], true) + '\n';
+            await Utils.addMaterial(user.id, materials[i], 1);
         }
     }
 
@@ -167,20 +178,21 @@ async function randomDrops(user, monsterID, min, max) {
 	}
 }
 
-async function randomEnemyStats(monsterID, isElite=false) {
-	let health = Utils.randomIntIn(isElite ? 75 : 25, isElite ? 150 : 100);
-	let magic = Utils.randomIntIn(isElite ? 50 : 25, isElite ? 150 : 50);
+async function randomEnemyStats(user, monsterID, isElite=false) {
+	let level = await Utils.getLocLevel(user);
+	let health = Utils.randomIntIn(isElite ? 100 : 50, isElite ? 200 : 150)+(level*10)*level;
+	let magic = Utils.randomIntIn(isElite ? 50 : 25, isElite ? 150 : 50)+(level*10)*level;
 	
 	var monsterStats = [0,0,0,0,0,100,100];
 	
-	monsterStats[0] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4);
-	monsterStats[1] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4);
-	monsterStats[2] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4);
-	monsterStats[3] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4);
-	monsterStats[4] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4);
+	monsterStats[0] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4)*level;
+	monsterStats[1] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4)*level;
+	monsterStats[2] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4)*level;
+	monsterStats[3] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4)*level;
+	monsterStats[4] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4)*level;
 	
-	monsterStats[5] = health;
-	monsterStats[6] = magic;
+	monsterStats[5] = health*level;
+	monsterStats[6] = magic*level;
 	
 	let monsterName = await getMonsterName(monsterID);
 	monsterStats[7] = (isElite ? 'Elite '+monsterName : monsterName);
@@ -211,15 +223,15 @@ async function battle(msg, monsterID, battleMap, random=false) {
 		let eliteChance = Utils.randomIntIn(1,100);
 		let elite = false;
 		if(eliteChance <= 10) elite = true;
-		monsterStats = await randomEnemyStats(monsterID, elite);
-		battle.opponent.name = await getMonsterName(monsterID);
+		monsterStats = await randomEnemyStats(msg.author, monsterID, elite);
+		battle.opponent.name = monsterStats[7];
 		battle.opponent.hp = monsterStats[5];
 		battle.opponent.mp = monsterStats[6];
-		battle.opponent.prBonus = monsterStats[0];
-		battle.opponent.forBonus = monsterStats[1];
-		battle.opponent.agiBonus = monsterStats[2];
-		battle.opponent.impBonus = monsterStats[3];
-		battle.opponent.preBonus = monsterStats[4];
+		battle.opponent.prBonus = await monsterBonus(monsterStats[0]);
+		battle.opponent.forBonus = await monsterBonus(monsterStats[1]);
+		battle.opponent.agiBonus = await monsterBonus(monsterStats[2]);
+		battle.opponent.impBonus = await monsterBonus(monsterStats[3]);
+		battle.opponent.preBonus = await monsterBonus(monsterStats[4]);
 	} else {
 		battle.opponent.hp = await getMonsterHP(monsterID);
 		battle.opponent.mp = await getMonsterMP(monsterID);
@@ -247,21 +259,21 @@ async function battle(msg, monsterID, battleMap, random=false) {
                 missed = 1;
 
             random = Utils.randomIntIn(1, 100);
-            if (random <= Math.floor(battle.attacker.preBonus / 2))
+            if (random <= Math.floor(battle.attacker.preBonus))
                 multiplier = 2;
 
             random = Utils.randomIntIn(1, 100);
-            if (random <= Math.floor(battle.attacker.impBonus / 1.5))
+            if (random <= Math.floor(battle.attacker.impBonus))
                 stunned = 1;
 
-            let dmgMin = 10 + (Math.floor(battle.attacker.prBonus / 2) - Math.floor(battle.defender.forBonus / 2)) * multiplier;
-            let dmgMinGuard = 5 + (Math.floor(battle.attacker.prBonus / 2) - Math.floor(battle.defender.forBonus)) * multiplier;
-            let dmgMax = 30 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus / 2)) * multiplier;
-            let dmgMaxGuard = 15 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus)) * multiplier;
+            let dmgMin = 10 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus/3)) * multiplier;
+            let dmgMinGuard = 5 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus/3)) * multiplier;
+            let dmgMax = 20 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus/3)) * multiplier;
+            let dmgMaxGuard = 10 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus/3)) * multiplier;
 
             let damage = Utils.randomIntIn(battle.defender.guard ? dmgMinGuard : dmgMin, battle.defender.guard ? dmgMaxGuard : dmgMax);
 
-            if (damage < 0) damage = 0;
+            if (damage < 1) damage = 1;
 
             if (missed) {
                 await msg.say(`${battle.attacker.name} missed!`);
@@ -319,6 +331,7 @@ async function battle(msg, monsterID, battleMap, random=false) {
     } else {
 		let drops = await randomDrops(msg.author, monsterID, 1, 3);
         msg.embed(Utils.makeRPGEmbed("You Won!", "<@" + msg.author.id + "> defeated the **" + battle.opponent.name + "**!\n\n***Drops:***\n"+drops));
+		await Utils.addAchProgress(msg.author.id, 'battlesWon', 1);
     }
 }
 

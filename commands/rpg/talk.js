@@ -46,7 +46,7 @@ module.exports = class TalkCommand extends Command {
 						if(inProgress == 0)
 							embedMsg.addField("Villager", "Hey "+userMention+", actually, I have something to ask of you.. do you think you could go to the forest down south and grab something for me? I'll make it worth your while. I left my **Bronze Axe** somewhere there, it shouldn't be too hard to find but the Mayor's got me working twice as hard today so I can't go myself. If you accept this, use `!quest 1`!");
 						else if(await Utils.hasQuestItem(msg.author.id, 1) && inProgress == 1) {
-							embedMsg.addField("Villager", "You found it! Thank you so much! For your reward.. uh, I have this spare axe you can use to chop down trees. It's not the best, but I'm sure a brave adventurer like yourself could put it to use!");
+							embedMsg.addField("Villager", "You found it! Thank you so much! For your reward.. I talked the mayor into giving me a spare logging permit, with this you're able to use the forests to gather resources!");
 							timesTalked++;
 							msg.channel.send(await Utils.completeQuest(msg.author.id, 1));
 						} else

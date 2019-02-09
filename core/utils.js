@@ -189,8 +189,21 @@ async function hasQuestItem(userID, item) {
     else return false;
 }
 
+async function hasMaterial(userID, item) {
+    const userRes = await queryDB("SELECT materials FROM users WHERE discordID=" + userID);
+    let materials = JSON.parse(userRes[0].materials);
+    if (materials[item]) return materials[item];
+    else return false;
+}
+
 async function getItem(item, description) {
     const itemRes = await queryDB("SELECT * from items WHERE id=" + item);
+    if (description) return itemRes[0].name + ' (*' + itemRes[0].description + '*)';
+    else return itemRes[0].name;
+}
+
+async function getMaterial(item, description) {
+    const itemRes = await queryDB("SELECT * from materials WHERE id=" + item);
     if (description) return itemRes[0].name + ' (*' + itemRes[0].description + '*)';
     else return itemRes[0].name;
 }
@@ -285,6 +298,21 @@ async function addQuestItem(userID, item) {
     }
 }
 
+async function addMaterial(userID, material, amount) {
+    const userRes = await queryDB("SELECT materials FROM users WHERE discordID=" + userID);
+    const matRes = await queryDB("SELECT * FROM materials WHERE id="+material);
+    let materialList = JSON.parse(userRes[0].materials);
+	let mat = material.toString();
+    if (materialList[mat]) {
+		// contains material already
+		materialList[mat]+=amount;
+    } else {
+		// does not contain material already
+		materialList[mat] = amount;
+	}
+	await queryDB("UPDATE users SET materials='"+JSON.stringify(materialList)+"' WHERE discordID="+userID);
+}
+
 async function addOrbs(userID, amount) {
     await queryDB("UPDATE users SET mysticOrbs=mysticOrbs+"+amount+" WHERE discordID=" + userID);
 }
@@ -376,6 +404,18 @@ async function getLocType(user) {
     return type;
 }
 
+async function resetBattles() {
+	await queryDB("UPDATE rpg_flags SET in_battle=0");
+    log("\x1b[32m%s\x1b[0m", "DB: Battles reset!");
+}
+
+async function getLocLevel(user) {
+    const locations = await getLocation(user);
+    const locationRes = await queryDB("SELECT * FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
+    let level = locationRes[0].level;
+    return level;
+}
+
 async function canUseAction(user, action) {
     let actions = await getLocActions(user);
     if (actions.includes(action)) return true;
@@ -400,6 +440,11 @@ async function getRandomMonster(user) {
     let monsterTable = await getLocMonsters(user);
 	let random = randomIntEx(0, monsterTable.length);
 	return monsterTable[random];
+}
+
+async function addAchProgress(userID,field,value) {
+	let dbUserID = await getUserID(userID, true);
+	await queryDB("UPDATE achievement_progress SET "+field+"="+field+"+"+value+" WHERE id="+dbUserID);
 }
 
 async function getLocBiome(user) {
@@ -848,6 +893,7 @@ module.exports = {
     hasCompletedQuest,
     getLocBiome,
     getLocActions,
+	getLocLevel,
     addLogs,
     list,
     verify,
@@ -873,5 +919,10 @@ module.exports = {
 	getLogType,
 	getCrateType,
 	getGemType,
-	avariceBonus
+	avariceBonus,
+	addAchProgress,
+	resetBattles,
+	getMaterial,
+	addMaterial,
+	hasMaterial
 };

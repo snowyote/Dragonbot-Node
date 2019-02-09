@@ -5,7 +5,7 @@ module.exports.MonsterBattle = class MonsterBattle {
 	constructor(user, monsterID) {
 		this.user = new UserBattler(this, user);
 		this.opponent = new MonsterBattler(this, monsterID);
-		this.userTurn = true;
+		this.userTurn = false;
 		this.turn = 1;
 	}
 

@@ -27,15 +27,24 @@ module.exports = class InventoryCommand extends Command {
 		var gems = JSON.parse(queryRes[0].gems);
 		var logs = JSON.parse(queryRes[0].logs);
         const itemRes = await Utils.queryDB("SELECT * FROM quest_items");
+        const matRes = await Utils.queryDB("SELECT * FROM materials");
 		var questItems = "";
-		for(var i = 0; i < itemRes.length; i++) {
+		for(let i = 0; i < itemRes.length; i++) {
 			if(await Utils.hasQuestItem(msg.author.id, itemRes[i].id)) {
-				questItems = questItems + itemRes[i].name + ', ';
+				questItems = questItems + itemRes[i].icon+' '+itemRes[i].name+'\n';
 			}
 		}
+		var materials = "";
+		for(let i = 0; i < matRes.length; i++) {
+			if(await Utils.hasMaterial(msg.author.id, matRes[i].id)) {
+				let matCount = await Utils.hasMaterial(msg.author.id, matRes[i].id);
+				materials = materials + matRes[i].icon+' '+matRes[i].name + ': **'+matCount+'**\n';
+			}
+		}
+		questItems = questItems.slice(0,-1);
+		materials = materials.slice(0,-1);
 		
 		if(questItems == "") questItems = "None";
-		else questItems = questItems.slice(0, -2);
 		
         const embedMsg = new Discord.RichEmbed()
             .setAuthor(msg.author.username+"'s Inventory", "https://i.imgur.com/CyAb3mV.png")
@@ -62,6 +71,8 @@ module.exports = class InventoryCommand extends Command {
 									"Ancient: **"+crates[3]+"**\n"+
 									"Celestial: **"+crates[4]+"**", true);
 		embedMsg.addField("🌟 Quest Items", "**"+questItems+"**", true);
+		embedMsg.addField("🍾 Materials", materials, true);
+		embedMsg.addBlankField();
 		return msg.embed(embedMsg);
     };
 }
