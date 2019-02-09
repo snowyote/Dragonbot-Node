@@ -26,8 +26,13 @@ async function getMonsterStats(monsterID) {
 }
 
 async function monsterBonus(skill) {
-    const skillMultiplier = 5;
-    return skill * skillMultiplier;
+    let skillMultiplier = 5;
+	calculated = 0;
+	for(let i = 1; i <= skill; i++) {
+		if(i > 10) skillMultiplier = 2.5;
+		calculated += skillMultiplier
+	}
+    return calculated;
 }
 
 async function randomDrop(user, monsterID) {
@@ -202,7 +207,7 @@ async function randomEnemyStats(user, monsterID, isElite=false) {
 	return monsterStats;
 }
 
-async function battle(msg, monsterID, battleMap, random=false) {
+async function battle(msg, monsterID, battleMap, random=false, giveRewards=true) {
     if (battleMap.has(msg.channel.id)) return msg.reply('Only one battle may be occurring per channel.');
     if (await Utils.isInBattle(msg.author)) return msg.reply('You are already in a battle!');
     battleMap.set(msg.channel.id, new MonsterBattle(msg.author, monsterID));
@@ -258,7 +263,7 @@ async function battle(msg, monsterID, battleMap, random=false) {
             let stunned = 0;
 
             let random = Utils.randomIntIn(1, 100);
-            if (random <= Math.floor(battle.defender.agiBonus))
+            if (random <= Math.floor(battle.defender.agiBonus-battle.attacker.agiBonus))
                 missed = 1;
 
             random = Utils.randomIntIn(1, 100);
@@ -267,7 +272,7 @@ async function battle(msg, monsterID, battleMap, random=false) {
 
             random = Utils.randomIntIn(1, 100);
             if (random <= Math.floor(battle.attacker.impBonus))
-                stunned = 1;
+                if(!battle.defender.stunned) stunned = 1;
 
             let dmgMin = 10 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus/3)) * multiplier;
             let dmgMinGuard = 5 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus/3)) * multiplier;
@@ -286,6 +291,7 @@ async function battle(msg, monsterID, battleMap, random=false) {
                 battle.defender.dealDamage(damage);
                 battle.reset();
                 battle.reset();
+				battle.defender.stunned = true;
             } else {
                 if (multiplier == 2) await msg.say(`${battle.attacker.name} ***critically hit***, dealing **${damage}** damage!`);
                 else await msg.say(`${battle.attacker.name} deals **${damage}** damage!`);
@@ -329,14 +335,18 @@ async function battle(msg, monsterID, battleMap, random=false) {
     await Utils.setInBattle(msg.author, 0);
     battleMap.delete(msg.channel.id);
     if (winner == battle.opponent.name) {
-        msg.embed(Utils.makeRPGEmbed("You Lost!", "<@" + msg.author.id + "> was defeated by the **" + battle.opponent.name + "**. After some time unconscious, you wake up back in Dragonstone Village..."));
+        msg.embed(Utils.makeRPGEmbed("You Lost!", "<@" + msg.author.id + "> was defeated by the **" + battle.opponent.name + "**. After some time unconscious, you wake up back in the encampment..."));
 		await Utils.deathXP(msg, msg.author.id);
         await Utils.queryDB("UPDATE users SET location='[0,0]' WHERE discordID=" + msg.author.id);
+		return false;
     } else {
-		let drops = await randomDrops(msg.author, monsterID, 1, 3);
-        msg.embed(Utils.makeRPGEmbed("You Won!", "<@" + msg.author.id + "> defeated the **" + battle.opponent.name + "**!\n\n***Drops:***\n"+drops));
-		await Utils.giveXP(msg, msg.author.id, monsterStats[8]);
+		if(giveRewards) {
+			let drops = await randomDrops(msg.author, monsterID, 1, 3);
+			msg.embed(Utils.makeRPGEmbed("You Won!", "<@" + msg.author.id + "> defeated the **" + battle.opponent.name + "**!\n\n***Drops:***\n"+drops));
+			await Utils.giveXP(msg, msg.author.id, monsterStats[8]);
+		}
 		await Utils.addAchProgress(msg.author.id, 'battlesWon', 1);
+		return true;
     }
 }
 

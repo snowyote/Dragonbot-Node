@@ -7,6 +7,7 @@ module.exports.MonsterBattler = class MonsterBattler {
 		this.mp = 100;
 		this.name = "";
 		this.guard = false;
+		this.stunned = false;
 		this.prBonus = 0;
 		this.preBonus = 0;
 		this.impBonus = 0;
@@ -18,6 +19,7 @@ module.exports.MonsterBattler = class MonsterBattler {
 		const monsterChoices = ['attack', 'attack', 'attack', 'defend'];
 		if (this.canHeal && this.hp < 50) monsterChoices.push('heal');
 		if (this.canMagic) monsterChoices.push('magic');
+		this.stunned = false;
 		return monsterChoices[Math.floor(Math.random() * monsterChoices.length)];
 	}
 	

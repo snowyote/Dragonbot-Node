@@ -86,9 +86,18 @@ module.exports = class MarketCommand extends Command {
 						} else if(userVar == "income") {
 							cost = (marketRes[selectedBuy].cost*income);
 							if(coins >= cost) {
-								var maxStamina = petRes[0].maxStamina;
 								await Utils.queryDB("UPDATE users SET income=income+1 WHERE discordID="+msg.author.id);
 								embedMsg.addField("Increased Income", "You have multiplied your daily coin bonus by **x"+(income+1)+"**!");
+								await Utils.takeCoins(msg.author.id, cost);
+								return msg.embed(embedMsg);
+							} else {
+								embedMsg.addField("Can't Buy", "You don't have the **" + cost + "** coins needed!");
+								return msg.embed(embedMsg);
+							}
+						} else if(userVar == "reincarnate") {
+							if(coins >= cost) {
+								await Utils.queryDB("UPDATE users SET prowess=0, fortitude=0, precise=0, vitality=0, arcana=0, impact=0, agility=0 WHERE discordID=" + msg.author.id);
+								embedMsg.addField("Reincarnated", "Your skills have been reset!");
 								await Utils.takeCoins(msg.author.id, cost);
 								return msg.embed(embedMsg);
 							} else {

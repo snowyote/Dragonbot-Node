@@ -92,7 +92,7 @@ async function calculateProwess(userID) {
 }
 
 async function calculateFortitude(userID) {
-    const skillMultiplier = 5;
+    let skillMultiplier = 5;
     const userRes = await queryDB("SELECT fortitude FROM users WHERE discordID=" + userID);
     let fortitude = 0;
     if (userRes && userRes.length) fortitude = userRes[0].fortitude;
@@ -100,27 +100,48 @@ async function calculateFortitude(userID) {
 }
 
 async function calculatePrecision(userID) {
-    const skillMultiplier = 5;
+    let skillMultiplier = 5;
     const userRes = await queryDB("SELECT precise FROM users WHERE discordID=" + userID);
     let precise = 0;
-    if (userRes && userRes.length) precise = userRes[0].precise;
+	let calculated = 0;
+    if (userRes && userRes.length) {
+		precise = userRes[0].precise;
+		for(let i = 1; i <= precise; i++) {
+			if(i > 10) skillMultiplier = 2.5;
+			calculated += skillMultiplier
+		}
+	}
     return precise * skillMultiplier;
 }
 
 async function calculateAgility(userID) {
-    const skillMultiplier = 5;
+    let skillMultiplier = 5;
     const userRes = await queryDB("SELECT agility FROM users WHERE discordID=" + userID);
     let agility = 0;
-    if (userRes && userRes.length) agility = userRes[0].agility;
-    return agility * skillMultiplier;
+	let calculated = 0;
+    if (userRes && userRes.length) {
+		agility = userRes[0].agility;
+		for(let i = 1; i <= agility; i++) {
+			if(i > 10) skillMultiplier = 2.5;
+			calculated += skillMultiplier
+		}
+	}
+    return calculated;
 }
 
 async function calculateImpact(userID) {
-    const skillMultiplier = 5;
+    let skillMultiplier = 5;
     const userRes = await queryDB("SELECT impact FROM users WHERE discordID=" + userID);
     let impact = 0;
-    if (userRes && userRes.length) impact = userRes[0].impact;
-    return impact * skillMultiplier;
+	let calculated = 0;
+    if (userRes && userRes.length) {
+		impact = userRes[0].impact;
+		for(let i = 1; i <= impact; i++) {
+			if(i > 10) skillMultiplier = 2.5;
+			calculated += skillMultiplier
+		}
+	}
+    return calculated;
 }
 
 // --
@@ -386,6 +407,9 @@ async function RPGOptions(coords) {
     if (actions.includes('fish')) opt = opt + '**Fish** (*!fish*)\n';
     if (actions.includes('chop')) opt = opt + '**Chop Trees** (*!chop*)\n';
     if (actions.includes('mine')) opt = opt + '**Mine** (*!mine*)\n';
+    if (actions.includes('tournament')) opt = opt + '**Tournament** (*!tournament*)\n';
+    if (actions.includes('mysticism')) opt = opt + '**Mysticism** (*!mysticism*)\n';
+    if (actions.includes('slots')) opt = opt + '**Casino Slots** (*!slots*)\n';
     if (actions.includes('battle')) opt = opt + '**Battle** (*!battle*)\n';
 
     opt = opt.slice(0, -1);
@@ -436,8 +460,16 @@ async function getLocMonsters(user) {
     return monsters;
 }
 
-async function getRandomMonster(user) {
-    let monsterTable = await getLocMonsters(user);
+async function getAnyMonster(user) {
+    const monsters = await queryDB("SELECT * FROM monsters");
+	let randomIndex = randomIntIn(0,monsters.length);
+    return monsters[randomIndex].id;
+}
+
+async function getRandomMonster(user, local=true) {
+	let monsterTable
+    if(local) monsterTable = await getLocMonsters(user);
+	else return await getAnyMonster();
     let random = randomIntEx(0, monsterTable.length);
     return monsterTable[random];
 }
@@ -816,7 +848,14 @@ async function giveXP(msg, userID, xp) {
     msg.embed(makeRPGEmbed("XP Gains", "[Lv." + stats[0] + "] **Combat:** +" + Math.floor(skillXP) + "xp\n*Progress:* [" + drawXPBar(rs.level_to_xp(stats[0] + 1), stats[1]) + "]\n"));
 
     if (newLevels > 0) {
-        msg.embed(makeRPGEmbed("Combat Up", "<@"+userID+"> levelled up and is now combat level " + (stats[0]) + "! You can apply 4 more skill points using `!skill`!"));
+		if(stats[0] == 5) {
+			msg.embed(makeRPGEmbed("Combat Up", "<@"+userID+"> levelled up and is now combat level " + (stats[0]) + "!\n"+
+			"You can apply 4 more skill points using `!skill`!\n"+
+			"As you're now level 5, you can increase skills to a maximum of 12!"));
+		} else {
+			msg.embed(makeRPGEmbed("Combat Up", "<@"+userID+"> levelled up and is now combat level " + (stats[0]) + "!\n"+
+			"You can apply 4 more skill points using `!skill`!"));
+		}
     }
 
     await queryDB("UPDATE users SET level='" + JSON.stringify(stats) + "' WHERE discordID=" + userID);

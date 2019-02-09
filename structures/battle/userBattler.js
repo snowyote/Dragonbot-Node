@@ -9,6 +9,7 @@ module.exports.UserBattler = class UserBattler {
 		this.hp = 100;
 		this.mp = 100;
 		this.guard = false;
+		this.stunned = false;
 		this.prBonus = 0;
 		this.preBonus = 0;
 		this.impBonus = 0;
@@ -19,6 +20,7 @@ module.exports.UserBattler = class UserBattler {
 	async chooseAction(msg) {		
 		let content = `${this}, do you ${Utils.list(choices.map(choice => `**${choice}**`), 'or')}? You have **${this.mp}** MP!\n**${this.battle.user.name}:** ${this.battle.user.hp} HP\n**${this.battle.opponent.name}:** ${this.battle.opponent.hp} HP`;
 		if (this.battle.turn === 1 || this.battle.turn === 2) {
+			this.stunned = false;
 			content += '\n\n*Magic always uses 50 MP and ignores enemy defense. Cure heals you for your remaining MP.*';
 		}
 		
@@ -51,6 +53,11 @@ module.exports.UserBattler = class UserBattler {
 	useMP(amount) {
 		this.mp -= amount;
 		return this.mp;
+	}
+
+	changeStunned() {
+		this.stunned = !this.stunned;
+		return this.stunned;
 	}
 
 	changeGuard() {

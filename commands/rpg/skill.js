@@ -50,18 +50,23 @@ module.exports = class SkillCommand extends Command {
         var currentAgility = userRes[0].agility;
         var currentImpact = userRes[0].impact;
 		
+		let skillMax = 8;
+		if(currentLevel >= 5) skillMax = 12;
+		if(currentLevel >= 10) skillMax = 16;
+		if(currentLevel >= 15) skillMax = 20;
+		
 		var maxPoints = 20+((currentLevel-1)*4)
 
         var pointsRemaining = maxPoints - (currentProwess + currentPrecision + currentFortitude + currentAgility + currentImpact + currentVitality + currentArcana);
         if (!id) {
             embedMsg.addField("Skill Upgrades", "You have **" + pointsRemaining + "** stat points remaining to allocate!");
-            embedMsg.addField("1: Prowess (" + currentProwess + "/8)", "Increases outgoing damage");
-            embedMsg.addField("2: Fortitude (" + currentFortitude + "/8)", "Decreases incoming damage");
-            embedMsg.addField("3: Precision (" + currentPrecision + "/8)", "Chance of double damage");
-            embedMsg.addField("4: Agility (" + currentAgility + "/8)", "Chance of avoiding most damage");
-            embedMsg.addField("5: Impact (" + currentImpact + "/8)", "Chance of causing enemies to skip a turn");
-            embedMsg.addField("6: Vitality (" + currentVitality + "/8)", "+25 health points");
-            embedMsg.addField("7: Arcana (" + currentArcana + "/8)", "+25 magic power");
+            embedMsg.addField("1: Prowess (" + currentProwess + "/"+skillMax+")", "Increases outgoing damage");
+            embedMsg.addField("2: Fortitude (" + currentFortitude + "/"+skillMax+")", "Decreases incoming damage");
+            embedMsg.addField("3: Precision (" + currentPrecision + "/"+skillMax+")", "Chance of double damage");
+            embedMsg.addField("4: Agility (" + currentAgility + "/"+skillMax+")", "Chance of avoiding most damage");
+            embedMsg.addField("5: Impact (" + currentImpact + "/"+skillMax+")", "Chance of causing enemies to skip a turn");
+            embedMsg.addField("6: Vitality (" + currentVitality + "/"+skillMax+")", "+25 health points");
+            embedMsg.addField("7: Arcana (" + currentArcana + "/"+skillMax+")", "+25 magic power");
             embedMsg.setFooter("!skill <stat number> <amount> - upgrade a stat by a certain number of points!")
             return msg.embed(embedMsg);
         } else {
@@ -75,43 +80,43 @@ module.exports = class SkillCommand extends Command {
                     case 1:
                         skillToUpgrade = "prowess";
                         upgradeName = "Prowess";
-                        upgradeMax = 8;
+                        upgradeMax = skillMax;
                         current = currentProwess;
                         break;
                     case 2:
                         skillToUpgrade = "fortitude";
                         upgradeName = "Fortitude";
-                        upgradeMax = 8;
+                        upgradeMax = skillMax;
                         current = currentFortitude;
                         break;
                     case 3:
                         skillToUpgrade = "precise";
                         upgradeName = "Precision";
-                        upgradeMax = 8;
+                        upgradeMax = skillMax;
                         current = currentPrecision;
                         break;
                     case 4:
                         skillToUpgrade = "agility";
                         upgradeName = "Agility";
-                        upgradeMax = 8;
+                        upgradeMax = skillMax;
                         current = currentAgility;
                         break;
                     case 5:
                         skillToUpgrade = "impact";
                         upgradeName = "Impact";
-                        upgradeMax = 8;
+                        upgradeMax = skillMax;
                         current = currentImpact;
                         break;
                     case 6:
                         skillToUpgrade = "vitality";
                         upgradeName = "Vitality";
-                        upgradeMax = 8;
+                        upgradeMax = skillMax;
                         current = currentVitality;
                         break;
                     case 7:
                         skillToUpgrade = "arcana";
                         upgradeName = "Arcana";
-                        upgradeMax = 8;
+                        upgradeMax = skillMax;
                         current = currentArcana;
                         break;
                 }
