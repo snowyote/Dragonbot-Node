@@ -193,7 +193,7 @@ module.exports = class ExploreCommand extends Command {
 												valueToAdd.push(0);
 											} else {
 												findMsg = findMsg + explores[rewardCheck].icon+" ...found some fruit, but decided against eating it!\n";
-												varToChange.push("crates");
+												varToChange.push("food");
 												valueToAdd.push(0);
 											}
 										}
@@ -341,7 +341,7 @@ module.exports = class ExploreCommand extends Command {
 												varToChange.push("mysticOrbs");
 												valueToAdd.push(randomAmount);
 											} else {
-												varToChange.push("crates");
+												varToChange.push("food");
 												valueToAdd.push(0);
 											}
 										}
@@ -359,7 +359,7 @@ module.exports = class ExploreCommand extends Command {
 												valueToAdd.push(0);
 											} else {
 												findMsg = findMsg + explores[rewardCheck].icon+" ...accidentally broke a golden crate!\n";
-												varToChange.push("crates");
+												varToChange.push("food");
 												valueToAdd.push(0);
 											}
 										}

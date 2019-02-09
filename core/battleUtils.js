@@ -183,7 +183,7 @@ async function randomEnemyStats(user, monsterID, isElite=false) {
 	let health = Utils.randomIntIn(isElite ? 100 : 50, isElite ? 200 : 150)+(level*10)*level;
 	let magic = Utils.randomIntIn(isElite ? 50 : 25, isElite ? 150 : 50)+(level*10)*level;
 	
-	var monsterStats = [0,0,0,0,0,100,100];
+	var monsterStats = [0,0,0,0,0,100,100,"Name",0];
 	
 	monsterStats[0] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4)*level;
 	monsterStats[1] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4)*level;
@@ -196,6 +196,9 @@ async function randomEnemyStats(user, monsterID, isElite=false) {
 	
 	let monsterName = await getMonsterName(monsterID);
 	monsterStats[7] = (isElite ? 'Elite '+monsterName : monsterName);
+	let multiplier = 1;
+	if(isElite) multiplier = 3;
+	monsterStats[8] = (((monsterStats[0]+monsterStats[1]+monsterStats[2]+monsterStats[3]+monsterStats[4]+monsterStats[5])/10)*level)*multiplier;
 	return monsterStats;
 }
 
@@ -327,10 +330,12 @@ async function battle(msg, monsterID, battleMap, random=false) {
     battleMap.delete(msg.channel.id);
     if (winner == battle.opponent.name) {
         msg.embed(Utils.makeRPGEmbed("You Lost!", "<@" + msg.author.id + "> was defeated by the **" + battle.opponent.name + "**. After some time unconscious, you wake up back in Dragonstone Village..."));
+		await Utils.deathXP(msg, msg.author.id);
         await Utils.queryDB("UPDATE users SET location='[0,0]' WHERE discordID=" + msg.author.id);
     } else {
 		let drops = await randomDrops(msg.author, monsterID, 1, 3);
         msg.embed(Utils.makeRPGEmbed("You Won!", "<@" + msg.author.id + "> defeated the **" + battle.opponent.name + "**!\n\n***Drops:***\n"+drops));
+		await Utils.giveXP(msg, msg.author.id, monsterStats[8]);
 		await Utils.addAchProgress(msg.author.id, 'battlesWon', 1);
     }
 }

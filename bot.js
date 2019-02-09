@@ -16,7 +16,7 @@ const config = require("./config.json");
 
 const client = new CommandoClient({
     commandPrefix: '!',
-    unknownCommandResponse: true,
+    unknownCommandResponse: false,
     owner: '194534206217388032',
     disableEveryone: true
 });

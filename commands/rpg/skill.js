@@ -40,6 +40,8 @@ module.exports = class SkillCommand extends Command {
         let userRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
         Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
 
+		var currentStats = JSON.parse(userRes[0].level);
+		var currentLevel = currentStats[0];
         var currentVitality = userRes[0].vitality;
         var currentArcana = userRes[0].arcana;
         var currentProwess = userRes[0].prowess;
@@ -47,8 +49,10 @@ module.exports = class SkillCommand extends Command {
         var currentPrecision = userRes[0].precise;
         var currentAgility = userRes[0].agility;
         var currentImpact = userRes[0].impact;
+		
+		var maxPoints = 20+((currentLevel-1)*4)
 
-        var pointsRemaining = 20 - (currentProwess + currentPrecision + currentFortitude + currentAgility + currentImpact + currentVitality + currentArcana);
+        var pointsRemaining = maxPoints - (currentProwess + currentPrecision + currentFortitude + currentAgility + currentImpact + currentVitality + currentArcana);
         if (!id) {
             embedMsg.addField("Skill Upgrades", "You have **" + pointsRemaining + "** stat points remaining to allocate!");
             embedMsg.addField("1: Prowess (" + currentProwess + "/8)", "Increases outgoing damage");

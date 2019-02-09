@@ -70,7 +70,7 @@ async function getMonsterStats(monsterID) {
 async function calculateHP(userID) {
     const skillMultiplier = 25;
     const userRes = await queryDB("SELECT vitality FROM users WHERE discordID=" + userID);
-	let vitality = userRes[0].vitality;
+    let vitality = userRes[0].vitality;
     let baseVitality = 100;
     return baseVitality + (vitality * skillMultiplier);
 }
@@ -78,7 +78,7 @@ async function calculateHP(userID) {
 async function calculateMP(userID) {
     const skillMultiplier = 25;
     const userRes = await queryDB("SELECT arcana FROM users WHERE discordID=" + userID);
-	let arcana = userRes[0].arcana;
+    let arcana = userRes[0].arcana;
     let baseArcana = 100;
     return baseArcana + (arcana * skillMultiplier);
 }
@@ -159,15 +159,15 @@ async function removeItem(userID, item) {
 }
 
 async function avariceBonus(userID) {
-	let queryRes = await queryDB("SELECT * FROM users WHERE discordID=" + userID);
-	var userID = queryRes[0].id;
-	var active = queryRes[0].activePet;
-	if(active > 0) {
-		let petRes = await queryDB("SELECT * FROM pets WHERE id="+active);
-		var avarice = petRes[0].avarice + petRes[0].avariceBoost;
-		return avarice;
-	} else
-		return 1;
+    let queryRes = await queryDB("SELECT * FROM users WHERE discordID=" + userID);
+    var userID = queryRes[0].id;
+    var active = queryRes[0].activePet;
+    if (active > 0) {
+        let petRes = await queryDB("SELECT * FROM pets WHERE id=" + active);
+        var avarice = petRes[0].avarice + petRes[0].avariceBoost;
+        return avarice;
+    } else
+        return 1;
 }
 
 async function addItem(userID, item) {
@@ -189,7 +189,7 @@ async function hasQuestItem(userID, item) {
     else return false;
 }
 
-async function hasMaterial(userID, item) {
+async function hasMaterial(userID, item, amount = 0) {
     const userRes = await queryDB("SELECT materials FROM users WHERE discordID=" + userID);
     let materials = JSON.parse(userRes[0].materials);
     if (materials[item]) return materials[item];
@@ -300,33 +300,33 @@ async function addQuestItem(userID, item) {
 
 async function addMaterial(userID, material, amount) {
     const userRes = await queryDB("SELECT materials FROM users WHERE discordID=" + userID);
-    const matRes = await queryDB("SELECT * FROM materials WHERE id="+material);
+    const matRes = await queryDB("SELECT * FROM materials WHERE id=" + material);
     let materialList = JSON.parse(userRes[0].materials);
-	let mat = material.toString();
+    let mat = material.toString();
     if (materialList[mat]) {
-		// contains material already
-		materialList[mat]+=amount;
+        // contains material already
+        materialList[mat] += amount;
     } else {
-		// does not contain material already
-		materialList[mat] = amount;
-	}
-	await queryDB("UPDATE users SET materials='"+JSON.stringify(materialList)+"' WHERE discordID="+userID);
+        // does not contain material already
+        materialList[mat] = amount;
+    }
+    await queryDB("UPDATE users SET materials='" + JSON.stringify(materialList) + "' WHERE discordID=" + userID);
 }
 
 async function addOrbs(userID, amount) {
-    await queryDB("UPDATE users SET mysticOrbs=mysticOrbs+"+amount+" WHERE discordID=" + userID);
+    await queryDB("UPDATE users SET mysticOrbs=mysticOrbs+" + amount + " WHERE discordID=" + userID);
 }
 
 async function addKeys(userID, amount) {
-    await queryDB("UPDATE users SET crateKeys=crateKeys+"+amount+" WHERE discordID=" + userID);
+    await queryDB("UPDATE users SET crateKeys=crateKeys+" + amount + " WHERE discordID=" + userID);
 }
 
 async function addFood(userID, amount) {
-    await queryDB("UPDATE users SET food=food+"+amount+" WHERE discordID=" + userID);
+    await queryDB("UPDATE users SET food=food+" + amount + " WHERE discordID=" + userID);
 }
 
 async function addArtifacts(userID, amount) {
-    await queryDB("UPDATE users SET artifacts=artifacts+"+amount+" WHERE discordID=" + userID);
+    await queryDB("UPDATE users SET artifacts=artifacts+" + amount + " WHERE discordID=" + userID);
 }
 
 async function addLogs(userID, logID, amount) {
@@ -337,18 +337,18 @@ async function addLogs(userID, logID, amount) {
 }
 
 async function getLogType(logID) {
-	let logRes = await queryDB("SELECT name, icon FROM log_types WHERE index="+logID);
-	return logRes[0].name;
+    let logRes = await queryDB("SELECT name, icon FROM log_types WHERE index=" + logID);
+    return logRes[0].name;
 }
 
 async function getCrateType(crateID) {
-	let crateRes = await queryDB("SELECT name FROM crate_types WHERE index="+crateID);
-	return crateRes[0].name;
+    let crateRes = await queryDB("SELECT name FROM crate_types WHERE index=" + crateID);
+    return crateRes[0].name;
 }
 
 async function getGemType(gemID) {
-	let gemRes = await queryDB("SELECT name, icon FROM gem_types WHERE index="+gemID);
-	return gemRes[0].name;
+    let gemRes = await queryDB("SELECT name, icon FROM gem_types WHERE index=" + gemID);
+    return gemRes[0].name;
 }
 
 async function addGems(userID, gemID, amount) {
@@ -405,7 +405,7 @@ async function getLocType(user) {
 }
 
 async function resetBattles() {
-	await queryDB("UPDATE rpg_flags SET in_battle=0");
+    await queryDB("UPDATE rpg_flags SET in_battle=0");
     log("\x1b[32m%s\x1b[0m", "DB: Battles reset!");
 }
 
@@ -438,13 +438,13 @@ async function getLocMonsters(user) {
 
 async function getRandomMonster(user) {
     let monsterTable = await getLocMonsters(user);
-	let random = randomIntEx(0, monsterTable.length);
-	return monsterTable[random];
+    let random = randomIntEx(0, monsterTable.length);
+    return monsterTable[random];
 }
 
-async function addAchProgress(userID,field,value) {
-	let dbUserID = await getUserID(userID, true);
-	await queryDB("UPDATE achievement_progress SET "+field+"="+field+"+"+value+" WHERE id="+dbUserID);
+async function addAchProgress(userID, field, value) {
+    let dbUserID = await getUserID(userID, true);
+    await queryDB("UPDATE achievement_progress SET " + field + "=" + field + "+" + value + " WHERE id=" + dbUserID);
 }
 
 async function getLocBiome(user) {
@@ -474,13 +474,13 @@ async function isInQuest(user) {
 async function isInBattle(user) {
     let userID = await getUserID(user, false);
     const rpgRes = await queryDB("SELECT in_battle FROM rpg_flags WHERE userID=" + userID);
-	if(rpgRes[0].in_battle == 0) return false;
-	else return true;
+    if (rpgRes[0].in_battle == 0) return false;
+    else return true;
 }
 
 async function setInBattle(user, inBattle) {
     let userID = await getUserID(user, false);
-    await queryDB("UPDATE rpg_flags SET in_battle="+inBattle+" WHERE userID="+userID);
+    await queryDB("UPDATE rpg_flags SET in_battle=" + inBattle + " WHERE userID=" + userID);
 }
 
 async function getLocName(user) {
@@ -493,32 +493,32 @@ async function getLocName(user) {
 // Generate a world tile
 //
 
-function isLandTile(x,y,val) {
-  return tileType(x,y) != 'ocean' ? val : 0;
+function isLandTile(x, y, val) {
+    return tileType(x, y) != 'ocean' ? val : 0;
 }
 
-async function tileType(x,y) {
+async function tileType(x, y) {
     var coords = new Array();
     coords.push(x);
     coords.push(y);
     const tiles = await queryDB("SELECT biome FROM locations WHERE coords='" + JSON.stringify(coords) + "'");
-	if(tiles && tiles.length)
-		return tiles[0].biome;
-	else
-		return 'ocean';
+    if (tiles && tiles.length)
+        return tiles[0].biome;
+    else
+        return 'ocean';
 }
 
-async function generateCoasts(x,y) {
-	const topLeft = await isLandTile(x-1,y-1,1);
-	const top = await isLandTile(x,y-1,2);
-	const topRight = await isLandTile(x+1,y-1,4);
-	const midLeft = await isLandTile(x-1,y,8);
-	const midRight = await isLandTile(x+1,y,16);
-	const botLeft = await isLandTile(x-1,y+1,32);
-	const bot = await isLandTile(x,y+1,64);
-	const botRight = await isLandTile(x+1,y+1,128);
-	const oceanIndex = topLeft+top+topRight+midLeft+midRight+botLeft+bot+botRight;
-	return oceanIndex;
+async function generateCoasts(x, y) {
+    const topLeft = await isLandTile(x - 1, y - 1, 1);
+    const top = await isLandTile(x, y - 1, 2);
+    const topRight = await isLandTile(x + 1, y - 1, 4);
+    const midLeft = await isLandTile(x - 1, y, 8);
+    const midRight = await isLandTile(x + 1, y, 16);
+    const botLeft = await isLandTile(x - 1, y + 1, 32);
+    const bot = await isLandTile(x, y + 1, 64);
+    const botRight = await isLandTile(x + 1, y + 1, 128);
+    const oceanIndex = topLeft + top + topRight + midLeft + midRight + botLeft + bot + botRight;
+    return oceanIndex;
 }
 
 async function makeTile(x, y) {
@@ -537,8 +537,8 @@ async function makeTile(x, y) {
         marker = '';
         biome = 'ocean';
     }
-	
-	
+
+
     let imgRaw = './img/tiles/' + biome + '.png';
     let imgMarker = './img/tiles/' + marker + '.png';
     let snowflake = new Date().getTime();
@@ -794,6 +794,47 @@ function delay(ms) {
     });
 }
 
+async function giveXP(msg, userID, xp) {
+    var rs = new RSExp();
+    let userRes = await queryDB("SELECT level FROM users WHERE discordID=" + userID);
+    let stats = JSON.parse(userRes[0].level);
+
+    let minSkillXP = (Math.round(Math.sqrt((Math.sqrt(stats[0]) * 0.25)+xp) * randomIntIn(5, 10) / 2));
+    let maxSkillXP = (Math.round(Math.sqrt((Math.sqrt(stats[0]) * 0.25)+xp) * randomIntIn(10, 15) / 2));
+    let skillXP = randomIntIn(minSkillXP, maxSkillXP);
+    stats[1] += skillXP;
+    var newLevels = 0;
+
+    while (stats[1] >= rs.level_to_xp(stats[0] + 1)) {
+        stats[1] -= rs.level_to_xp(stats[0] + 1);
+        stats[0] += 1;
+        newLevels++;
+    }
+	
+	if(stats[1] < 0 || stats[1] === null) stats[1] = 0;
+
+    msg.embed(makeRPGEmbed("XP Gains", "[Lv." + stats[0] + "] **Combat:** +" + Math.floor(skillXP) + "xp\n*Progress:* [" + drawXPBar(rs.level_to_xp(stats[0] + 1), stats[1]) + "]\n"));
+
+    if (newLevels > 0) {
+        msg.embed(makeRPGEmbed("Combat Up", "<@"+userID+"> levelled up and is now combat level " + (stats[0]) + "! You can apply 4 more skill points using `!skill`!"));
+    }
+
+    await queryDB("UPDATE users SET level='" + JSON.stringify(stats) + "' WHERE discordID=" + userID);
+}
+
+async function deathXP(msg, userID) {
+    var rs = new RSExp();
+    let userRes = await queryDB("SELECT level FROM users WHERE discordID=" + userID);
+    let stats = JSON.parse(userRes[0].level);
+
+    let xpLost = Math.floor(stats[1]/3);
+    stats[1] -= xpLost;
+
+    msg.embed(makeRPGEmbed("XP Loss", "Due to losing the battle, you lost **"+xpLost+"** experience points!\n"));
+	
+    await queryDB("UPDATE users SET level='" + JSON.stringify(stats) + "' WHERE discordID=" + userID);
+}
+
 function list(arr, conj = 'and') {
     const len = arr.length;
     return `${arr.slice(0, -1).join(', ')}${len > 1 ? `${len > 2 ? ',' : ''} ${conj} ` : ''}${arr.slice(-1)}`;
@@ -893,7 +934,7 @@ module.exports = {
     hasCompletedQuest,
     getLocBiome,
     getLocActions,
-	getLocLevel,
+    getLocLevel,
     addLogs,
     list,
     verify,
@@ -904,25 +945,27 @@ module.exports = {
     calculatePrecision,
     calculateProwess,
     canUseAction,
-	setInBattle,
-	isInBattle,
-	calculateHP,
-	calculateMP,
-	getLocMonsters,
-	getRandomMonster,
-	addOrbs,
-	addKeys,
-	addCrate,
-	addArtifacts,
-	addFood,
-	addGems,
-	getLogType,
-	getCrateType,
-	getGemType,
-	avariceBonus,
-	addAchProgress,
-	resetBattles,
-	getMaterial,
-	addMaterial,
-	hasMaterial
+    setInBattle,
+    isInBattle,
+    calculateHP,
+    calculateMP,
+    getLocMonsters,
+    getRandomMonster,
+    addOrbs,
+    addKeys,
+    addCrate,
+    addArtifacts,
+    addFood,
+    addGems,
+    getLogType,
+    getCrateType,
+    getGemType,
+    avariceBonus,
+    addAchProgress,
+    resetBattles,
+    getMaterial,
+    addMaterial,
+    hasMaterial,
+	giveXP,
+	deathXP
 };

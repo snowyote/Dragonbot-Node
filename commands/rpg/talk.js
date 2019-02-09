@@ -100,7 +100,7 @@ module.exports = class TalkCommand extends Command {
 						else if(await Utils.hasQuestItem(msg.author.id, 3)) {
 							embedMsg.addField("Quarry Guard", "Oh! You got it! Good job, adventurer. Now I'll just put this on a spike outside of the quarry and those pesky goblins should stay clear of here. In return, I'll give you access to the mine - and here's my own pickaxe for you to use!");
 							timesTalked++;
-							msg.channel.send(await Utils.completeQuest(msg.author.id, 2) && inProgress == 2);
+							msg.channel.send(await Utils.completeQuest(msg.author.id, 2));
 						} else
 							embedMsg.addField("Quarry Guard", "You look like you should be doing something, get to it, adventurer!");
 						break;
@@ -137,7 +137,9 @@ module.exports = class TalkCommand extends Command {
 				}
 				
 				await Utils.queryDB("UPDATE rpg_flags SET talk_goblin_hideout="+timesTalked+" WHERE userID="+userRes[0].id);
-			} 
+			} else {
+				embedMsg.addField("Can't Talk", "There's no-one to talk to here!");
+			}
 		}
 		else {
 			embedMsg.addField("Can't Talk", "There's no-one to talk to here!");

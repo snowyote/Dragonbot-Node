@@ -23,7 +23,12 @@ module.exports = class BattleCommand extends Command {
 			
 		if(await Utils.canUseAction(msg.author, 'battle')) {
 			let monsterToFight = await Utils.getRandomMonster(msg.author);
-			let battle = await BattleUtils.battle(msg, monsterToFight, this.battles);
+			if(monsterToFight > 0)
+				await BattleUtils.battle(msg, monsterToFight, this.battles, true);
+			else {
+				embedMsg.addField("Can't Battle", "There's nothing here for you to battle!");
+				return msg.embed(embedMsg);
+			}
 		} else {
 			embedMsg.addField("Can't Battle", "There's nothing here for you to battle!");
 			return msg.embed(embedMsg);
