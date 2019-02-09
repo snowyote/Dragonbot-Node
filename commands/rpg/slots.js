@@ -25,12 +25,12 @@ module.exports = class SlotsCommand extends Command {
     }
 	
 	    async run(msg, {amount}) {
+			const embedMsg = new Discord.RichEmbed()
+				.setAuthor("House of Dragons Casino", "https://i.imgur.com/CyAb3mV.png")
+				.setColor("#FDF018")
+				.setDescription("<@"+msg.author.id+">")
 			if(await Utils.canUseAction(msg.author, 'slots')) {
-				const embedMsg = new Discord.RichEmbed()
-					.setAuthor("House of Dragons Casino", "https://i.imgur.com/CyAb3mV.png")
-					.setColor("#FDF018")
-					.setDescription("<@"+msg.author.id+">")
-					.setFooter("📝 Please wait 10 seconds before using this again..")
+				embedMsg.setFooter("📝 Please wait 10 seconds before using this again..")
 				let userRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
 				let serverRes = await Utils.queryDB("SELECT * FROM server");
 				
