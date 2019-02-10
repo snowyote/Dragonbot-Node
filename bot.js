@@ -26,6 +26,7 @@ client.registry
     .registerGroups([
         ['economy', 'Economy Commands'],
         ['profile', 'Profile Commands'],
+        ['casino', 'Casino Commands'],
         ['rpg', 'RPG Commands'],
         ['server', 'Server Commands'],
         ['fun', 'Fun Commands'],

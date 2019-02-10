@@ -92,3 +92,4 @@ fonts/
 
 # Config file
 /config.json
+*.json

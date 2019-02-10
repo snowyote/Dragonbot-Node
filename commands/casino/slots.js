@@ -7,18 +7,18 @@ module.exports = class SlotsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'slots',
-            group: 'economy',
-            memberName: 'rpg',
-            description: 'Play slots to win coins or pet items!',
+            group: 'casino',
+            memberName: 'slots',
+            description: 'Play slots to win casino chips or pet items!',
             examples: ['bet amount'],
 			args: [
 			{
 				key: 'amount',
-				prompt: 'How many coins do you want to bet?',
+				prompt: 'How many chips do you want to bet?',
 				type: 'integer',
 				validate: amount => {
 					if(amount > 0) return true;
-					return 'Amount of coins is below 1!';
+					return 'Amount of chips is below 1!';
 				}
 			}]
         });
@@ -29,16 +29,16 @@ module.exports = class SlotsCommand extends Command {
 				.setAuthor("House of Dragons Casino", "https://i.imgur.com/CyAb3mV.png")
 				.setColor("#FDF018")
 				.setDescription("<@"+msg.author.id+">")
-			if(await Utils.canUseAction(msg.author, 'slots')) {
+			if (await Utils.getLocType(msg.author) == 'casino') {
 				embedMsg.setFooter("📝 Please wait 10 seconds before using this again..")
 				let userRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
 				let serverRes = await Utils.queryDB("SELECT * FROM server");
 				
 				var jackpotAmt = serverRes[0].jackpotAmount;
-				var coins = userRes[0].coins;
+				var chips = userRes[0].casinoChips;
 				var userID = userRes[0].id;
 				var crate = JSON.parse(userRes[0].crate);
-				if(amount <= coins){
+				if(amount <= chips){
 					var jackpotChance = 0.0005*amount;
 					if(jackpotChance > 15) jackpotChance = 15;
 					
@@ -122,11 +122,11 @@ module.exports = class SlotsCommand extends Command {
 						
 					if(winNum > 0) { 
 						coinsGained += totalPoints;
-						totalCoins = (parseInt(coins) + coinsGained);
+						totalCoins = (parseInt(chips) + coinsGained);
 					}
 					else {
 						coinsGained = 0 - amount;
-						totalCoins = (parseInt(coins) - amount);
+						totalCoins = (parseInt(chips) - amount);
 					}
 						
 					for(var i = 0; i < resultArray.length; i++) {
@@ -172,12 +172,12 @@ module.exports = class SlotsCommand extends Command {
 					}
 						
 					if(winNum < 1 || totalPoints < 1) {
-						embedMsg.addField("Try again!", "No wins this time!\n"+keyMsg+crateMsg+"🐲 Jackpot: ***"+jackpotAmt+"***\n"+"💰 Coins: ***"+totalCoins+"***",true);
-						await Utils.queryDB("UPDATE users SET crate='"+JSON.stringify(crate)+"', crateKeys=crateKeys+"+keyNum+", coins=coins-"+parseInt(amount)+" WHERE discordID="+msg.author.id);
+						embedMsg.addField("Try again!", "No wins this time!\n"+keyMsg+crateMsg+"🐲 Jackpot: ***"+jackpotAmt+"***\n"+"💮 Chips: ***"+totalCoins+"***",true);
+						await Utils.queryDB("UPDATE users SET crate='"+JSON.stringify(crate)+"', crateKeys=crateKeys+"+keyNum+", casinoChips=casinoChips-"+parseInt(amount)+" WHERE discordID="+msg.author.id);
 						await Utils.queryDB("UPDATE achievement_progress SET slotCount=slotCount+1, casinoProfit=casinoProfit-"+parseInt(amount)+" WHERE id="+userID);					
 						} else if(winNum > 0) {
-							embedMsg.addField("You won!", "Gained "+totalPoints+" coins!\n"+keyMsg+crateMsg+"🐲 Jackpot: ***"+jackpotAmt+"***\n"+"💰 Coins: ***"+totalCoins+"***",true);
-							await Utils.queryDB("UPDATE users SET crate='"+JSON.stringify(crate)+"', crateKeys=crateKeys+"+keyNum+", coins=coins+"+totalPoints+" WHERE discordID="+msg.author.id);
+							embedMsg.addField("You won!", "Gained "+totalPoints+" chips!\n"+keyMsg+crateMsg+"🐲 Jackpot: ***"+jackpotAmt+"***\n"+"💮 Chips: ***"+totalCoins+"***",true);
+							await Utils.queryDB("UPDATE users SET crate='"+JSON.stringify(crate)+"', crateKeys=crateKeys+"+keyNum+", casinoChips=casinoChips+"+totalPoints+" WHERE discordID="+msg.author.id);
 							await Utils.queryDB("UPDATE achievement_progress SET slotCount=slotCount+1, coinsGained=coinsGained+"+totalPoints+", casinoProfit=casinoProfit+"+totalPoints+" WHERE id="+userID);
 						}
 						
@@ -196,11 +196,11 @@ module.exports = class SlotsCommand extends Command {
 						return msg.embed(embedMsg);
 					}
 					else {
-						embedMsg.addField("Not Enough Money", "You don't have the required number of coins to make that bet!");
+						embedMsg.addField("Not Enough Money", "You don't have the required number of chips to make that bet!");
 						return msg.embed(embedMsg);
 					}
 			} else {
-				embedMsg.addField("Can't Play Slots", "You need to be in a casino to use this, find one on the `!map`!");
+				embedMsg.addField("Not In Casino", "You need to be in a casino to use this, find one on the `!map`!");
 				return msg.embed(embedMsg);
 			}
 		};

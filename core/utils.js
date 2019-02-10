@@ -136,6 +136,17 @@ function makeRPGEmbed(fieldTitle, fieldValue) {
     return embedMsg;
 }
 
+function makeBJEmbed(fieldTitle, fieldValue, field2Title=false, field2Value=false, field3Title=false, field3Value=false) {
+    const embedMsg = new Discord.RichEmbed()
+        .setAuthor("Casino Island Blackjack", "https://i.imgur.com/CyAb3mV.png")
+        .addField(fieldTitle, fieldValue);
+		
+    if(field2Title !== false) embedMsg.addField(field2Title, field2Value);
+    if(field3Title !== false) embedMsg.addField(field3Title, field3Value);
+
+    return embedMsg;
+}
+
 async function takeCoins(userID, coins) {
     await queryDB("UPDATE users SET coins=coins-" + coins + " WHERE discordID=" + userID);
     log("\x1b[32m%s\x1b[0m", "Utils: Took " + coins + " coins from " + userID);
@@ -144,6 +155,22 @@ async function takeCoins(userID, coins) {
 async function giveCoins(userID, coins) {
     await queryDB("UPDATE users SET coins=coins+" + coins + " WHERE discordID=" + userID);
     log("\x1b[32m%s\x1b[0m", "Utils: Gave " + coins + " coins to " + userID);
+}
+
+async function takeChips(userID, chips) {
+    await queryDB("UPDATE users SET casinoChips=casinoChips-" + chips + " WHERE discordID=" + userID);
+    log("\x1b[32m%s\x1b[0m", "Utils: Took " + chips + " casino chips from " + userID);
+}
+
+async function hasChips(userID, chips) {
+    let userRes = await queryDB("SELECT casinoChips FROM users WHERE discordID=" + userID);
+	if(userRes[0].casinoChips >= chips) return true;
+	else return false;
+}
+
+async function giveChips(userID, chips) {
+    await queryDB("UPDATE users SET casinoChips=casinoChips+" + chips + " WHERE discordID=" + userID);
+    log("\x1b[32m%s\x1b[0m", "Utils: Gave " + chips + " casino chips to " + userID);
 }
 
 function log(colour, string) {
@@ -512,6 +539,17 @@ function isNumeric(num) {
     return !isNaN(num)
 }
 
+function shuffle(array) {
+		const arr = array.slice(0);
+		for (let i = arr.length - 1; i >= 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			const temp = arr[i];
+			arr[i] = arr[j];
+			arr[j] = temp;
+		}
+		return arr;
+}
+
 async function RPGOptions(coords) {
     //log(coords);
     const locations = await queryDB("SELECT * FROM locations WHERE coords='" + coords + "'");
@@ -528,7 +566,9 @@ async function RPGOptions(coords) {
     if (actions.includes('activate')) opt = opt + '**Waypoint** (*!activate*)\n';
     if (actions.includes('tournament')) opt = opt + '**Tournament** (*!tournament*)\n';
     if (actions.includes('mysticism')) opt = opt + '**Mysticism** (*!mysticism*)\n';
-    if (actions.includes('slots')) opt = opt + '**Casino Slots** (*!slots*)\n';
+    if (actions.includes('slots')) opt = opt + '**Slot Machine** (*!slots*)\n';
+    if (actions.includes('blackjack')) opt = opt + '**Blackjack** (*!blackjack*)\n';
+    if (actions.includes('chips')) opt = opt + '**Buy/Sell Chips** (*!chips*)\n';
     if (actions.includes('battle')) opt = opt + '**Battle** (*!battle*)\n';
 
     opt = opt.slice(0, -1);
@@ -1122,8 +1162,7 @@ function list(arr, conj = 'and') {
 }
 
 async function awaitPlayers(msg, max, min, {
-    time = 30000,
-    dmCheck = false
+    time = 30000
 } = {}) {
     const joined = [];
     joined.push(msg.author.id);
@@ -1140,15 +1179,6 @@ async function awaitPlayers(msg, max, min, {
         time
     });
     verify.set(msg.id, msg);
-    if (dmCheck) {
-        for (const message of verify.values()) {
-            try {
-                await message.author.send('Hi! Just testing that DMs work, pay this no mind.');
-            } catch (err) {
-                verify.delete(message.id);
-            }
-        }
-    }
     if (verify.size < min) return false;
     return verify.map(message => message.author);
 }
@@ -1210,6 +1240,7 @@ module.exports = {
     isInQuest,
     completeQuest,
     makeRPGEmbed,
+	makeBJEmbed,
     getQuestItem,
     getQuestsCompleted,
     hasCompletedQuest,
@@ -1262,5 +1293,9 @@ module.exports = {
 	getMP,
 	canTournament,
 	getUserID,
-	updateUser
+	updateUser,
+	giveChips,
+	hasChips,
+	shuffle,
+	takeChips
 };

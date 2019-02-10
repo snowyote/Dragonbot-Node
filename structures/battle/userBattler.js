@@ -1,5 +1,5 @@
 const Utils = require('../../core/utils.js');
-const choices = ['attack', 'fortify', 'counter', 'focus', 'magic', 'heal', 'run'];
+const choices = ['attack', 'fortify', 'counter', 'focus', 'stance', 'magic', 'heal', 'run'];
 
 module.exports.UserBattler = class UserBattler {
 	constructor(battle, user) {
@@ -10,6 +10,7 @@ module.exports.UserBattler = class UserBattler {
 		this.hasForfeit = false;
 		this.maxHP = 100;
 		this.mp = 100;
+		this.stance = 0;
 		this.maxMP = 100;
 		this.guard = false;
 		this.counter = false;
@@ -88,6 +89,19 @@ module.exports.UserBattler = class UserBattler {
 	changeFocus() {
 		this.focus = !this.focus;
 		return this.focus;
+	}
+	
+	changeStance() {
+		if(this.stance <= 3) this.stance++;
+		else this.stance = 0;
+	}
+	
+	getStance() {
+		if(this.stance == 0) return 'Balanced';
+		if(this.stance == 1) return 'Defensive';
+		if(this.stance == 2) return 'Offensive';
+		if(this.stance == 3) return 'Evasive';
+		return 'None';
 	}
 
 	forfeit() {

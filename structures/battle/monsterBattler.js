@@ -10,6 +10,7 @@ module.exports.MonsterBattler = class MonsterBattler {
 		this.maxMP = 100;
 		this.hasForfeit = false;
 		this.name = "";
+		this.stance = 0;
 		this.guard = false;
 		this.counter = false;
 		this.focus = false;
@@ -47,6 +48,14 @@ module.exports.MonsterBattler = class MonsterBattler {
 	addMP(amount) {
 		this.mp += amount;
 		return this.mp;
+	}
+	
+	getStance() {
+		if(this.stance == 0) return 'Balanced';
+		if(this.stance == 1) return 'Defensive';
+		if(this.stance == 2) return 'Offensive';
+		if(this.stance == 3) return 'Evasive';
+		return 'None';
 	}
 
 	useMP(amount) {

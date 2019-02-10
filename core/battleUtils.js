@@ -268,7 +268,7 @@ async function battle(msg, monsterID, battleMap, random=false, tournament=false)
 	if(random) {
 		let eliteChance = Utils.randomIntIn(1,100);
 		let elite = false;
-		let ultraElite = true;
+		let ultraElite = false;
 		if(eliteChance <= 10) elite = true;
 		if(eliteChance <= 1) ultraElite = true;
 		if(tournament) elite = false;

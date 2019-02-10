@@ -23,6 +23,7 @@ module.exports = class InventoryCommand extends Command {
 		var crates = JSON.parse(queryRes[0].crate);
 		var food = queryRes[0].food;
 		var artifacts = queryRes[0].artifacts;
+		var chips = queryRes[0].casinoChips;
 		var trash = queryRes[0].trash;
 		var gems = JSON.parse(queryRes[0].gems);
 		var logs = JSON.parse(queryRes[0].logs);
@@ -55,6 +56,7 @@ module.exports = class InventoryCommand extends Command {
 		embedMsg.addField("💰 Coins", "**"+coins+"**", true);
 		embedMsg.addField("🔮 Mystic Orbs", "**"+mysticOrbs+"**", true);
 		embedMsg.addField("🏛️ Artifacts", "**"+artifacts+"**", true);
+		embedMsg.addField("💮️ Casino Chips", "**"+chips+"**", true);
 		embedMsg.addField("💎 Gems", "Shards: **"+gems[0]+"**\n"+
 									"Chipped: **"+gems[1]+"**\n"+
 									"Flawed: **"+gems[2]+"**\n"+
