@@ -123,105 +123,6 @@ async function petUpdates() {
     await petUpdates();
 }
 
-// -----------------------------------
-// Add users to database, achievements
-// -----------------------------------
-
-async function updateUser(member, message) {
-	try{
-		let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + member);
-		if (queryRes && queryRes.length) {
-			var userID = queryRes[0].id;
-			var active = queryRes[0].activePet;
-			let petRes = await Utils.queryDB("SELECT * FROM pets WHERE id=" + active);
-			let userAch = await Utils.queryDB("SELECT achievements FROM users WHERE id=" + userID)
-			var AchJSON = JSON.parse(userAch[0].achievements);
-			var postCount = queryRes[0].xp;
-			if(petRes && petRes.length) {
-				var petLvl = petRes[0].level;
-				var foodStored = queryRes[0].food;
-				var petID = JSON.parse(queryRes[0].petID);
-				await Utils.queryDB("UPDATE users SET xp = xp + 1 WHERE discordID = " + member);
-				await Utils.queryDB("UPDATE server SET jackpotAmount = jackpotAmount + 1 WHERE id = 1");
-				var urCount = 0;
-				var rCount = 0;
-				if(active > 0) {
-					for (var pi = 0; pi < petID.length; pi++) {
-						let newPetRes = await Utils.queryDB("SELECT * FROM pets WHERE id=" + petID[pi]);
-						var type = newPetRes[0].petType;
-						let petTypeRes = await Utils.queryDB("SELECT * FROM pet_types WHERE id=" + type);
-						var rarity = petTypeRes[0].rarity;
-						if (rarity == 1) urCount++;
-						if (rarity == 3) rCount++;
-					}
-				}
-				var equipmentList = JSON.parse(queryRes[0].equipmentList);
-				const itemRes = await Utils.queryDB("SELECT * FROM items");
-				var hasHG = 0;
-				var hasTR = 0;
-				var hasPW = 0;
-				var hasMI = 0;
-				if (equipmentList.length > 0) {
-					for (var i = 0; i < equipmentList.length; i++) {
-						var iType = itemRes[equipmentList[i] - 1].type;
-						if (iType == "Headgear") {
-							hasHG++;
-						}
-						if (iType == "Trinket") {
-							hasTR++;
-						}
-						if (iType == "Power") {
-							hasPW++;
-						}
-						if (iType == "Misc") {
-							hasMI++;
-						}
-					}
-				}
-				
-				var equipCount = hasHG + hasTR + hasPW + hasMI;
-				
-				await Utils.queryDB("UPDATE achievement_progress SET hgNumber=" + hasHG + ", trNumber=" + hasTR + ", pwNumber=" + hasPW + ", petLevel=" + petLvl + ", ultraRareOwned=" + urCount + ", rareOwned=" + rCount + ", achUnlocked=" + AchJSON.length + ", foodStored=" + foodStored + ", equipCount=" + equipCount + " WHERE id=" + userID);
-				
-				Utils.log("\x1b[36m%s\x1b[0m", "DB: Updated achievement_progress for user ID " + userID);
-			}
-
-			let achProgRes = await Utils.queryDB("SELECT * FROM achievement_progress WHERE id=" + userID)
-			var achKeys = Object.keys(achProgRes[0]);
-			let achRes = await Utils.queryDB("SELECT id, varToCheck, varRequired, name, description FROM achievements")
-
-			for (var index = 0; index < achRes.length; index++) {
-				let i = index;
-				let achievement = achRes[i];
-				var varToCheck = parseInt(achievement.varToCheck);
-				var varRequired = parseInt(achievement.varRequired);
-				if (achProgRes[0][achKeys[varToCheck]] >= varRequired) {
-					if (AchJSON.includes(i + 1) == false) {
-						// doesn't have achievement
-						const achUnlock = new Discord.RichEmbed()
-							.setAuthor("Unlocked Achievement", "https://i.imgur.com/CyAb3mV.png")
-							.setColor("#FDF018")
-							.addField("Congratulations!", "<@" + member + "> - The achievement **" + achievement.name + "** has been unlocked for completing the objective: *" + achievement.description + "*!\nUse `hod?achievements` to check your progress!")
-						client.channels.get(message.channel.id).send(achUnlock);
-						AchJSON.push(i + 1);
-						var JSONString = JSON.stringify(AchJSON);
-						await Utils.queryDB("UPDATE users SET achievements='" + JSONString + "' WHERE id=" + userID);
-						Utils.log("\x1b[36m%s\x1b[0m", "DB: Added achievement " + achievement.id + " to user " + userID);
-					}
-				}
-			}
-		} else {
-			Utils.log("\x1b[36m%s\x1b[0m", "DB: " + member + " was NOT found, adding to database!");
-			let addMemberRes = await Utils.queryDB("INSERT INTO users(discordID) VALUES (" + member + "); ");
-			Utils.log("\x1b[36m%s\x1b[0m", "DB: " + member + " successfully added to database as ID " + addMemberRes.insertId + "!");
-			let addAchievementQuery = Utils.queryDB("INSERT INTO achievement_progress(id) VALUES (" + addMemberRes.insertId + ")");
-			Utils.log("\x1b[36m%s\x1b[0m", "DB: Successfully added to achievement_progress!");
-		}
-	} catch(err) {
-		Utils.log("\x1b[31m%s\x1b[0m", "DB: Error in updating user: "+ err.stack);
-	}
-}
-
 // --------------------------
 // THE PURGE COMMENCES REEEEE
 // --------------------------
@@ -248,8 +149,8 @@ async function kickGuests() {
 
 client.on('message', async message => {
     if (message.author.bot) return;
-	//Utils.log("\x1b[33m%s\x1b[0m", "\nMSG: ["+message.channel.name+"] "+message.author.username+": "+message+"\n");
-    await updateUser(message.author.id, message);
+	if(message.content.indexOf('!') !== 0) return;
+    await Utils.updateUser(message.author.id, message);
 });
 
 client.on('ready', () => {

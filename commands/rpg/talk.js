@@ -112,6 +112,19 @@ module.exports = class TalkCommand extends Command {
 				await Utils.queryDB("UPDATE rpg_flags SET talk_quarry="+timesTalked+" WHERE userID="+userRes[0].id);
 			} 
 			
+			// Hell's Point Town
+			else if(x==2 && y==6) {
+				var timesTalked = flagRes[0].talk_hells_point;
+				
+				switch(timesTalked) {
+					case 0:
+						embedMsg.addField("Silence...", "There is no-one here but dead trees and silence.");
+						break;
+				}
+				
+				await Utils.queryDB("UPDATE rpg_flags SET talk_quarry="+timesTalked+" WHERE userID="+userRes[0].id);
+			} 
+			
 			// Goblin Hideout
 			else if(x==2 && y==2) {
 				var timesTalked = flagRes[0].talk_goblin_hideout;

@@ -25,12 +25,20 @@ async function getMonsterStats(monsterID) {
     return monsterStats;
 }
 
-async function monsterBonus(skill) {
+async function monsterBonus(skill, half=false) {
     let skillMultiplier = 5;
+	if(half) skillMultiplier = 2.5;
 	calculated = 0;
 	for(let i = 1; i <= skill; i++) {
-		if(i > 10) skillMultiplier = 2.5;
-		calculated += skillMultiplier
+		if(i > 10) {
+			if(!half) skillMultiplier = 2.5;
+			else skillMultiplier = 1.25;
+		}
+		if(i > 20) {
+			if(!half) skillMultiplier = 1.25;
+			else skillMultiplier = 0.75;
+		}
+		calculated += skillMultiplier;
 	}
     return calculated;
 }
@@ -183,31 +191,59 @@ async function randomDrops(user, monsterID, min, max) {
 	}
 }
 
-async function randomEnemyStats(user, monsterID, isElite=false) {
+async function randomEnemyStats(user, monsterID, isElite=false, isUltraElite=false) {
 	let level = await Utils.getLocLevel(user);
-	let health = Utils.randomIntIn(isElite ? 100 : 50, isElite ? 200 : 150)+(level*10)*level;
-	let magic = Utils.randomIntIn(isElite ? 50 : 25, isElite ? 150 : 50)+(level*10)*level;
+	
+	let rVitality = (Utils.randomIntIn(isElite ? 3 : 0, isElite ? 7 : 2)+level)*level;
+	let rArcana = (Utils.randomIntIn(isElite ? 3 : 0, isElite ? 7: 2)+level)*level;
+	
+	let randomHealth = 25 + (rVitality*25);
+	let randomMagic = Utils.randomIntIn(25,50);
+	
+	if(isElite) {
+		randomHealth = randomHealth * 2;
+		randomMagic = randomMagic * 2;
+	}
+	
+	if(isUltraElite) {
+		randomHealth = randomHealth * 3;
+		randomMagic = randomMagic * 3;
+	}
 	
 	var monsterStats = [0,0,0,0,0,100,100,"Name",0];
 	
-	monsterStats[0] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4)*level;
-	monsterStats[1] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4)*level;
-	monsterStats[2] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4)*level;
-	monsterStats[3] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4)*level;
-	monsterStats[4] = Utils.randomIntIn(isElite ? 4 : 1, isElite ? 8 : 4)*level;
+	monsterStats[0] = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
+	monsterStats[1] = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
+	monsterStats[2] = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
+	monsterStats[3] = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
+	monsterStats[4] = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
 	
-	monsterStats[5] = health*level;
-	monsterStats[6] = magic*level;
+	monsterStats[5] = randomHealth*level;
+	monsterStats[6] = randomMagic*level;
 	
 	let monsterName = await getMonsterName(monsterID);
-	monsterStats[7] = (isElite ? 'Elite '+monsterName : monsterName);
+	monsterStats[7] = monsterName;
 	let multiplier = 1;
-	if(isElite) multiplier = 3;
-	monsterStats[8] = (((monsterStats[0]+monsterStats[1]+monsterStats[2]+monsterStats[3]+monsterStats[4]+monsterStats[5])/10)*level)*multiplier;
+	if(isElite) {
+		multiplier = 3;
+		monsterStats[7] = 'Elite '+monsterName;
+	}
+	if(isUltraElite) {
+		multiplier = 5;
+		monsterStats[7] = 'Ultra Elite '+monsterName;
+	}
+	let yourLevel = await Utils.getLevel(user.id);
+	let yourStatCount = 20+((yourLevel-1)*4);
+	let statCount = monsterStats[0]+monsterStats[1]+monsterStats[2]+monsterStats[3]+monsterStats[4]+Math.floor(monsterStats[5]/25)+Math.floor(monsterStats[6]/25);
+	let adjustedStatCount = statCount - yourStatCount;
+	console.log("XP Debug:\nEnemy Stat Count: "+statCount+"\nYour Stat Count: "+yourStatCount+"\nAdjust Amount :"+adjustedStatCount);
+	monsterStats[8] = ((statCount+(adjustedStatCount*2))*level)*multiplier;
+	if(monsterStats[8] <= 0) monsterStats[8] = 1;
+	console.log("XP Debug: Final XP: "+monsterStats[8]);
 	return monsterStats;
 }
 
-async function battle(msg, monsterID, battleMap, random=false, giveRewards=true) {
+async function battle(msg, monsterID, battleMap, random=false, tournament=false) {
     if (battleMap.has(msg.channel.id)) return msg.reply('Only one battle may be occurring per channel.');
     if (await Utils.isInBattle(msg.author)) return msg.reply('You are already in a battle!');
     battleMap.set(msg.channel.id, new MonsterBattle(msg.author, monsterID));
@@ -216,13 +252,15 @@ async function battle(msg, monsterID, battleMap, random=false, giveRewards=true)
 
     // User stuff
     battle.user.hp = await Utils.calculateHP(msg.author.id);
+    battle.user.maxHP = await Utils.calculateHP(msg.author.id);
     battle.user.mp = await Utils.calculateMP(msg.author.id);
+    battle.user.maxMP = await Utils.calculateMP(msg.author.id);
 
-    battle.user.prBonus = await Utils.calculateProwess(msg.author.id);
-    battle.user.preBonus = await Utils.calculatePrecision(msg.author.id);
-    battle.user.impBonus = await Utils.calculateImpact(msg.author.id);
-    battle.user.agiBonus = await Utils.calculateAgility(msg.author.id);
-    battle.user.forBonus = await Utils.calculateFortitude(msg.author.id);
+    battle.user.prBonus = Math.ceil(await Utils.calculateProwess(msg.author.id));
+    battle.user.preBonus = Math.ceil(await Utils.calculatePrecision(msg.author.id));
+    battle.user.impBonus = Math.ceil(await Utils.calculateImpact(msg.author.id));
+    battle.user.agiBonus = Math.ceil(await Utils.calculateAgility(msg.author.id));
+    battle.user.forBonus = Math.ceil(await Utils.calculateFortitude(msg.author.id));
 
 	let monsterStats = await getMonsterStats(monsterID);
 	
@@ -230,19 +268,26 @@ async function battle(msg, monsterID, battleMap, random=false, giveRewards=true)
 	if(random) {
 		let eliteChance = Utils.randomIntIn(1,100);
 		let elite = false;
+		let ultraElite = true;
 		if(eliteChance <= 10) elite = true;
+		if(eliteChance <= 1) ultraElite = true;
+		if(tournament) elite = false;
 		monsterStats = await randomEnemyStats(msg.author, monsterID, elite);
 		battle.opponent.name = monsterStats[7];
 		battle.opponent.hp = monsterStats[5];
+		battle.opponent.maxHP = monsterStats[5];
 		battle.opponent.mp = monsterStats[6];
-		battle.opponent.prBonus = await monsterBonus(monsterStats[0]);
-		battle.opponent.forBonus = await monsterBonus(monsterStats[1]);
-		battle.opponent.agiBonus = await monsterBonus(monsterStats[2]);
-		battle.opponent.impBonus = await monsterBonus(monsterStats[3]);
-		battle.opponent.preBonus = await monsterBonus(monsterStats[4]);
+		battle.opponent.maxMP = monsterStats[6];
+		battle.opponent.prBonus = Math.ceil(await monsterBonus(monsterStats[0]));
+		battle.opponent.forBonus = Math.ceil(await monsterBonus(monsterStats[1]));
+		battle.opponent.agiBonus = Math.ceil(await monsterBonus(monsterStats[2]));
+		battle.opponent.impBonus = Math.ceil(await monsterBonus(monsterStats[3], true));
+		battle.opponent.preBonus = Math.ceil(await monsterBonus(monsterStats[4], true));
 	} else {
 		battle.opponent.hp = await getMonsterHP(monsterID);
+		battle.opponent.maxHP = await getMonsterHP(monsterID);
 		battle.opponent.mp = await getMonsterMP(monsterID);
+		battle.opponent.maxMP = await getMonsterMP(monsterID);
 		battle.opponent.name = await getMonsterName(monsterID);
 		battle.opponent.prBonus = await monsterBonus(monsterStats[0]);
 		battle.opponent.forBonus = await monsterBonus(monsterStats[1]);
@@ -250,13 +295,29 @@ async function battle(msg, monsterID, battleMap, random=false, giveRewards=true)
 		battle.opponent.impBonus = await monsterBonus(monsterStats[3]);
 		battle.opponent.preBonus = await monsterBonus(monsterStats[4]);
 	}
+	
+	// Coin flip for who goes first
+	
+	let firstStrike = Utils.randomIntIn(1,100);
+	if(firstStrike <= 50) battle.userTurn = true;
+	else battle.userTurn = false;
 		
-	console.log(monsterStats);
-		
-	await msg.embed(Utils.makeRPGEmbed("Battle!", "<@"+msg.author.id+"> encountered a **"+battle.opponent.name+"**!"));
-
+	if(!tournament) msg.embed(Utils.makeRPGEmbed("Battle!", "<@"+msg.author.id+"> encountered a **"+battle.opponent.name
+	+"**!\n🗡️ Prowess: "+monsterStats[0]
+	+"\n🛡️ Fortitude: "+monsterStats[1]
+	+"\n👢 Agility: "+monsterStats[2]
+	+"\n💥 Impact: "+monsterStats[3]
+	+"\n🎯 Precision: "+monsterStats[4]));
+	
     while (!battle.winner) {
         const choice = await battle.attacker.chooseAction(msg);
+		let countered = 0;
+			
+		if(battle.defender.counter) {
+			countered = 1;
+			battle.defender.changeCounter();
+		}
+
         if (choice === 'attack') {
             let multiplier = 1;
             let missed = 0;
@@ -275,16 +336,25 @@ async function battle(msg, monsterID, battleMap, random=false, giveRewards=true)
                 if(!battle.defender.stunned) stunned = 1;
 
             let dmgMin = 10 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus/3)) * multiplier;
-            let dmgMinGuard = 5 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus/3)) * multiplier;
+            let dmgMinGuard = (5 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus/3)) * multiplier) / 2;
             let dmgMax = 20 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus/3)) * multiplier;
-            let dmgMaxGuard = 10 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus/3)) * multiplier;
+            let dmgMaxGuard = (10 + (Math.floor(battle.attacker.prBonus) - Math.floor(battle.defender.forBonus/3)) * multiplier) / 2;
 
             let damage = Utils.randomIntIn(battle.defender.guard ? dmgMinGuard : dmgMin, battle.defender.guard ? dmgMaxGuard : dmgMax);
-
+			
+			if(battle.attacker.focus) {
+                await msg.say(`${battle.attacker.name} feels powerful!`);
+				damage = damage*2;
+				battle.attacker.changeFocus();
+			}
             if (damage < 1) damage = 1;
 
             if (missed) {
                 await msg.say(`${battle.attacker.name} missed!`);
+                battle.reset();
+            } else if (countered) {
+                await msg.say(`${battle.defender.name} countered the attack, dealing **${damage}** damage!`);
+                battle.attacker.dealDamage(damage);
                 battle.reset();
             } else if (stunned) {
                 await msg.say(`${battle.attacker.name} deals **${damage}** impact damage, causing ${battle.defender.name} to miss a turn!`);
@@ -298,35 +368,50 @@ async function battle(msg, monsterID, battleMap, random=false, giveRewards=true)
                 battle.defender.dealDamage(damage);
                 battle.reset();
             }
-        } else if (choice === 'defend') {
-            await msg.say(`${battle.attacker.name} is now on guard!`);
+        } else if (choice === 'fortify') {
+            await msg.say(`${battle.attacker.name} is now fortifying to regain MP!`);
             battle.attacker.changeGuard();
             battle.reset(false);
+        } else if (choice === 'focus') {
+            await msg.say(`${battle.attacker.name} is now focusing their strength!`);
+            battle.attacker.changeFocus();
+            battle.reset(true,false);
+        } else if (choice === 'counter') {
+            await msg.say(`${battle.attacker.name} is watching their opponent's moves carefully!`);
+            battle.attacker.changeCounter();
+            battle.reset(true,false,false);
         } else if (choice === 'magic' && battle.attacker.canMagic) {
-            const miss = Math.floor(Math.random() * 3);
+            const miss = Math.floor(Math.random() * 2);
             if (miss) {
                 await msg.say(`${battle.attacker.name}'s magic missile missed!`);
             } else {
-                const damage = Utils.randomIntIn(battle.defender.guard ? 10 : 50, battle.defender.guard ? 50 : 100);
+                let damage = Utils.randomIntIn(battle.defender.guard ? 10 : 50, battle.defender.guard ? 50 : 100);
+				if(countered) damage = damage*2;
                 await msg.say(`${battle.attacker.name} deals **${damage}** magic damage!`);
                 battle.defender.dealDamage(damage);
             }
             battle.attacker.useMP(50);
             battle.reset();
         } else if (choice === 'heal' && battle.attacker.canHeal) {
-            const amount = Math.round(battle.attacker.mp);
+            let amount = battle.attacker.maxHP - battle.attacker.hp;
+			if(amount >= battle.attacker.mp) amount = battle.attacker.mp;
             await msg.say(`${battle.attacker.name} heals **${amount}** HP!`);
             battle.attacker.heal(amount);
-            battle.attacker.useMP(battle.attacker.mp);
+            battle.attacker.useMP(amount);
             battle.reset();
         } else if (choice === 'run') {
-            await msg.say(`${battle.attacker.name} flees!`);
-            battle.attacker.forfeit();
+			let runChance = Utils.randomIntIn(1,100);
+			if(runChance <= 33) {
+				battle.attacker.forfeit();
+			} else {
+				await msg.say(`${battle.attacker.name} was unable to flee!`);
+				battle.reset();
+			}
         } else if (choice === 'failed:time') {
             await msg.say(`Time's up, ${battle.attacker.name}!`);
             battle.reset();
         } else {
-            await msg.say('I do not understand what you want to do.');
+            await msg.say('You cannot do that!');
         }
     }
     const {
@@ -335,18 +420,31 @@ async function battle(msg, monsterID, battleMap, random=false, giveRewards=true)
     await Utils.setInBattle(msg.author, 0);
     battleMap.delete(msg.channel.id);
     if (winner == battle.opponent.name) {
-        msg.embed(Utils.makeRPGEmbed("You Lost!", "<@" + msg.author.id + "> was defeated by the **" + battle.opponent.name + "**. After some time unconscious, you wake up back in the encampment..."));
-		await Utils.deathXP(msg, msg.author.id);
-        await Utils.queryDB("UPDATE users SET location='[0,0]' WHERE discordID=" + msg.author.id);
+		if(!tournament) {
+			if(battle.user.hasForfeit) {
+				msg.embed(Utils.makeRPGEmbed("You Ran Away!", "<@" + msg.author.id + "> ran away from the **" + battle.opponent.name + "**!"));
+			}
+			else {
+				msg.embed(Utils.makeRPGEmbed("You Lost!", "<@" + msg.author.id + "> was defeated by the **" + battle.opponent.name + "**. After some time unconscious, you wake up back in the encampment..."));
+				await Utils.deathXP(msg, msg.author.id);
+				await Utils.queryDB("UPDATE users SET location='[0,0]' WHERE discordID=" + msg.author.id);
+			}
+		}
 		return false;
     } else {
-		if(giveRewards) {
-			let drops = await randomDrops(msg.author, monsterID, 1, 3);
-			msg.embed(Utils.makeRPGEmbed("You Won!", "<@" + msg.author.id + "> defeated the **" + battle.opponent.name + "**!\n\n***Drops:***\n"+drops));
-			await Utils.giveXP(msg, msg.author.id, monsterStats[8]);
+		if(!tournament) {
+			if(battle.opponent.hasForfeit) {
+				msg.embed(Utils.makeRPGEmbed("Enemy Ran!", battle.opponent.name+" ran away from the battle!"));
+			} 
+			else {
+				let drops = await randomDrops(msg.author, monsterID, 1, 3);
+				msg.embed(Utils.makeRPGEmbed("You Won!", "<@" + msg.author.id + "> defeated the **" + battle.opponent.name + "**!\n\n***Drops:***\n"+drops));
+				await Utils.giveXP(msg, msg.author.id, monsterStats[8]);
+			}
+		} else {
+			await Utils.addAchProgress(msg.author.id, 'battlesWon', 1);
+			return monsterStats[8];
 		}
-		await Utils.addAchProgress(msg.author.id, 'battlesWon', 1);
-		return true;
     }
 }
 

@@ -20,6 +20,9 @@ module.exports = class ChopCommand extends Command {
     }
 
     async run(msg) {
+		if(await Utils.isInBattle(msg.author)) {
+			return msg.say("You're in a battle, finish that before using this command!");
+		}
         const noticeMsg = new Discord.RichEmbed()
             .setAuthor("World of the House of Dragons", "https://i.imgur.com/CyAb3mV.png")
             .setDescription("<@" + msg.author.id + ">")

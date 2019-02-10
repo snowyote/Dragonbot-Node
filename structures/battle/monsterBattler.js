@@ -2,11 +2,17 @@ const Utils = require('../../core/utils.js');
 
 module.exports.MonsterBattler = class MonsterBattler {
 	constructor(battle, monsterID) {
+		this.battle = battle;
 		this.monster = monsterID;
 		this.hp = 100;
+		this.maxHP = 100;
 		this.mp = 100;
+		this.maxMP = 100;
+		this.hasForfeit = false;
 		this.name = "";
 		this.guard = false;
+		this.counter = false;
+		this.focus = false;
 		this.stunned = false;
 		this.prBonus = 0;
 		this.preBonus = 0;
@@ -16,9 +22,14 @@ module.exports.MonsterBattler = class MonsterBattler {
 	}
 
 	async chooseAction(msg) {
-		const monsterChoices = ['attack', 'attack', 'attack', 'defend'];
-		if (this.canHeal && this.hp < 50) monsterChoices.push('heal');
+		const monsterChoices = [];
+		if (this.focus) monsterChoices.push('attack', 'attack');
+		else monsterChoices.push('focus', 'attack', 'counter');
+		if (this.battle.user.counter) monsterChoices.push('focus', 'counter');
+		if (this.canHeal) monsterChoices.push('heal');
 		if (this.canMagic) monsterChoices.push('magic');
+		if (this.mp <= (this.maxMP/10) || this.hp <= (this.maxHP/10)) monsterChoices.push('fortify');
+		if (this.hp <= (this.maxHP/10)) monsterChoices.push('run');
 		this.stunned = false;
 		return monsterChoices[Math.floor(Math.random() * monsterChoices.length)];
 	}
@@ -32,6 +43,11 @@ module.exports.MonsterBattler = class MonsterBattler {
 		this.hp += amount;
 		return this.hp;
 	}
+	
+	addMP(amount) {
+		this.mp += amount;
+		return this.mp;
+	}
 
 	useMP(amount) {
 		this.mp -= amount;
@@ -43,13 +59,24 @@ module.exports.MonsterBattler = class MonsterBattler {
 		return this.guard;
 	}
 
+	changeCounter() {
+		this.counter = !this.counter;
+		return this.counter;
+	}
+
+	changeFocus() {
+		this.focus = !this.focus;
+		return this.focus;
+	}
+
 	forfeit() {
 		this.hp = 0;
+		this.hasForfeit = true;
 		return null;
 	}
 	
 	get canHeal() {
-		return this.mp > 0;
+		return (this.hp < this.maxHP && this.mp > 0);
 	}
 
 	get canMagic() {

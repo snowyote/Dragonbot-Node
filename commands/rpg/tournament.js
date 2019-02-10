@@ -20,22 +20,32 @@ module.exports = class TournamentCommand extends Command {
 	async run(msg) {
 		const embedMsg = new Discord.RichEmbed()
 			.setAuthor("World of the House of Dragons", "https://i.imgur.com/CyAb3mV.png")
-			
-		if(await Utils.canUseAction(msg.author, 'tournament')) {
-			let alive = true;
-			let counter = 0;
-			while(alive && counter < 10) {
-				let monsterToFight = await Utils.getRandomMonster(msg.author, false);
-				if(await BattleUtils.battle(msg, monsterToFight, this.battles, true, false))
-					counter++;
-				else alive = false;
-			}
-			if(alive) {
-				embedMsg.addField("Tournament Won", "You won the tournament!");
-				await Utils.giveXP(msg, msg.author.id, 500);
-				return msg.embed(embedMsg);
+		let formattedTime = "";
+		if((formattedTime = await Utils.canUseAction(msg.author, 'tournament')) == true) {
+			if(await Utils.canTournament(msg.author.id)) {
+				let alive = true;
+				let counter = 0;
+				let finalXP = 0;
+				while(alive && counter < 10) {
+					let monsterToFight = await Utils.getRandomMonster(msg.author, false);
+					if((finalXP += await BattleUtils.battle(msg, monsterToFight, this.battles, true, true)) !== false) {
+						counter++;
+					}
+					else alive = false;
+				}
+				if(alive) {
+					embedMsg.addField("Tournament Won", "You won the tournament!");
+					await Utils.giveXP(msg, msg.author.id, finalXP);
+					let dbUserID = await Utils.getUserID(msg.author.id, true);
+					let tournamentTime = new Date().getTime() + 600000;
+					await Utils.queryDB("UPDATE rpg_flags SET lastTournament="+tournamentTime+" WHERE userID="+dbUserID);
+					return msg.embed(embedMsg);
+				} else {
+					embedMsg.addField("Tournament Lost", "You lost the tournament!");
+					return msg.embed(embedMsg);
+				}
 			} else {
-				embedMsg.addField("Tournament Lost", "You lost the tournament!");
+				embedMsg.addField("Can't Enter Tournament", "You can join the tournament again in **"+formattedTime+"**!");
 				return msg.embed(embedMsg);
 			}
 		} else {

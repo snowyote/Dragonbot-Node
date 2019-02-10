@@ -23,6 +23,9 @@ module.exports = class MysticismCommand extends Command {
     }
 
     async run(msg, {id}) {
+		if(await Utils.isInBattle(msg.author)) {
+			return msg.say("You're in a battle, finish that before using this command!");
+		}
 		const embedMsg = new Discord.RichEmbed()
             .setAuthor("House of Dragons Notice", "https://i.imgur.com/CyAb3mV.png")
 		if(await Utils.canUseAction(msg.author, 'mysticism')) {

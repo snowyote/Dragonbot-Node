@@ -12,6 +12,105 @@ const config = {
     charset: configFile.charset
 };
 
+// -----------------------------------
+// Add users to database, achievements
+// -----------------------------------
+
+async function updateUser(userID, msg) {
+	try{
+		let queryRes = await queryDB("SELECT * FROM users WHERE discordID=" + userID);
+		if (queryRes && queryRes.length) {
+			var userID = queryRes[0].id;
+			var active = queryRes[0].activePet;
+			let petRes = await queryDB("SELECT * FROM pets WHERE id=" + active);
+			let userAch = await queryDB("SELECT achievements FROM users WHERE id=" + userID)
+			var AchJSON = JSON.parse(userAch[0].achievements);
+			var postCount = queryRes[0].xp;
+			if(petRes && petRes.length) {
+				var petLvl = petRes[0].level;
+				var foodStored = queryRes[0].food;
+				var petID = JSON.parse(queryRes[0].petID);
+				await queryDB("UPDATE users SET xp = xp + 1 WHERE discordID = " + userID);
+				await queryDB("UPDATE server SET jackpotAmount = jackpotAmount + 1 WHERE id = 1");
+				var urCount = 0;
+				var rCount = 0;
+				if(active > 0) {
+					for (var pi = 0; pi < petID.length; pi++) {
+						let newPetRes = await queryDB("SELECT * FROM pets WHERE id=" + petID[pi]);
+						var type = newPetRes[0].petType;
+						let petTypeRes = await queryDB("SELECT * FROM pet_types WHERE id=" + type);
+						var rarity = petTypeRes[0].rarity;
+						if (rarity == 1) urCount++;
+						if (rarity == 3) rCount++;
+					}
+				}
+				var equipmentList = JSON.parse(queryRes[0].equipmentList);
+				const itemRes = await queryDB("SELECT * FROM items");
+				var hasHG = 0;
+				var hasTR = 0;
+				var hasPW = 0;
+				var hasMI = 0;
+				if (equipmentList.length > 0) {
+					for (var i = 0; i < equipmentList.length; i++) {
+						var iType = itemRes[equipmentList[i] - 1].type;
+						if (iType == "Headgear") {
+							hasHG++;
+						}
+						if (iType == "Trinket") {
+							hasTR++;
+						}
+						if (iType == "Power") {
+							hasPW++;
+						}
+						if (iType == "Misc") {
+							hasMI++;
+						}
+					}
+				}
+				
+				var equipCount = hasHG + hasTR + hasPW + hasMI;
+				
+				await queryDB("UPDATE achievement_progress SET hgNumber=" + hasHG + ", trNumber=" + hasTR + ", pwNumber=" + hasPW + ", petLevel=" + petLvl + ", ultraRareOwned=" + urCount + ", rareOwned=" + rCount + ", achUnlocked=" + AchJSON.length + ", foodStored=" + foodStored + ", equipCount=" + equipCount + " WHERE id=" + userID);
+				
+				log("\x1b[36m%s\x1b[0m", "DB: Updated achievement_progress for user ID " + userID);
+			}
+
+			let achProgRes = await queryDB("SELECT * FROM achievement_progress WHERE id=" + userID)
+			var achKeys = Object.keys(achProgRes[0]);
+			let achRes = await queryDB("SELECT id, varToCheck, varRequired, name, description FROM achievements")
+
+			for (var index = 0; index < achRes.length; index++) {
+				let i = index;
+				let achievement = achRes[i];
+				var varToCheck = parseInt(achievement.varToCheck);
+				var varRequired = parseInt(achievement.varRequired);
+				if (achProgRes[0][achKeys[varToCheck]] >= varRequired) {
+					if (AchJSON.includes(i + 1) == false) {
+						// doesn't have achievement
+						const achUnlock = new Discord.RichEmbed()
+							.setAuthor("Unlocked Achievement", "https://i.imgur.com/CyAb3mV.png")
+							.setColor("#FDF018")
+							.addField("Congratulations!", "<@" + userID + "> - The achievement **" + achievement.name + "** has been unlocked for completing the objective: *" + achievement.description + "*!\nUse `hod?achievements` to check your progress!")
+						client.channels.get(msg.channel.id).send(achUnlock);
+						AchJSON.push(i + 1);
+						var JSONString = JSON.stringify(AchJSON);
+						await queryDB("UPDATE users SET achievements='" + JSONString + "' WHERE id=" + userID);
+						log("\x1b[36m%s\x1b[0m", "DB: Added achievement " + achievement.id + " to user " + userID);
+					}
+				}
+			}
+		} else {
+			log("\x1b[36m%s\x1b[0m", "DB: " + userID + " was NOT found, adding to database!");
+			let adduserIDRes = await queryDB("INSERT INTO users(discordID) VALUES (" + userID + "); ");
+			log("\x1b[36m%s\x1b[0m", "DB: " + userID + " successfully added to database as ID " + adduserIDRes.insertId + "!");
+			let addAchievementQuery = queryDB("INSERT INTO achievement_progress(id) VALUES (" + adduserIDRes.insertId + ")");
+			log("\x1b[36m%s\x1b[0m", "DB: Successfully added to achievement_progress!");
+		}
+	} catch(err) {
+		log("\x1b[31m%s\x1b[0m", "DB: Error in updating user: "+ err.stack);
+	}
+}
+
 // --
 // Query SQL database function
 // --
@@ -84,34 +183,51 @@ async function calculateMP(userID) {
 }
 
 async function calculateProwess(userID) {
-    const skillMultiplier = 5;
+    let skillMultiplier = 5;
     const userRes = await queryDB("SELECT prowess FROM users WHERE discordID=" + userID);
     let prowess = 0;
-    if (userRes && userRes.length) prowess = userRes[0].prowess;
-    return prowess * skillMultiplier;
+	let calculated = 0;
+    if (userRes && userRes.length) {
+		prowess = userRes[0].prowess;
+		for(let i = 1; i <= prowess; i++) {
+			if(i > 10) skillMultiplier = 2.5;
+			if(i > 20) skillMultiplier = 1.25;
+			calculated += skillMultiplier
+		}
+	}
+    return calculated;
 }
 
 async function calculateFortitude(userID) {
     let skillMultiplier = 5;
     const userRes = await queryDB("SELECT fortitude FROM users WHERE discordID=" + userID);
     let fortitude = 0;
-    if (userRes && userRes.length) fortitude = userRes[0].fortitude;
-    return fortitude * skillMultiplier;
+	let calculated = 0;
+    if (userRes && userRes.length) {
+		fortitude = userRes[0].fortitude;
+		for(let i = 1; i <= fortitude; i++) {
+			if(i > 10) skillMultiplier = 2.5;
+			if(i > 20) skillMultiplier = 1.25;
+			calculated += skillMultiplier
+		}
+	}
+    return calculated;
 }
 
 async function calculatePrecision(userID) {
-    let skillMultiplier = 5;
+    let skillMultiplier = 2.5;
     const userRes = await queryDB("SELECT precise FROM users WHERE discordID=" + userID);
     let precise = 0;
 	let calculated = 0;
     if (userRes && userRes.length) {
 		precise = userRes[0].precise;
 		for(let i = 1; i <= precise; i++) {
-			if(i > 10) skillMultiplier = 2.5;
+			if(i > 10) skillMultiplier = 1.25;
+			if(i > 20) skillMultiplier = 0.75;
 			calculated += skillMultiplier
 		}
 	}
-    return precise * skillMultiplier;
+    return calculated;
 }
 
 async function calculateAgility(userID) {
@@ -123,6 +239,7 @@ async function calculateAgility(userID) {
 		agility = userRes[0].agility;
 		for(let i = 1; i <= agility; i++) {
 			if(i > 10) skillMultiplier = 2.5;
+			if(i > 20) skillMultiplier = 1.25;
 			calculated += skillMultiplier
 		}
 	}
@@ -130,14 +247,15 @@ async function calculateAgility(userID) {
 }
 
 async function calculateImpact(userID) {
-    let skillMultiplier = 5;
+    let skillMultiplier = 2.5;
     const userRes = await queryDB("SELECT impact FROM users WHERE discordID=" + userID);
     let impact = 0;
 	let calculated = 0;
     if (userRes && userRes.length) {
 		impact = userRes[0].impact;
 		for(let i = 1; i <= impact; i++) {
-			if(i > 10) skillMultiplier = 2.5;
+			if(i > 10) skillMultiplier = 1.25;
+			if(i > 20) skillMultiplier = 0.75;
 			calculated += skillMultiplier
 		}
 	}
@@ -407,6 +525,7 @@ async function RPGOptions(coords) {
     if (actions.includes('fish')) opt = opt + '**Fish** (*!fish*)\n';
     if (actions.includes('chop')) opt = opt + '**Chop Trees** (*!chop*)\n';
     if (actions.includes('mine')) opt = opt + '**Mine** (*!mine*)\n';
+    if (actions.includes('activate')) opt = opt + '**Waypoint** (*!activate*)\n';
     if (actions.includes('tournament')) opt = opt + '**Tournament** (*!tournament*)\n';
     if (actions.includes('mysticism')) opt = opt + '**Mysticism** (*!mysticism*)\n';
     if (actions.includes('slots')) opt = opt + '**Casino Slots** (*!slots*)\n';
@@ -426,6 +545,64 @@ async function getLocType(user) {
     const locationRes = await queryDB("SELECT * FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
     let type = locationRes[0].type;
     return type;
+}
+
+async function getLocID(user) {
+    const locations = await getLocation(user);
+    const locationRes = await queryDB("SELECT id FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
+    let id = locationRes[0].id;
+    return id;
+}
+
+async function getLocCoords(locationID) {
+    const locationRes = await queryDB("SELECT coords FROM locations WHERE id="+locationID);
+    let coords = JSON.parse(locationRes[0].coords);
+    return coords;
+}
+
+async function getLocNameByID(locationID) {
+    const locationRes = await queryDB("SELECT name FROM locations WHERE id="+locationID);
+    let name = locationRes[0].name;
+    return name;
+}
+
+async function listWaypoints(userID) {
+	let waypointList = await getWaypoints(userID);
+	let listStr = "";
+	for(let i = 0; i < waypointList.length; i++) {
+		let currentName = await getLocNameByID(waypointList[i]);
+		listStr = listStr + '['+waypointList[i]+']'+' '+currentName+'\n';
+	}
+	listStr = listStr.slice(0,-1);
+	return listStr;
+}
+
+async function getWaypoints(userID) {
+    let dbUserID = await getUserID(userID, true);
+    const questRes = await queryDB("SELECT active_waypoints FROM rpg_flags WHERE userID=" + dbUserID);
+    let waypointList = JSON.parse(questRes[0].active_waypoints);
+    return waypointList;
+}
+
+async function hasWaypoint(userID, waypoint) {
+    let waypointList = await getWaypoints(userID);
+    if (waypointList.includes(waypoint)) return true;
+    else return false;
+}
+
+async function activateWaypoint(user, waypoint) {
+	let waypointList = await getWaypoints(user.id);
+	let waypointID = await getLocID(user);
+    waypointList.push(waypointID);
+    let dbUserID = await getUserID(user, false);
+	await queryDB("UPDATE rpg_flags SET active_waypoints='"+JSON.stringify(waypointList)+"' WHERE userID="+dbUserID);
+}
+
+async function teleport(userID, x, y, json=false, jsonv=[]) {
+	let coords = [x,y];
+	if(json) coords = jsonv;
+	await queryDB("UPDATE users SET location='"+JSON.stringify(coords)+"' WHERE discordID="+userID);
+	return makeRPGEmbed("Waypoint Activated", "You teleported to another waypoint!");
 }
 
 async function resetBattles() {
@@ -626,13 +803,46 @@ async function generateMap(x, y, user) {
     return buffer;
 }
 
+async function getLevel(userID) {
+	let userRes = await queryDB("SELECT * FROM users WHERE discordID=" + userID);
+	var currentStats = JSON.parse(userRes[0].level);
+	var currentLevel = currentStats[0];
+	return currentLevel;
+}
+
+async function canTournament(userID) {
+    let dbUserID = await getUserID(userID, true);
+	const userRes = await queryDB("SELECT lastTournament FROM rpg_flags WHERE userID="+dbUserID);
+	let currentTime = new Date().getTime();
+	let tournamentTime = userRes[0].lastTournament
+	let formattedTime = formatTimeUntil(tournamentTime);
+	if(currentTime > tournamentTime) {
+		await queryDB("UPDATE rpg_flags SET lastTournament=0 WHERE userID="+dbUserID);
+		return true;
+	} else return formattedTime;
+}
+
+async function getHealth(userID) {
+	let userRes = await queryDB("SELECT * FROM users WHERE discordID=" + userID);
+	var currentStats = JSON.parse(userRes[0].vitality);
+	var currentVitality = currentVitality[0];
+	return 100+(currentVitality*25);
+}
+
+async function getMP(userID) {
+	let userRes = await queryDB("SELECT * FROM users WHERE discordID=" + userID);
+	var currentStats = JSON.parse(userRes[0].arcana);
+	var currentArcana = currentArcana[0];
+	return 100+(currentArcana*25);
+}
+
 async function generateWorldMap() {
-    let map = await new Jimp(1400, 1400);
+    let map = await new Jimp(1200, 1600);
     var worldX = 10;
     var worldY = 10;
     var xOffset = 0;
     var yOffset = 0;
-    for (let i = -5; i < worldY; i++) {
+    for (let i = -8; i < worldY; i++) {
         //Each Y
         for (let i2 = -5; i2 < worldX; i2++) {
             //Each X
@@ -827,6 +1037,38 @@ function delay(ms) {
 }
 
 async function giveXP(msg, userID, xp) {
+	var rs = new RSExp();
+    let userRes = await queryDB("SELECT level FROM users WHERE discordID=" + userID);
+    let stats = JSON.parse(userRes[0].level);
+	
+    stats[1] += xp;
+    var newLevels = 0;
+
+    while (stats[1] >= rs.level_to_xp(stats[0] + 1)) {
+        stats[1] -= rs.level_to_xp(stats[0] + 1);
+        stats[0] += 1;
+        newLevels++;
+    }
+	
+	if(stats[1] < 0 || stats[1] === null) stats[1] = 0;
+
+    msg.embed(makeRPGEmbed("XP Gains", "[Lv." + stats[0] + "] **Combat:** +" + Math.floor(xp) + "xp\n*Progress:* [" + drawXPBar(rs.level_to_xp(stats[0] + 1), stats[1]) + "]\n"));
+
+    if (newLevels > 0) {
+		if(stats[0] == 5) {
+			msg.embed(makeRPGEmbed("Combat Up", "<@"+userID+"> levelled up and is now combat level " + (stats[0]) + "!\n"+
+			"You can apply 4 more skill points using `!skill`!\n"+
+			"As you're now level 5, you can increase skills to a maximum of 12!"));
+		} else {
+			msg.embed(makeRPGEmbed("Combat Up", "<@"+userID+"> levelled up and is now combat level " + (stats[0]) + "!\n"+
+			"You can apply 4 more skill points using `!skill`!"));
+		}
+    }
+
+    await queryDB("UPDATE users SET level='" + JSON.stringify(stats) + "' WHERE discordID=" + userID);
+}
+
+async function giveCalcXP(msg, userID, xp) {
     var rs = new RSExp();
     let userRes = await queryDB("SELECT level FROM users WHERE discordID=" + userID);
     let stats = JSON.parse(userRes[0].level);
@@ -1006,5 +1248,19 @@ module.exports = {
     addMaterial,
     hasMaterial,
 	giveXP,
-	deathXP
+	deathXP,
+	teleport,
+	getWaypoints,
+	activateWaypoint,
+	hasWaypoint,
+	listWaypoints,
+	getLocID,
+	getLocCoords,
+	getLocNameByID,
+	getLevel,
+	getHealth,
+	getMP,
+	canTournament,
+	getUserID,
+	updateUser
 };

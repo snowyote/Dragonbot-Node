@@ -26,7 +26,7 @@ module.exports = class TravelCommand extends Command {
 
     async run(msg, {direction}) {
 		if(await Utils.isInBattle(msg.author)) {
-			return msg.say("You're in a battle, finish that before moving!");
+			return msg.say("You're in a battle, finish that before using this command!");
 		}
 		const userRes = await Utils.queryDB("SELECT * FROM users WHERE discordID="+msg.author.id);
 		let coords = JSON.parse(userRes[0].location);

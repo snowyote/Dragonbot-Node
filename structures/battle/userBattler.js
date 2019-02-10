@@ -1,5 +1,5 @@
 const Utils = require('../../core/utils.js');
-const choices = ['attack', 'defend', 'magic', 'heal'];
+const choices = ['attack', 'fortify', 'counter', 'focus', 'magic', 'heal', 'run'];
 
 module.exports.UserBattler = class UserBattler {
 	constructor(battle, user) {
@@ -7,8 +7,13 @@ module.exports.UserBattler = class UserBattler {
 		this.user = user;
 		this.name = user.username;
 		this.hp = 100;
+		this.hasForfeit = false;
+		this.maxHP = 100;
 		this.mp = 100;
+		this.maxMP = 100;
 		this.guard = false;
+		this.counter = false;
+		this.focus = false;
 		this.stunned = false;
 		this.prBonus = 0;
 		this.preBonus = 0;
@@ -17,11 +22,16 @@ module.exports.UserBattler = class UserBattler {
 		this.forBonus = 0;
 	}
 
-	async chooseAction(msg) {		
-		let content = `${this}, do you ${Utils.list(choices.map(choice => `**${choice}**`), 'or')}? You have **${this.mp}** MP!\n**${this.battle.user.name}:** ${this.battle.user.hp} HP\n**${this.battle.opponent.name}:** ${this.battle.opponent.hp} HP`;
+	async chooseAction(msg) {
+		let content = `${this}, do you ${Utils.list(choices.map(choice => `**${choice}**`), 'or')}? You have **${this.mp}**/**${this.maxMP}** MP!\n**${this.battle.user.name}:** ${this.battle.user.hp}/${this.battle.user.maxHP} HP\n**${this.battle.opponent.name}:** ${this.battle.opponent.hp}/${this.battle.opponent.maxHP} HP`;
 		if (this.battle.turn === 1 || this.battle.turn === 2) {
 			this.stunned = false;
-			content += '\n\n*Magic always uses 50 MP and ignores enemy defense. Cure heals you for your remaining MP.*';
+			content += '\n\n**Magic:** 50 MP, magical attack ignoring enemy fortitude'+
+			'\n**Heal:** regain HP for your remaining MP'+
+			'\n**Fortify:** regain 25 MP every turn while fortifying'+
+			'\n**Counter:** evade and retaliate if you are attacked, take double damage from magic'+
+			'\n**Focus:** skip a turn to triple your damage'+
+			'\n**Run:** run from the fight';
 		}
 		
 		await msg.say(content);
@@ -49,6 +59,11 @@ module.exports.UserBattler = class UserBattler {
 		this.hp += amount;
 		return this.hp;
 	}
+	
+	addMP(amount) {
+		this.mp += amount;
+		return this.mp;
+	}
 
 	useMP(amount) {
 		this.mp -= amount;
@@ -65,13 +80,24 @@ module.exports.UserBattler = class UserBattler {
 		return this.guard;
 	}
 
+	changeCounter() {
+		this.counter = !this.counter;
+		return this.counter;
+	}
+
+	changeFocus() {
+		this.focus = !this.focus;
+		return this.focus;
+	}
+
 	forfeit() {
 		this.hp = 0;
+		this.hasForfeit = true;
 		return null;
 	}
 	
 	get canHeal() {
-		return this.mp > 0;
+		return (this.hp < this.maxHP);
 	}
 
 	get canMagic() {
