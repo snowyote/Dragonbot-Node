@@ -392,6 +392,40 @@ async function getQuestsCompleted(userID) {
     return completedList;
 }
 
+async function getTilesActivated(userID) {
+    let dbUserID = await getUserID(userID, true);
+    const questRes = await queryDB("SELECT tiles_activated FROM rpg_flags WHERE userID=" + dbUserID);
+    let tilesActivated = JSON.parse(questRes[0].tiles_activated);
+    return tilesActivated;
+}
+
+async function hasActivatedTile(userID, tileID) {
+    let tilesList = await getTilesActivated(userID);
+    if (tilesList.includes(tileID)) return true;
+    else return false;
+}
+
+async function activateTile(user, tileID) {
+	if(await hasActivatedTile(user.id, tileID)) return false;
+	
+	let tilesList = await getTilesActivated(user.id);
+	tilesList.push(tileID);
+	await queryDB("UPDATE rpg_flags SET tiles_activated='"+JSON.stringify(tilesList)+"'");
+}
+
+async function getTileID(user) {
+	let location, query;
+	if(await isInDungeon(user.id)) {
+		location = await getDungeonLocation(user);
+		query = await queryDB("SELECT * FROM locations_dungeon WHERE coords='"+JSON.stringify(location)+"'");
+		return query[0].id;
+	} else {
+		location = await getLocation(user);
+		query = await queryDB("SELECT * FROM locations WHERE coords='"+JSON.stringify(location)+"'");
+		return query[0].id;
+	}
+}
+
 async function hasCompletedQuest(userID, quest) {
     let completedList = await getQuestsCompleted(userID);
     if (completedList.includes(quest)) return true;
@@ -508,17 +542,17 @@ async function addLogs(userID, logID, amount) {
 }
 
 async function getLogType(logID) {
-    let logRes = await queryDB("SELECT name, icon FROM log_types WHERE index=" + logID);
+    let logRes = await queryDB("SELECT name, icon FROM log_types WHERE id=" + (logID+1));
     return logRes[0].name;
 }
 
 async function getCrateType(crateID) {
-    let crateRes = await queryDB("SELECT name FROM crate_types WHERE index=" + crateID);
+    let crateRes = await queryDB("SELECT name FROM crate_types WHERE id=" + (crateID+1));
     return crateRes[0].name;
 }
 
 async function getGemType(gemID) {
-    let gemRes = await queryDB("SELECT name, icon FROM gem_types WHERE index=" + gemID);
+    let gemRes = await queryDB("SELECT name FROM gem_types WHERE id=" + (gemID+1));
     return gemRes[0].name;
 }
 
@@ -587,11 +621,175 @@ async function RPGOptions(user) {
     if (actions.includes('exit')) opt = opt + '**Exit Dungeon** (*!exit*)\n';
     if (actions.includes('descend')) opt = opt + '**Descend Stairs** (*!descend*)\n';
     if (actions.includes('ascend')) opt = opt + '**Ascend Stairs** (*!ascend*)\n';
+    if (actions.includes('search')) opt = opt + '**Search** (*!search*)\n';
 
     opt = opt.slice(0, -1);
 	
 	if(opt.length < 1) opt = "No Actions";
     return opt;
+}
+
+async function randomDungeonLoot(user, loot) {
+    if (loot.length > 0) {
+		let randomDrop = randomIntEx(0, loot.length);
+		let drop = loot[randomDrop];
+		if(drop.indexOf('-') > -1) {
+			return dropArray = drop.split('-');
+			return drop;
+		} else {
+			return ["none","0"];
+		}
+	}
+}
+
+async function searchRewards(user) {
+	let dungeonName = await getDungeon(user);
+	let dungeonRes = await queryDB("SELECT * FROM location_dungeons WHERE name='"+dungeonName+"'")
+    let dropNum = randomIntIn(dungeonRes[0].loot_min, dungeonRes[0].loot_max);
+    let questItems = new Array;
+    let normalItems = new Array;
+	let materials = new Array;
+    let coins = 0;
+    let food = 0;
+    let orbs = 0;
+    let keys = 0;
+    let artifacts = 0;
+    let logs = [0, 0, 0, 0, 0];
+    let gems = [0, 0, 0, 0, 0];
+    let crate = [0, 0, 0, 0, 0];
+	let locationLevel = await getLocLevel(user);
+    for (let i = 0; i < dropNum; i++) {
+		let dungeonLoot = await getDungeonLoot(user);
+        let dropArray = await randomDungeonLoot(user, dungeonLoot);
+		
+		let dropType = dropArray;
+		let typeID = 0;
+		
+		if(Array.isArray(dropArray)) {
+			if(dropArray.length == 2) {
+				dropType = dropArray[0];
+				typeID = parseInt(dropArray[1]);
+			}
+		}
+		
+        // Is quest item
+        if (dropType == "quest") {
+            if (await hasQuestItem(user.id, typeID) == false && !questItems.includes(typeID))
+                questItems.push(typeID);
+            // Is normal item
+        } else if (dropType == "item") {
+            if (await hasItem(user.id, typeID) == false && !normalItems.includes(typeID))
+                normalItems.push(typeID);
+            // Is material
+        } else if (dropType == "material") {
+                materials.push(typeID);
+            // Is coins
+        } else if (dropType == "coins") {
+			let avarice = await avariceBonus(user.id);
+            let randomCoins = Math.floor((randomIntIn(25,100)*((avarice+1)/10))*locationLevel);
+			coins += randomCoins;
+            // Is mystic orb
+        } else if (dropType == "orbs") {
+            let randomOrbs = Math.floor(randomIntIn(1*locationLevel,2*locationLevel));
+            orbs += randomOrbs;
+            // Is key
+        } else if (dropType == "keys") {
+            let randomKeys = Math.floor(randomIntIn(1*locationLevel,2*locationLevel));
+            keys += randomKeys;
+            // Is artifact
+        } else if (dropType == "artifacts") {
+            let randomArt = Math.floor(randomIntIn(1*locationLevel,2*locationLevel));
+            artifacts += randomArt;
+            // Is log
+        } else if (dropType == "logs") {
+            let randomLogs = Math.floor(randomIntIn(1*locationLevel,3*locationLevel));
+            logs[typeID] += randomLogs;
+            // Is gem
+        } else if (dropType == "gems") {
+            let randomGems = Math.floor(randomIntIn(1*locationLevel,3*locationLevel));
+            gems[typeID] += randomGems;
+            // Is crate
+        } else if (dropType == "crates") {
+            let randomCrate = Math.floor(randomIntIn(1*locationLevel,2*locationLevel));
+            crate[typeID] += randomCrate;
+        }
+    }
+
+    // Make the strings and give the things
+    let dropStr = "";
+
+    if (normalItems.length > 0) {
+        for (let i = 0; i < normalItems.length; i++) {
+            dropStr = dropStr + await getItem(normalItems[i], true) + '\n';
+            await addItem(user.id, normalItems[i]);
+        }
+    }
+
+    if (questItems.length > 0) {
+        for (let i = 0; i < questItems.length; i++) {
+            dropStr = dropStr + await getQuestItem(questItems[i], true) + '\n';
+            await addQuestItem(user.id, questItems[i]);
+        }
+    }
+
+    if (materials.length > 0) {
+        for (let i = 0; i < materials.length; i++) {
+            dropStr = dropStr + await getMaterial(materials[i], true) + '\n';
+            await addMaterial(user.id, materials[i], 1);
+        }
+    }
+
+    if (coins > 0) {
+        dropStr = dropStr + '**' + coins + '** coins\n';
+        await giveCoins(user.id, coins);
+    }
+
+    if (food > 0) {
+        dropStr = dropStr + '**' + food + '** food\n';
+        await addFood(user.id, food);
+    }
+
+    if (orbs > 0) {
+        dropStr = dropStr + '**' + orbs + '** mystic orbs\n';
+        await addOrbs(user.id, orbs);
+    }
+
+    if (keys > 0) {
+        dropStr = dropStr + '**' + keys + '** crate keys\n';
+        await addKeys(user.id, keys);
+    }
+	
+    if (artifacts > 0) {
+        dropStr = dropStr + '**' + artifacts + '** ancient artifacts\n';
+        await addArtifacts(user.id, artifacts);
+    }
+
+    for (let i = 0; i < 5; i++) {
+        let type = '';
+        if (logs[i] > 0) {
+            type = await getLogType(i);
+            dropStr = dropStr + '**' + logs[i] + '** ' + type.toLowerCase() + ' log(s)\n';
+            await addLogs(user.id, i, logs[i]);
+        }
+        if (gems[i] > 0) {
+			console.log("Has gems 2");
+            type = await getGemType(i);
+            dropStr = dropStr + '**' + gems[i] + '** ' + type.toLowerCase() + '(s) \n';
+            await addGems(user.id, i, gems[i]);
+        }
+        if (crate[i] > 0) {
+            type = await getCrateType(i);
+            dropStr = dropStr + '**' + crate[i] + '** ' + type.toLowerCase() + '(s) \n';
+            await addCrate(user.id, i, crate[i]);
+        }
+    }
+	
+	if(dropStr.length > 0) {
+		dropStr = dropStr.slice(0,-1);
+		return dropStr;
+	} else {
+		return "Nothing!";
+	}
 }
 
 async function getLocation(user) {
@@ -663,6 +861,18 @@ async function getDungeonWarp(user) {
 	return JSON.parse(dungeonRes[0].warp);
 }
 
+async function getDungeon(user) {
+	let location = await getDungeonLocation(user);
+	let dungeonRes = await queryDB("SELECT dungeon FROM locations_dungeon WHERE coords='"+JSON.stringify(location)+"'");
+	return dungeonRes[0].dungeon;
+}
+
+async function getDungeonLoot(user) {
+	let dungeon = await getDungeon(user);
+	let dungeonRes = await queryDB("SELECT search_loot FROM location_dungeons WHERE name='"+dungeon+"'");
+	return JSON.parse(dungeonRes[0].search_loot);
+}
+
 async function getWarp(user) {
 	let location = await getLocation(user);
 	let warpRes = await queryDB("SELECT warp FROM locations WHERE coords='"+JSON.stringify(location)+"'");
@@ -681,8 +891,14 @@ async function resetBattles() {
 }
 
 async function getLocLevel(user) {
-    const locations = await getLocation(user);
-    const locationRes = await queryDB("SELECT * FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
+	let locations, locationRes;
+	if(await isInDungeon(user.id)) {
+		locations = await getDungeonLocation(user);
+		locationRes = await queryDB("SELECT * FROM locations_dungeon WHERE coords='" + JSON.stringify(locations) + "'");
+	} else {
+		locations = await getLocation(user);
+		locationRes = await queryDB("SELECT * FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
+	}
     let level = locationRes[0].level;
     return level;
 }
@@ -728,14 +944,12 @@ async function getAnyMonster(user) {
     return monsters[randomIndex].id;
 }
 
-async function getRandomMonster(user, local=true, biome=true, any=false) {
+async function getRandomMonster(user, local=true, biome=true, any=false, dungeon=false) {
     let biomeName = await getLocBiome(user);
 	let monsterTable = [];
-	console.log(monsterTable);
 	if(biome) monsterTable = monsterTable.concat(await getBiomeMonsters(biomeName));
-	console.log(monsterTable);
     if(local) monsterTable = monsterTable.concat(await getLocalMonsters(user));
-	console.log(monsterTable);
+	if(dungeon) monsterTable = monsterTable.concat(await getDungeonMonsters(user));
 	if(any) return await getAnyMonster();
     let random = randomIntEx(0, monsterTable.length);
     return monsterTable[random];
@@ -776,6 +990,12 @@ async function getLocActions(user) {
 async function getDungeonLocation(user) {
     const locations = await queryDB("SELECT dungeon_location FROM users WHERE discordID=" + user.id);
     return JSON.parse(locations[0].dungeon_location);
+}
+
+async function getDungeonMonsters(user) {
+	let dungeon = await getDungeon(user);
+    const locations = await queryDB("SELECT monster_table FROM location_dungeons WHERE name='" + dungeon + "'");
+    return JSON.parse(locations[0].monster_table);
 }
 
 async function getDungeonActions(user) {
@@ -829,6 +1049,12 @@ async function setInBattle(user, inBattle) {
 async function getLocName(user) {
     const locations = await getLocation(user);
     const locationRes = await queryDB("SELECT * FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
+    return locationRes[0].name;
+}
+
+async function getDungeonLocName(user) {
+    const locations = await getDungeonLocation(user);
+    const locationRes = await queryDB("SELECT * FROM locations_dungeon WHERE coords='" + JSON.stringify(locations) + "'");
     return locationRes[0].name;
 }
 
@@ -1025,6 +1251,31 @@ async function generateWorldMap() {
         for (let i2 = -5; i2 < worldX; i2++) {
             //Each X
             let tile = await makeTile(i2, i);
+            let font = await Jimp.loadFont('./fonts/beleren15.fnt');
+            tile.print(font, 5, 5, '[' + i2 + ',' + i + ']', 500, 500);
+            log("\x1b[32m%s\x1b[0m", "DB: Place world map tile at x" + xOffset + " y" + yOffset);
+            map.composite(tile, xOffset, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+            xOffset += 100;
+        }
+        yOffset += 100;
+        xOffset = 0;
+    }
+
+    const buffer = await map.filterType(0).getBufferAsync('image/png');
+    return buffer;
+}
+
+async function generateDungeonWorldMap() {
+    let map = await new Jimp(1000, 1000);
+    var worldX = 10;
+    var worldY = 10;
+    var xOffset = 0;
+    var yOffset = 0;
+    for (let i = -1; i < worldY; i++) {
+        //Each Y
+        for (let i2 = -1; i2 < worldX; i2++) {
+            //Each X
+            let tile = await makeTile(i2, i, true);
             let font = await Jimp.loadFont('./fonts/beleren15.fnt');
             tile.print(font, 5, 5, '[' + i2 + ',' + i + ']', 500, 500);
             log("\x1b[32m%s\x1b[0m", "DB: Place world map tile at x" + xOffset + " y" + yOffset);
@@ -1441,7 +1692,15 @@ module.exports = {
 	getBiomeMonsters,
 	isInDungeon,
 	generateDungeonMap,
+	generateDungeonWorldMap,
 	getDungeonWarp,
 	dungeonTeleport,
-	getWarp
+	getWarp,
+	getTileID,
+	getTilesActivated,
+	hasActivatedTile,
+	searchRewards,
+	getDungeonLoot,
+	getDungeonLocName,
+	activateTile
 };

@@ -52,16 +52,9 @@ module.exports = class MysticismCommand extends Command {
 										break;
 									case 2:
 										var amount = 1;
-										if(levels > 1) {
-											amount = levels;
-										}
-										if(queryRes[0].mysticOrbs >= amount) {
-											await Utils.queryDB("UPDATE users SET prowess=0, fortitude=0, precise=0, vitality=0, arcana=0, impact=0, agility=0 WHERE discordID=" + msg.author.id);
-										embedMsg.addField("Mysticism Applied", "Your pet's skills have been reset!");
+										await Utils.queryDB("UPDATE users SET prowess=0, fortitude=0, precise=0, vitality=0, arcana=0, impact=0, agility=0 WHERE discordID=" + msg.author.id);
+										embedMsg.addField("Mysticism Applied", "Your skills have been reset!");
 										return msg.embed(embedMsg);
-											embedMsg.addField("Mysticism Applied", "Your skills have been reset!");
-											return msg.embed(embedMsg);
-										}
 										break;
 									default:
 										embedMsg.addField("Can't Use Power", "That wasn't a valid mysticism! Try `1`, `2`, `3`, or `4`!");

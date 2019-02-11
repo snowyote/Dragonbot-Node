@@ -211,8 +211,8 @@ async function randomDrops(user, monsterID, min, max) {
 async function randomEnemyStats(user, monsterID, isElite=false, isUltraElite=false) {
 	let level = await Utils.getLocLevel(user);
 	
-	let rVitality = (Utils.randomIntIn(isElite ? 3 : 0, isElite ? 7 : 2)+level)*level;
-	let rArcana = (Utils.randomIntIn(isElite ? 3 : 0, isElite ? 7: 2)+level)*level;
+	let rVitality = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
+	let rArcana = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8: 3)+level)*level;
 	
 	let randomHealth = 25 + (rVitality*25);
 	let randomMagic = Utils.randomIntIn(25,50);
@@ -235,7 +235,7 @@ async function randomEnemyStats(user, monsterID, isElite=false, isUltraElite=fal
 	monsterStats[3] = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
 	monsterStats[4] = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
 	
-	monsterStats[5] = randomHealth*level;
+	monsterStats[5] = randomHealth;
 	monsterStats[6] = randomMagic*level;
 	
 	let monsterName = await getMonsterName(monsterID);
@@ -444,7 +444,7 @@ async function battle(msg, monsterID, battleMap, random=false, tournament=false)
 			else {
 				msg.embed(Utils.makeRPGEmbed("You Lost!", "<@" + msg.author.id + "> was defeated by the **" + battle.opponent.name + "**. After some time unconscious, you wake up back in the encampment..."));
 				await Utils.deathXP(msg, msg.author.id);
-				await Utils.queryDB("UPDATE users SET location='[0,0]' WHERE discordID=" + msg.author.id);
+				await Utils.queryDB("UPDATE users SET location='[0,0]', inDungeon=0 WHERE discordID=" + msg.author.id);
 			}
 		}
 		return false;
