@@ -27,7 +27,7 @@ module.exports = class TournamentCommand extends Command {
 				let counter = 0;
 				let finalXP = 0;
 				while(alive && counter < 10) {
-					let monsterToFight = await Utils.getRandomMonster(msg.author, false);
+					let monsterToFight = await Utils.getRandomMonster(msg.author, false, false, true);
 					if((finalXP += await BattleUtils.battle(msg, monsterToFight, this.battles, true, true)) !== false) {
 						counter++;
 					}

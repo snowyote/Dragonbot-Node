@@ -28,7 +28,7 @@ module.exports = class ChopCommand extends Command {
             .setDescription("<@" + msg.author.id + ">")
 
         if (await Utils.hasCompletedQuest(msg.author.id, 1)) {
-            if (await Utils.getLocType(msg.author) == 'forest') {
+            if (await Utils.getLocType(msg.author) == 'Forest') {
                 let queryRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);
                 Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
                 var userID = queryRes[0].id;
@@ -39,16 +39,16 @@ module.exports = class ChopCommand extends Command {
                     var possibleRewards = new Array();
 
                     switch (locationBiome) {
-                        case 'plains':
+                        case 'Plains':
                             possibleRewards.push('Oak', 'Pine');
                             break;
-                        case 'desert':
+                        case 'Desert':
                             possibleRewards.push('Palm');
                             break;
-                        case 'snow':
+                        case 'Snow':
                             possibleRewards.push('Oak', 'Pine', 'Festive');
                             break;
-                        case 'ashen':
+                        case 'Ashen':
                             possibleRewards.push('Spirit');
                             break;
                     }

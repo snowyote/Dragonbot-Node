@@ -30,7 +30,6 @@ module.exports.MonsterBattler = class MonsterBattler {
 		if (this.canHeal) monsterChoices.push('heal');
 		if (this.canMagic) monsterChoices.push('magic');
 		if (this.mp <= (this.maxMP/10) || this.hp <= (this.maxHP/10)) monsterChoices.push('fortify');
-		if (this.hp <= (this.maxHP/10)) monsterChoices.push('run');
 		this.stunned = false;
 		return monsterChoices[Math.floor(Math.random() * monsterChoices.length)];
 	}

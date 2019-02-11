@@ -31,7 +31,7 @@ module.exports = class BlackjackCommand extends Command {
 			.setAuthor("House of Dragons Casino", "https://i.imgur.com/CyAb3mV.png")
 			.setColor("#FDF018")
 			.setDescription("<@"+msg.author.id+">")
-		if (await Utils.getLocType(msg.author) == 'casino') {
+		if (await Utils.getLocType(msg.author) == 'Casino') {
 			if (this.decks.has(msg.channel.id)) return msg.reply('Only one game of blackjack may be occurring per channel.');
 			if(await Utils.hasChips(msg.author.id, amount)) {
 				try {

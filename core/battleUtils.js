@@ -53,12 +53,12 @@ async function randomDrop(user, monsterID) {
             let randomDrop = Utils.randomIntEx(0, dropList.length);
 			let drop = dropList[randomDrop];
 			console.log(drop);
-			let dropArray = drop.split('-');
-			console.log(dropArray);
-            return dropArray;
+			if(drop.indexOf('-') > -1)
+				return dropArray = drop.split('-');
+			return drop;
         }
     } else {
-		return ["none","0","0"];
+		return ["none","0"];
 	}
 }
 
@@ -75,43 +75,60 @@ async function randomDrops(user, monsterID, min, max) {
     let logs = [0, 0, 0, 0, 0];
     let gems = [0, 0, 0, 0, 0];
     let crate = [0, 0, 0, 0, 0];
+	let locationLevel = await Utils.getLocLevel(user);
     for (let i = 0; i < dropNum; i++) {
         let dropArray = await randomDrop(user, monsterID);
-		let dropID = parseInt(dropArray[1]);
-		let typeID = parseInt(dropArray[2]);
+		
+		let dropType = dropArray;
+		let typeID = 0;
+		
+		if(Array.isArray(dropArray)) {
+			if(dropArray.length == 2) {
+				dropType = dropArray[0];
+				typeID = parseInt(dropArray[1]);
+			}
+		}
+		
         // Is quest item
-        if (dropArray[0] == "quest") {
-            if (await Utils.hasQuestItem(user.id, dropID) == false && !questItems.includes(dropID))
-                questItems.push(dropID);
+        if (dropType == "quest") {
+            if (await Utils.hasQuestItem(user.id, typeID) == false && !questItems.includes(typeID))
+                questItems.push(typeID);
             // Is normal item
-        } else if (dropArray[0] == "item") {
-            if (await Utils.hasItem(user.id, dropID) == false && !normalItems.includes(dropID))
-                normalItems.push(dropID);
+        } else if (dropType == "item") {
+            if (await Utils.hasItem(user.id, typeID) == false && !normalItems.includes(typeID))
+                normalItems.push(typeID);
             // Is material
-        } else if (dropArray[0] == "material") {
-                materials.push(dropID);
+        } else if (dropType == "material") {
+                materials.push(typeID);
             // Is coins
-        } else if (dropArray[0] == "coins") {
+        } else if (dropType == "coins") {
 			let avarice = await Utils.avariceBonus(user.id);
-            coins += dropID * avarice;
+            let randomCoins = Math.floor((Utils.randomIntIn(25,100)*((avarice+1)/10))*locationLevel);
+			coins += randomCoins;
             // Is mystic orb
-        } else if (dropArray[0] == "orbs") {
-            orbs += dropID;
+        } else if (dropType == "orbs") {
+            let randomOrbs = Math.floor(Utils.randomIntIn(1*locationLevel,2*locationLevel));
+            orbs += randomOrbs;
             // Is key
-        } else if (dropArray[0] == "keys") {
-            keys += dropID;
+        } else if (dropType == "keys") {
+            let randomKeys = Math.floor(Utils.randomIntIn(1*locationLevel,2*locationLevel));
+            keys += randomKeys;
             // Is artifact
-        } else if (dropArray[0] == "artifacts") {
-            artifacts += dropID;
+        } else if (dropType == "artifacts") {
+            let randomArt = Math.floor(Utils.randomIntIn(1*locationLevel,2*locationLevel));
+            artifacts += randomArt;
             // Is log
-        } else if (dropArray[0] == "logs") {
-            crate[typeID] += dropID;
+        } else if (dropType == "logs") {
+            let randomLogs = Math.floor(Utils.randomIntIn(1*locationLevel,3*locationLevel));
+            logs[typeID] += randomLogs;
             // Is gem
-        } else if (dropArray[0] == "gems") {
-            gems[typeID] += dropID;
+        } else if (dropType == "gems") {
+            let randomGems = Math.floor(Utils.randomIntIn(1*locationLevel,3*locationLevel));
+            gems[typeID] += randomGems;
             // Is crate
-        } else if (dropArray[0] == "crates") {
-            crate[typeID] += dropID;
+        } else if (dropType == "crates") {
+            let randomCrate = Math.floor(Utils.randomIntIn(1*locationLevel,2*locationLevel));
+            crate[typeID] += randomCrate;
         }
     }
 

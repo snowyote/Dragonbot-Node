@@ -65,24 +65,24 @@ module.exports = class ExploreCommand extends Command {
 								var foodMsg = "went hunting and got";
 								
 								switch(locationType) {
-									case 'town':
+									case 'Town':
 										possibleRewards.push('nothing', 'trash', 'coins', 'quest');
 										trashMsg = "looked through some villager's garbage and found";
 										break;
-									case 'desert':
+									case 'Desert':
 										possibleRewards.push('nothing', 'trash', 'coins', 'quest');
 										trashMsg = "sifted through some sand and found";
 										break;
-									case 'water':
+									case 'Water':
 										possibleRewards.push('nothing', 'trash', 'battle', 'food', 'coins', 'item', 'crates', 'quest');
 										trashMsg = "threw a net in the water and recovered";
 										foodMsg = "went spear fishing, gaining";
 										break;
-									case 'plains':
+									case 'Plains':
 										possibleRewards.push('nothing', 'trash', 'battle', 'stamina', 'item', 'crates', 'keys', 'caves', 'quest');
 										trashMsg = "found a dumping ground containing";
 										break;
-									case 'forest':
+									case 'Forest':
 										possibleRewards.push('nothing', 'battle', 'stamina', 'food', 'coins', 'quest', 'item', 'keys', 'crates', 'artifacts', 'quest');
 										foodMsg = "hunted an animal in the forest, gaining";
 										break;
@@ -244,8 +244,6 @@ module.exports = class ExploreCommand extends Command {
 													if(await Utils.isInQuest(msg.author) == itemsQuest[rewardCheck].questID) {
 														findMsg = findMsg + itemsQuest[rewardCheck].icon+" ...found **"+itemsQuest[rewardCheck].name+"** (Quest Item)!\n";
 														await Utils.addQuestItem(msg.author.id, rewardCheck+1);
-													} else {
-														findMsg = findMsg + itemsQuest[rewardCheck].icon+" ...left something that belongs to someone else!\n";
 													}
 												}
 											} else {

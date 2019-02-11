@@ -35,7 +35,7 @@ module.exports = class ChipsCommand extends Command {
 				.setAuthor("House of Dragons Casino", "https://i.imgur.com/CyAb3mV.png")
 				.setColor("#FDF018")
 				.setDescription("<@"+msg.author.id+">")
-			if (await Utils.getLocType(msg.author) == 'casino') {
+			if (await Utils.getLocType(msg.author) == 'Casino') {
 				let userRes = await Utils.queryDB("SELECT * FROM users WHERE discordID=" + msg.author.id);	
 				
 				let chips = userRes[0].casinoChips;

@@ -44,7 +44,8 @@ module.exports = class ActivateCommand extends Command {
 				return msg.embed(embedMsg);
 			} else {
 				if(await Utils.hasWaypoint(msg.author.id, id)) {
-					return msg.embed(await Utils.teleport(msg.author.id, 0, 0, true, await Utils.getLocCoords(id)));
+					await Utils.teleport(msg.author.id, 0, 0, true, await Utils.getLocCoords(id));
+					return msg.embed(Utils.makeRPGEmbed("Waypoint Activated", "You teleported to another waypoint!"));
 				}
 			}
 		} else {

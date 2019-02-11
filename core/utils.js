@@ -157,6 +157,11 @@ async function giveCoins(userID, coins) {
     log("\x1b[32m%s\x1b[0m", "Utils: Gave " + coins + " coins to " + userID);
 }
 
+async function addTrash(userID, trash) {
+    await queryDB("UPDATE users SET trash=trash+" + trash + " WHERE discordID=" + userID);
+    log("\x1b[32m%s\x1b[0m", "Utils: Gave " + trash + " trash to " + userID);
+}
+
 async function takeChips(userID, chips) {
     await queryDB("UPDATE users SET casinoChips=casinoChips-" + chips + " WHERE discordID=" + userID);
     log("\x1b[32m%s\x1b[0m", "Utils: Took " + chips + " casino chips from " + userID);
@@ -550,10 +555,18 @@ function shuffle(array) {
 		return arr;
 }
 
-async function RPGOptions(coords) {
-    //log(coords);
-    const locations = await queryDB("SELECT * FROM locations WHERE coords='" + coords + "'");
-    let actions = JSON.parse(locations[0].actions);
+async function RPGOptions(user) {
+    let actions;
+	let inDungeon = await isInDungeon(user.id);
+	if(inDungeon) actions = await getDungeonActions(user);
+	else {
+		const locationType = await getLocType(user);
+		const locActions = await getLocActions(user);
+		const typeActions = await getLocTypeActions(locationType);
+		actions = locActions.concat(typeActions);
+	}
+	
+	
     //log(actions);
     var opt = "";
     if (actions.includes('market')) opt = opt + '**Market** (*!market*)\n';
@@ -570,21 +583,20 @@ async function RPGOptions(coords) {
     if (actions.includes('blackjack')) opt = opt + '**Blackjack** (*!blackjack*)\n';
     if (actions.includes('chips')) opt = opt + '**Buy/Sell Chips** (*!chips*)\n';
     if (actions.includes('battle')) opt = opt + '**Battle** (*!battle*)\n';
+    if (actions.includes('enter')) opt = opt + '**Enter Dungeon** (*!enter*)\n';
+    if (actions.includes('exit')) opt = opt + '**Exit Dungeon** (*!exit*)\n';
+    if (actions.includes('descend')) opt = opt + '**Descend Stairs** (*!descend*)\n';
+    if (actions.includes('ascend')) opt = opt + '**Ascend Stairs** (*!ascend*)\n';
 
     opt = opt.slice(0, -1);
+	
+	if(opt.length < 1) opt = "No Actions";
     return opt;
 }
 
 async function getLocation(user) {
     const locations = await queryDB("SELECT location FROM users WHERE discordID=" + user.id);
     return JSON.parse(locations[0].location);
-}
-
-async function getLocType(user) {
-    const locations = await getLocation(user);
-    const locationRes = await queryDB("SELECT * FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
-    let type = locationRes[0].type;
-    return type;
 }
 
 async function getLocID(user) {
@@ -645,6 +657,24 @@ async function teleport(userID, x, y, json=false, jsonv=[]) {
 	return makeRPGEmbed("Waypoint Activated", "You teleported to another waypoint!");
 }
 
+async function getDungeonWarp(user) {
+	let location = await getDungeonLocation(user);
+	let dungeonRes = await queryDB("SELECT warp FROM locations_dungeon WHERE coords='"+JSON.stringify(location)+"'");
+	return JSON.parse(dungeonRes[0].warp);
+}
+
+async function getWarp(user) {
+	let location = await getLocation(user);
+	let warpRes = await queryDB("SELECT warp FROM locations WHERE coords='"+JSON.stringify(location)+"'");
+	return JSON.parse(warpRes[0].warp);
+}
+
+async function dungeonTeleport(userID, x, y, json=false, jsonv=[]) {
+	let coords = [x,y];
+	if(json) coords = jsonv;
+	await queryDB("UPDATE users SET dungeon_location='"+JSON.stringify(coords)+"' WHERE discordID="+userID);
+}
+
 async function resetBattles() {
     await queryDB("UPDATE rpg_flags SET in_battle=0");
     log("\x1b[32m%s\x1b[0m", "DB: Battles reset!");
@@ -658,35 +688,55 @@ async function getLocLevel(user) {
 }
 
 async function canUseAction(user, action) {
-    let actions = await getLocActions(user);
-    if (actions.includes(action)) return true;
+	if(await isInDungeon(user.id)) {
+		let dungeonActions = await getDungeonActions(user);
+		if(dungeonActions.includes(action)) return true;
+		else return false;
+	}
+	const locationType = await getLocType(user);
+	const actions = await getLocActions(user);
+	const typeActions = await getLocTypeActions(locationType);
+    if (actions.includes(action) || typeActions.includes(action)) return true;
     else return false;
-}
-
-async function getLocActions(user) {
-    const locations = await getLocation(user);
-    const locationRes = await queryDB("SELECT actions FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
-    let actions = JSON.parse(locationRes[0].actions);
-    return actions;
 }
 
 async function getLocMonsters(user) {
     const locations = await getLocation(user);
-    const locationRes = await queryDB("SELECT monsterTable FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
-    let monsters = JSON.parse(locationRes[0].monsterTable);
+    const biome = await getLocBiome(user);
+	
+    const locationRes = await queryDB("SELECT monster_table FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
+	
+    let monsters = JSON.parse(locationRes[0].monster_table);
+    let biomeMonsters = await getBiomeMonsters(biome);
+	
+    return monsters.concat(biomeMonsters);
+}
+
+async function getLocalMonsters(user) {
+    const locations = await getLocation(user);
+	
+    const locationRes = await queryDB("SELECT monster_table FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
+	
+    let monsters = JSON.parse(locationRes[0].monster_table);
+	
     return monsters;
 }
 
 async function getAnyMonster(user) {
     const monsters = await queryDB("SELECT * FROM monsters");
-	let randomIndex = randomIntIn(0,monsters.length);
+	let randomIndex = randomIntEx(0,monsters.length);
     return monsters[randomIndex].id;
 }
 
-async function getRandomMonster(user, local=true) {
-	let monsterTable
-    if(local) monsterTable = await getLocMonsters(user);
-	else return await getAnyMonster();
+async function getRandomMonster(user, local=true, biome=true, any=false) {
+    let biomeName = await getLocBiome(user);
+	let monsterTable = [];
+	console.log(monsterTable);
+	if(biome) monsterTable = monsterTable.concat(await getBiomeMonsters(biomeName));
+	console.log(monsterTable);
+    if(local) monsterTable = monsterTable.concat(await getLocalMonsters(user));
+	console.log(monsterTable);
+	if(any) return await getAnyMonster();
     let random = randomIntEx(0, monsterTable.length);
     return monsterTable[random];
 }
@@ -698,9 +748,53 @@ async function addAchProgress(userID, field, value) {
 
 async function getLocBiome(user) {
     const locations = await getLocation(user);
-    const locationRes = await queryDB("SELECT * FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
+    const locationRes = await queryDB("SELECT biome FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
     let biome = locationRes[0].biome;
     return biome;
+}
+
+async function getLocType(user) {
+    const locations = await getLocation(user);
+    const locationRes = await queryDB("SELECT type FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
+    let type = locationRes[0].type;
+    return type;
+}
+
+async function getLocTypeActions(locationType) {
+    const locationRes = await queryDB("SELECT location_actions FROM location_types WHERE type_name='" + locationType + "'");
+    let actions = JSON.parse(locationRes[0].location_actions);
+    return actions;
+}
+
+async function getLocActions(user) {
+    const locations = await getLocation(user);
+    const locationRes = await queryDB("SELECT actions FROM locations WHERE coords='" + JSON.stringify(locations) + "'");
+    let actions = JSON.parse(locationRes[0].actions);
+    return actions;
+}
+
+async function getDungeonLocation(user) {
+    const locations = await queryDB("SELECT dungeon_location FROM users WHERE discordID=" + user.id);
+    return JSON.parse(locations[0].dungeon_location);
+}
+
+async function getDungeonActions(user) {
+    const locations = await getDungeonLocation(user);
+    const locationRes = await queryDB("SELECT actions FROM locations_dungeon WHERE coords='" + JSON.stringify(locations) + "'");
+    let actions = JSON.parse(locationRes[0].actions);
+    return actions;
+}
+
+async function getBiomeDrops(biomeName) {
+    const biomeRes = await queryDB("SELECT biome_drops FROM location_biomes WHERE name='" + biomeName + "'");
+    let drops = JSON.parse(biomeRes[0].biome_drops);
+    return drops;
+}
+
+async function getBiomeMonsters(biomeName) {
+    const biomeRes = await queryDB("SELECT monster_table FROM location_biomes WHERE name='" + biomeName + "'");
+    let table = JSON.parse(biomeRes[0].monster_table);
+    return table;
 }
 
 async function getUserID(user, isID) {
@@ -770,11 +864,12 @@ async function generateCoasts(x, y) {
     return oceanIndex;
 }
 
-async function makeTile(x, y) {
+async function makeTile(x, y, dungeon=false) {
     var coords = new Array();
     coords.push(x);
     coords.push(y);
-    const tiles = await queryDB("SELECT * FROM locations WHERE coords='" + JSON.stringify(coords) + "'");
+    let tiles = await queryDB("SELECT * FROM locations WHERE coords='" + JSON.stringify(coords) + "'");
+	if(dungeon) tiles = await queryDB("SELECT * FROM locations_dungeon WHERE coords='" + JSON.stringify(coords) + "'");
     var marker;
     var biome;
 
@@ -785,6 +880,7 @@ async function makeTile(x, y) {
         log("\x1b[31m%s\x1b[0m", "DB: Couldn't find tile at x" + x + " y" + y);
         marker = '';
         biome = 'ocean';
+		if(dungeon) biome = 'black';
     }
 
 
@@ -807,6 +903,12 @@ async function makeTile(x, y) {
     return tpl;
 }
 
+async function isInDungeon(userID) {
+	let userRes = await queryDB("SELECT inDungeon FROM users WHERE discordID="+userID);
+	if(userRes[0].inDungeon == 1) return true;
+	else return false;
+}
+
 async function generateMap(x, y, user) {
     let center = await makeTile(x, y);
     let west = await makeTile(x - 1, y);
@@ -817,6 +919,42 @@ async function generateMap(x, y, user) {
     let southEast = await makeTile(x + 1, y + 1);
     let south = await makeTile(x, y + 1);
     let southWest = await makeTile(x - 1, y + 1);
+
+    let map = await new Jimp(300, 300);
+    map.composite(northWest, 0, 0, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+    map.composite(north, 100, 0, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+    map.composite(northEast, 200, 0, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+    map.composite(west, 0, 100, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+    map.composite(center, 100, 100, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+    map.composite(east, 200, 100, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+    map.composite(southWest, 0, 200, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+    map.composite(south, 100, 200, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+    map.composite(southEast, 200, 200, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+
+    // Generate player marker
+    const avatar = await Jimp.read(user.displayAvatarURL);
+    avatar.resize(38, 38);
+    const avatarMask = await Jimp.read('./img/tiles/youMask.png');
+    const marker = await Jimp.read('./img/tiles/you.png');
+    marker.opacity(0.5);
+    avatar.mask(avatarMask, 0, 0);
+    marker.composite(avatar, 4, 4);
+    map.composite(marker, 127, 80);
+
+    const buffer = await map.filterType(0).getBufferAsync('image/png');
+    return buffer;
+}
+
+async function generateDungeonMap(x, y, user) {
+    let center = await makeTile(x, y, true);
+    let west = await makeTile(x - 1, y, true);
+    let northWest = await makeTile(x - 1, y - 1, true);
+    let north = await makeTile(x, y - 1, true);
+    let northEast = await makeTile(x + 1, y - 1, true);
+    let east = await makeTile(x + 1, y, true);
+    let southEast = await makeTile(x + 1, y + 1, true);
+    let south = await makeTile(x, y + 1, true);
+    let southWest = await makeTile(x - 1, y + 1, true);
 
     let map = await new Jimp(300, 300);
     map.composite(northWest, 0, 0, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
@@ -1297,5 +1435,13 @@ module.exports = {
 	giveChips,
 	hasChips,
 	shuffle,
-	takeChips
+	takeChips,
+	addTrash,
+	getBiomeDrops,
+	getBiomeMonsters,
+	isInDungeon,
+	generateDungeonMap,
+	getDungeonWarp,
+	dungeonTeleport,
+	getWarp
 };

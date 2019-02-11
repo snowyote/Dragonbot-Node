@@ -1,5 +1,5 @@
 const Utils = require('../../core/utils.js');
-const choices = ['attack', 'fortify', 'counter', 'focus', 'stance', 'magic', 'heal', 'run'];
+const choices = ['attack', 'fortify', 'counter', 'focus', 'magic', 'heal', 'run'];
 
 module.exports.UserBattler = class UserBattler {
 	constructor(battle, user) {

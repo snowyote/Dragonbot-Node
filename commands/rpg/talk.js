@@ -32,7 +32,7 @@ module.exports = class TalkCommand extends Command {
 		let userMention = "<@"+msg.author.id+">";
 		if(await Utils.canUseAction(msg.author, 'talk')) {
 			// Dragonstone Village
-			if(x==0 && y==0) {
+			if(x==0 && y==-1) {
 				var timesTalked = flagRes[0].talk_dragonstone;
 				var questsCompleted = flagRes[0].quests_dragonstone;
 				var inProgress = flagRes[0].quest_in_progress;
