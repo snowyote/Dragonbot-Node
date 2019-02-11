@@ -62,7 +62,26 @@ async function randomDrop(user, monsterID) {
 	}
 }
 
-async function randomDrops(user, monsterID, min, max) {
+async function randomBossDrop(user, bossID) {
+    let dropChance = Utils.randomIntIn(1, 100);
+    let monRes = await Utils.queryDB("SELECT * FROM monsters_bosses WHERE id=" + bossID);
+    let dropList = JSON.parse(monRes[0].drops);
+    let dropRate = monRes[0].dropRate;
+    if (dropChance <= dropRate) {
+        if (dropList.length > 0) {
+            let randomDrop = Utils.randomIntEx(0, dropList.length);
+			let drop = dropList[randomDrop];
+			console.log(drop);
+			if(drop.indexOf('-') > -1)
+				return dropArray = drop.split('-');
+			return drop;
+        }
+    } else {
+		return ["none","0"];
+	}
+}
+
+async function randomDrops(user, monsterID, min, max, isBoss=false) {
     let dropNum = Utils.randomIntIn(min, max);
     let questItems = new Array;
     let normalItems = new Array;
@@ -78,6 +97,7 @@ async function randomDrops(user, monsterID, min, max) {
 	let locationLevel = await Utils.getLocLevel(user);
     for (let i = 0; i < dropNum; i++) {
         let dropArray = await randomDrop(user, monsterID);
+		if(isBoss) dropArray = await randomBossDrop(user, monsterID);
 		
 		let dropType = dropArray;
 		let typeID = 0;
@@ -218,37 +238,39 @@ async function randomEnemyStats(user, monsterID, isElite=false, isUltraElite=fal
 	let randomMagic = Utils.randomIntIn(25,50);
 	
 	if(isElite) {
+		randomHealth = Math.floor(randomHealth * 1.5);
+		randomMagic = Math.floor(randomMagic * 1.5);
+	}
+	
+	if(isUltraElite) {
 		randomHealth = randomHealth * 2;
 		randomMagic = randomMagic * 2;
 	}
 	
-	if(isUltraElite) {
-		randomHealth = randomHealth * 3;
-		randomMagic = randomMagic * 3;
-	}
-	
-	var monsterStats = [0,0,0,0,0,100,100,"Name",0];
-	
-	monsterStats[0] = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
-	monsterStats[1] = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
-	monsterStats[2] = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
-	monsterStats[3] = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
-	monsterStats[4] = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
-	
-	monsterStats[5] = randomHealth;
-	monsterStats[6] = randomMagic*level;
-	
-	let monsterName = await getMonsterName(monsterID);
-	monsterStats[7] = monsterName;
 	let multiplier = 1;
 	if(isElite) {
-		multiplier = 3;
+		multiplier = 2;
 		monsterStats[7] = 'Elite '+monsterName;
 	}
 	if(isUltraElite) {
 		multiplier = 5;
 		monsterStats[7] = 'Ultra Elite '+monsterName;
 	}
+	
+	var monsterStats = [0,0,0,0,0,100,100,"Name",0];
+	
+	monsterStats[0] = ((Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level)*multiplier;
+	monsterStats[1] = ((Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level)*multiplier;
+	monsterStats[2] = ((Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level)*multiplier;
+	monsterStats[3] = ((Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level)*multiplier;
+	monsterStats[4] = ((Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level)*multiplier;
+	
+	monsterStats[5] = randomHealth;
+	monsterStats[6] = randomMagic*level;
+	
+	let monsterName = await getMonsterName(monsterID);
+	monsterStats[7] = monsterName;
+	
 	let yourLevel = await Utils.getLevel(user.id);
 	let yourStatCount = 20+((yourLevel-1)*4);
 	let statCount = monsterStats[0]+monsterStats[1]+monsterStats[2]+monsterStats[3]+monsterStats[4]+Math.floor(monsterStats[5]/25)+Math.floor(monsterStats[6]/25);
@@ -260,7 +282,26 @@ async function randomEnemyStats(user, monsterID, isElite=false, isUltraElite=fal
 	return monsterStats;
 }
 
-async function battle(msg, monsterID, battleMap, random=false, tournament=false) {
+async function bossStats(user, bossID) {
+	let bossRes = await Utils.queryDB("SELECT * FROM monsters_bosses WHERE id="+bossID);
+	let level = await Utils.getLocLevel(user);
+	
+	var monsterStats = [bossRes[0].prowess,bossRes[0].fortitude,bossRes[0].agility,bossRes[0].impact,bossRes[0].precise,bossRes[0].health,bossRes[0].magic,"[Boss] "+bossRes[0].name,0];
+	
+	let multiplier = 10;
+	
+	let yourLevel = await Utils.getLevel(user.id);
+	let yourStatCount = 20+((yourLevel-1)*4);
+	let statCount = monsterStats[0]+monsterStats[1]+monsterStats[2]+monsterStats[3]+monsterStats[4]+Math.floor(monsterStats[5]/25)+Math.floor(monsterStats[6]/25);
+	let adjustedStatCount = statCount - yourStatCount;
+	console.log("XP Debug:\nEnemy Stat Count: "+statCount+"\nYour Stat Count: "+yourStatCount+"\nAdjust Amount :"+adjustedStatCount);
+	monsterStats[8] = ((statCount+(adjustedStatCount*2))*level)*multiplier;
+	if(monsterStats[8] <= 0) monsterStats[8] = 1;
+	console.log("XP Debug: Final XP: "+monsterStats[8]);
+	return monsterStats;
+}
+
+async function battle(msg, monsterID, battleMap, random=false, tournament=false, isBoss=false) {
     if (battleMap.has(msg.channel.id)) return msg.reply('Only one battle may be occurring per channel.');
     if (await Utils.isInBattle(msg.author)) return msg.reply('You are already in a battle!');
     battleMap.set(msg.channel.id, new MonsterBattle(msg.author, monsterID));
@@ -279,7 +320,9 @@ async function battle(msg, monsterID, battleMap, random=false, tournament=false)
     battle.user.agiBonus = Math.ceil(await Utils.calculateAgility(msg.author.id));
     battle.user.forBonus = Math.ceil(await Utils.calculateFortitude(msg.author.id));
 
-	let monsterStats = await getMonsterStats(monsterID);
+	let monsterStats;
+	if(isBoss) monsterStats = await bossStats(msg.author, monsterID);
+	else monsterStats = await getMonsterStats(monsterID);
 	
     // Monster stuff
 	if(random) {
@@ -300,6 +343,17 @@ async function battle(msg, monsterID, battleMap, random=false, tournament=false)
 		battle.opponent.agiBonus = Math.ceil(await monsterBonus(monsterStats[2]));
 		battle.opponent.impBonus = Math.ceil(await monsterBonus(monsterStats[3], true));
 		battle.opponent.preBonus = Math.ceil(await monsterBonus(monsterStats[4], true));
+	} else if(isBoss) {
+		battle.opponent.name = monsterStats[7];
+		battle.opponent.hp = monsterStats[5];
+		battle.opponent.maxHP = monsterStats[5];
+		battle.opponent.mp = monsterStats[6];
+		battle.opponent.maxMP = monsterStats[6];
+		battle.opponent.prBonus = Math.ceil(await monsterBonus(monsterStats[0]));
+		battle.opponent.forBonus = Math.ceil(await monsterBonus(monsterStats[1]));
+		battle.opponent.agiBonus = Math.ceil(await monsterBonus(monsterStats[2]));
+		battle.opponent.impBonus = Math.ceil(await monsterBonus(monsterStats[3], true));
+		battle.opponent.preBonus = Math.ceil(await monsterBonus(monsterStats[4], true));
 	} else {
 		battle.opponent.hp = await getMonsterHP(monsterID);
 		battle.opponent.maxHP = await getMonsterHP(monsterID);
@@ -310,7 +364,7 @@ async function battle(msg, monsterID, battleMap, random=false, tournament=false)
 		battle.opponent.forBonus = await monsterBonus(monsterStats[1]);
 		battle.opponent.agiBonus = await monsterBonus(monsterStats[2]);
 		battle.opponent.impBonus = await monsterBonus(monsterStats[3]);
-		battle.opponent.preBonus = await monsterBonus(monsterStats[4]);
+		battle.opponent.preBonus = await monsterBonus(monsterStats[4]);	
 	}
 	
 	// Coin flip for who goes first
@@ -319,7 +373,7 @@ async function battle(msg, monsterID, battleMap, random=false, tournament=false)
 	if(firstStrike <= 50) battle.userTurn = true;
 	else battle.userTurn = false;
 		
-	if(!tournament) msg.embed(Utils.makeRPGEmbed("Battle!", "<@"+msg.author.id+"> encountered a **"+battle.opponent.name
+	if(!tournament) msg.embed(Utils.makeRPGEmbed("Battle!", "<@"+msg.author.id+"> encountered **"+battle.opponent.name
 	+"**!\n🗡️ Prowess: "+monsterStats[0]
 	+"\n🛡️ Fortitude: "+monsterStats[1]
 	+"\n👢 Agility: "+monsterStats[2]
@@ -417,12 +471,16 @@ async function battle(msg, monsterID, battleMap, random=false, tournament=false)
             battle.attacker.useMP(amount);
             battle.reset();
         } else if (choice === 'run') {
+			if(!isBoss) {
 			let runChance = Utils.randomIntIn(1,100);
-			if(runChance <= 33) {
-				battle.attacker.forfeit();
+				if(runChance <= 33) {
+					battle.attacker.forfeit();
+				} else {
+					await msg.say(`${battle.attacker.name} was unable to flee!`);
+					battle.reset();
+				}
 			} else {
-				await msg.say(`${battle.attacker.name} was unable to flee!`);
-				battle.reset();
+				await msg.say(`You cannot run from this fight.`);
 			}
         } else if (choice === 'failed:time') {
             await msg.say(`Time's up, ${battle.attacker.name}!`);
@@ -454,7 +512,8 @@ async function battle(msg, monsterID, battleMap, random=false, tournament=false)
 				msg.embed(Utils.makeRPGEmbed("Enemy Ran!", battle.opponent.name+" ran away from the battle!"));
 			} 
 			else {
-				let drops = await randomDrops(msg.author, monsterID, 1, 3);
+				let drops = await randomDrops(msg.author, monsterID, 1, 3, false);
+				if(isBoss) drops = await randomDrops(msg.author, monsterID, 1, 3, true);
 				msg.embed(Utils.makeRPGEmbed("You Won!", "<@" + msg.author.id + "> defeated the **" + battle.opponent.name + "**!\n\n***Drops:***\n"+drops));
 				await Utils.giveXP(msg, msg.author.id, monsterStats[8]);
 			}

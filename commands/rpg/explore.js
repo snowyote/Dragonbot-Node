@@ -78,7 +78,7 @@ module.exports = class ExploreCommand extends Command {
 										trashMsg = "threw a net in the water and recovered";
 										foodMsg = "went spear fishing, gaining";
 										break;
-									case 'Plains':
+									case 'Field':
 										possibleRewards.push('nothing', 'trash', 'battle', 'stamina', 'item', 'crates', 'keys', 'caves', 'quest');
 										trashMsg = "found a dumping ground containing";
 										break;
@@ -185,7 +185,7 @@ module.exports = class ExploreCommand extends Command {
 											Utils.log("\x1b[36m%s\x1b[0m", "DB: Stamina");
 											const explores = await Utils.queryDB("SELECT * FROM exploration WHERE type = 'Stamina'");
 											rewardCheck = Utils.biasedRandom(0,explores.length-1,(8-(luck/10)));
-											if(petStamina < (petStamina/10)) {
+											if(petStamina <= ((petMaxStamina/10)*2)) {
 												randomAmount = Utils.randomIntIn(explores[rewardCheck].amountMin, explores[rewardCheck].amountMax);
 												findMsg = findMsg + explores[rewardCheck].icon+" ...found some fruit, gaining **"+randomAmount+"** stamina!\n";
 												staminaAdd += randomAmount;

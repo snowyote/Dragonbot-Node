@@ -2,6 +2,7 @@ const {Command} = require('discord.js-commando');
 const Utils = require('../../core/utils.js');
 const BattleUtils = require('../../core/battleUtils.js');
 const Discord = require('discord.js');
+const { PerformanceObserver, performance } = require('perf_hooks');
 
 module.exports = class TravelCommand extends Command {
     constructor(client) {
@@ -25,9 +26,11 @@ module.exports = class TravelCommand extends Command {
     }
 
     async run(msg, {direction}) {
+		let t0 = performance.now();
 		if(await Utils.isInBattle(msg.author)) {
 			return msg.say("You're in a battle, finish that before using this command!");
 		}
+		if (this.battles.has(msg.channel.id)) return msg.reply('Please wait for the battle in this channel to end before moving!');
 		let locType = "location";
 		if(await Utils.isInDungeon(msg.author.id)) locType="dungeon_location";
 		const userRes = await Utils.queryDB("SELECT * FROM users WHERE discordID="+msg.author.id);
@@ -76,6 +79,8 @@ module.exports = class TravelCommand extends Command {
 					embedMsg.addField(tiles[0].name, await Utils.RPGOptions(msg.author));
 				}
 				msg.embed(embedMsg);
+				let t1 = performance.now();
+				Utils.log("\x1b[45m%s\x1b[0m", "Generating map (by travel) took " + ((t1 - t0)/1000).toFixed(2) + " seconds!");
 				let encounterChance = Utils.randomIntIn(1,100);
 				let monsterToFight = await Utils.getRandomMonster(msg.author, true, true);
 				if(locType == "dungeon_location") monsterToFight = await Utils.getRandomMonster(msg.author, true, false, false, true);

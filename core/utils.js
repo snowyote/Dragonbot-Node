@@ -3,6 +3,7 @@ const Jimp = require('jimp');
 const Discord = require('discord.js');
 const request = require('request-promise');
 const configFile = require("../config.json");
+const { PerformanceObserver, performance } = require('perf_hooks');
 
 const config = {
     host: configFile.host,
@@ -12,105 +13,6 @@ const config = {
     charset: configFile.charset
 };
 
-// -----------------------------------
-// Add users to database, achievements
-// -----------------------------------
-
-async function updateUser(userID, msg) {
-	try{
-		let queryRes = await queryDB("SELECT * FROM users WHERE discordID=" + userID);
-		if (queryRes && queryRes.length) {
-			var userID = queryRes[0].id;
-			var active = queryRes[0].activePet;
-			let petRes = await queryDB("SELECT * FROM pets WHERE id=" + active);
-			let userAch = await queryDB("SELECT achievements FROM users WHERE id=" + userID)
-			var AchJSON = JSON.parse(userAch[0].achievements);
-			var postCount = queryRes[0].xp;
-			if(petRes && petRes.length) {
-				var petLvl = petRes[0].level;
-				var foodStored = queryRes[0].food;
-				var petID = JSON.parse(queryRes[0].petID);
-				await queryDB("UPDATE users SET xp = xp + 1 WHERE discordID = " + userID);
-				await queryDB("UPDATE server SET jackpotAmount = jackpotAmount + 1 WHERE id = 1");
-				var urCount = 0;
-				var rCount = 0;
-				if(active > 0) {
-					for (var pi = 0; pi < petID.length; pi++) {
-						let newPetRes = await queryDB("SELECT * FROM pets WHERE id=" + petID[pi]);
-						var type = newPetRes[0].petType;
-						let petTypeRes = await queryDB("SELECT * FROM pet_types WHERE id=" + type);
-						var rarity = petTypeRes[0].rarity;
-						if (rarity == 1) urCount++;
-						if (rarity == 3) rCount++;
-					}
-				}
-				var equipmentList = JSON.parse(queryRes[0].equipmentList);
-				const itemRes = await queryDB("SELECT * FROM items");
-				var hasHG = 0;
-				var hasTR = 0;
-				var hasPW = 0;
-				var hasMI = 0;
-				if (equipmentList.length > 0) {
-					for (var i = 0; i < equipmentList.length; i++) {
-						var iType = itemRes[equipmentList[i] - 1].type;
-						if (iType == "Headgear") {
-							hasHG++;
-						}
-						if (iType == "Trinket") {
-							hasTR++;
-						}
-						if (iType == "Power") {
-							hasPW++;
-						}
-						if (iType == "Misc") {
-							hasMI++;
-						}
-					}
-				}
-				
-				var equipCount = hasHG + hasTR + hasPW + hasMI;
-				
-				await queryDB("UPDATE achievement_progress SET hgNumber=" + hasHG + ", trNumber=" + hasTR + ", pwNumber=" + hasPW + ", petLevel=" + petLvl + ", ultraRareOwned=" + urCount + ", rareOwned=" + rCount + ", achUnlocked=" + AchJSON.length + ", foodStored=" + foodStored + ", equipCount=" + equipCount + " WHERE id=" + userID);
-				
-				log("\x1b[36m%s\x1b[0m", "DB: Updated achievement_progress for user ID " + userID);
-			}
-
-			let achProgRes = await queryDB("SELECT * FROM achievement_progress WHERE id=" + userID)
-			var achKeys = Object.keys(achProgRes[0]);
-			let achRes = await queryDB("SELECT id, varToCheck, varRequired, name, description FROM achievements")
-
-			for (var index = 0; index < achRes.length; index++) {
-				let i = index;
-				let achievement = achRes[i];
-				var varToCheck = parseInt(achievement.varToCheck);
-				var varRequired = parseInt(achievement.varRequired);
-				if (achProgRes[0][achKeys[varToCheck]] >= varRequired) {
-					if (AchJSON.includes(i + 1) == false) {
-						// doesn't have achievement
-						const achUnlock = new Discord.RichEmbed()
-							.setAuthor("Unlocked Achievement", "https://i.imgur.com/CyAb3mV.png")
-							.setColor("#FDF018")
-							.addField("Congratulations!", "<@" + userID + "> - The achievement **" + achievement.name + "** has been unlocked for completing the objective: *" + achievement.description + "*!\nUse `hod?achievements` to check your progress!")
-						client.channels.get(msg.channel.id).send(achUnlock);
-						AchJSON.push(i + 1);
-						var JSONString = JSON.stringify(AchJSON);
-						await queryDB("UPDATE users SET achievements='" + JSONString + "' WHERE id=" + userID);
-						log("\x1b[36m%s\x1b[0m", "DB: Added achievement " + achievement.id + " to user " + userID);
-					}
-				}
-			}
-		} else {
-			log("\x1b[36m%s\x1b[0m", "DB: " + userID + " was NOT found, adding to database!");
-			let adduserIDRes = await queryDB("INSERT INTO users(discordID) VALUES (" + userID + "); ");
-			log("\x1b[36m%s\x1b[0m", "DB: " + userID + " successfully added to database as ID " + adduserIDRes.insertId + "!");
-			let addAchievementQuery = queryDB("INSERT INTO achievement_progress(id) VALUES (" + adduserIDRes.insertId + ")");
-			log("\x1b[36m%s\x1b[0m", "DB: Successfully added to achievement_progress!");
-		}
-	} catch(err) {
-		log("\x1b[31m%s\x1b[0m", "DB: Error in updating user: "+ err.stack);
-	}
-}
-
 // --
 // Query SQL database function
 // --
@@ -118,7 +20,7 @@ async function updateUser(userID, msg) {
 async function queryDB(sql) {
     let connection;
     try {
-        log("\x1b[36m%s\x1b[0m", "DB: Running query: " + sql);
+        //log("\x1b[36m%s\x1b[0m", "DB: Running query: " + sql);
         connection = await mysql.createConnection(config);
         let result = await connection.query(sql);
         connection.end();
@@ -408,9 +310,11 @@ async function hasActivatedTile(userID, tileID) {
 async function activateTile(user, tileID) {
 	if(await hasActivatedTile(user.id, tileID)) return false;
 	
+    let dbUserID = await getUserID(user.id, true);
+	
 	let tilesList = await getTilesActivated(user.id);
 	tilesList.push(tileID);
-	await queryDB("UPDATE rpg_flags SET tiles_activated='"+JSON.stringify(tilesList)+"'");
+	await queryDB("UPDATE rpg_flags SET tiles_activated='"+JSON.stringify(tilesList)+"' WHERE userID="+dbUserID);
 }
 
 async function getTileID(user) {
@@ -444,10 +348,20 @@ async function completeQuest(userID, quest) {
     // This can be the ID if it's an item, or amount if it's a resource!
     let rewardAmount = questRes[0].rewardAmount;
 
-    let itemNeeded = questRes[0].itemNeeded;
+	// Take needed items
+    let itemType = questRes[0].itemType;
+    let typeID = questRes[0].typeID;
+    let itemAmount = questRes[0].amountNeeded;
 
-    await removeQuestItem(userID, itemNeeded);
-
+	switch(itemType) {
+		case 'quest':
+			await removeQuestItem(userID, typeID);
+			break;
+		case 'material':
+			await takeMaterial(userID, typeID, itemAmount);
+			break;
+	}
+    
     let rewardStr = "";
 
     switch (reward) {
@@ -515,6 +429,23 @@ async function addMaterial(userID, material, amount) {
         // does not contain material already
         materialList[mat] = amount;
     }
+    await queryDB("UPDATE users SET materials='" + JSON.stringify(materialList) + "' WHERE discordID=" + userID);
+}
+
+async function takeMaterial(userID, material, amount) {
+    const userRes = await queryDB("SELECT materials FROM users WHERE discordID=" + userID);
+    const matRes = await queryDB("SELECT * FROM materials WHERE id=" + material);
+    let materialList = JSON.parse(userRes[0].materials);
+    let mat = material.toString();
+    if (materialList[mat]) {
+        // contains material already
+        materialList[mat] -= amount;
+		if(materialList[mat] <= 0) {
+			let index = materialList.indexOf(mat);
+			materialList.splice(index, 1);
+		}
+    }
+	
     await queryDB("UPDATE users SET materials='" + JSON.stringify(materialList) + "' WHERE discordID=" + userID);
 }
 
@@ -622,6 +553,7 @@ async function RPGOptions(user) {
     if (actions.includes('descend')) opt = opt + '**Descend Stairs** (*!descend*)\n';
     if (actions.includes('ascend')) opt = opt + '**Ascend Stairs** (*!ascend*)\n';
     if (actions.includes('search')) opt = opt + '**Search** (*!search*)\n';
+    if (actions.includes('touch')) opt = opt + '**Touch** (*!touch*)\n';
 
     opt = opt.slice(0, -1);
 	
@@ -1136,7 +1068,7 @@ async function isInDungeon(userID) {
 }
 
 async function generateMap(x, y, user) {
-    let center = await makeTile(x, y);
+    /*let center = await makeTile(x, y);
     let west = await makeTile(x - 1, y);
     let northWest = await makeTile(x - 1, y - 1);
     let north = await makeTile(x, y - 1);
@@ -1144,9 +1076,31 @@ async function generateMap(x, y, user) {
     let east = await makeTile(x + 1, y);
     let southEast = await makeTile(x + 1, y + 1);
     let south = await makeTile(x, y + 1);
-    let southWest = await makeTile(x - 1, y + 1);
+    let southWest = await makeTile(x - 1, y + 1);*/
+	
+	let center, west, northWest, north, northEast, east, southEast, south, southWest, map, avatar, avatarMask, marker;
+	
+	const runAsyncFunctions = async () => {
+		
+		Promise.all([
+			center = await makeTile(x, y),
+			west = await makeTile(x - 1, y),
+			northWest = await makeTile(x - 1, y - 1),
+			north = await makeTile(x, y - 1),
+			northEast = await makeTile(x + 1, y - 1),
+			east = await makeTile(x + 1, y),
+			southEast = await makeTile(x + 1, y + 1),
+			south = await makeTile(x, y + 1),
+			southWest = await makeTile(x - 1, y + 1),
+			map = await new Jimp(300, 300),
+			avatar = await Jimp.read(user.displayAvatarURL),
+			avatarMask = await Jimp.read('./img/tiles/youMask.png'),
+			marker = await Jimp.read('./img/tiles/you.png')
+		])
+	};
 
-    let map = await new Jimp(300, 300);
+	await runAsyncFunctions();
+
     map.composite(northWest, 0, 0, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
     map.composite(north, 100, 0, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
     map.composite(northEast, 200, 0, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
@@ -1158,29 +1112,36 @@ async function generateMap(x, y, user) {
     map.composite(southEast, 200, 200, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
 
     // Generate player marker
-    const avatar = await Jimp.read(user.displayAvatarURL);
     avatar.resize(38, 38);
-    const avatarMask = await Jimp.read('./img/tiles/youMask.png');
-    const marker = await Jimp.read('./img/tiles/you.png');
     marker.opacity(0.5);
     avatar.mask(avatarMask, 0, 0);
     marker.composite(avatar, 4, 4);
     map.composite(marker, 127, 80);
-
-    const buffer = await map.filterType(0).getBufferAsync('image/png');
+	map.quality(75);
+    const buffer = await map.filterType(0).getBufferAsync('image/jpeg');
     return buffer;
 }
 
 async function generateDungeonMap(x, y, user) {
-    let center = await makeTile(x, y, true);
-    let west = await makeTile(x - 1, y, true);
-    let northWest = await makeTile(x - 1, y - 1, true);
-    let north = await makeTile(x, y - 1, true);
-    let northEast = await makeTile(x + 1, y - 1, true);
-    let east = await makeTile(x + 1, y, true);
-    let southEast = await makeTile(x + 1, y + 1, true);
-    let south = await makeTile(x, y + 1, true);
-    let southWest = await makeTile(x - 1, y + 1, true);
+	
+	let center, west, northWest, north, northEast, east, southEast, south, southWest;
+	
+	const runAsyncFunctions = async () => {
+		
+		Promise.all([
+			center = await makeTile(x, y, true),
+			west = await makeTile(x - 1, y, true),
+			northWest = await makeTile(x - 1, y - 1, true),
+			north = await makeTile(x, y - 1, true),
+			northEast = await makeTile(x + 1, y - 1, true),
+			east = await makeTile(x + 1, y, true),
+			southEast = await makeTile(x + 1, y + 1, true),
+			south = await makeTile(x, y + 1, true),
+			southWest = await makeTile(x - 1, y + 1, true)
+		])
+	};
+
+	await runAsyncFunctions();
 
     let map = await new Jimp(300, 300);
     map.composite(northWest, 0, 0, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
@@ -1241,27 +1202,54 @@ async function getMP(userID) {
 }
 
 async function generateWorldMap() {
-    let map = await new Jimp(1200, 1600);
-    var worldX = 10;
-    var worldY = 10;
+    let map = await new Jimp(1200, 1400);
+    var worldY = 8;
     var xOffset = 0;
     var yOffset = 0;
-    for (let i = -8; i < worldY; i++) {
+    for (let i = -6; i < worldY; i++) {
         //Each Y
-        for (let i2 = -5; i2 < worldX; i2++) {
-            //Each X
-            let tile = await makeTile(i2, i);
-            let font = await Jimp.loadFont('./fonts/beleren15.fnt');
-            tile.print(font, 5, 5, '[' + i2 + ',' + i + ']', 500, 500);
-            log("\x1b[32m%s\x1b[0m", "DB: Place world map tile at x" + xOffset + " y" + yOffset);
-            map.composite(tile, xOffset, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
-            xOffset += 100;
-        }
-        yOffset += 100;
-        xOffset = 0;
-    }
+		let tile1, tile2, tile3, tile4, tile5, tile6, tile7, tile8, tile9, tile10, tile11, tile12;
+		
+		let runAsyncFunctions = async () => {
+		
+			Promise.all([
+				tile1 = await makeTile(-5, i),
+				tile2 = await makeTile(-4, i),
+				tile3 = await makeTile(-3, i),
+				tile4 = await makeTile(-2, i),
+				tile5 = await makeTile(-1, i),
+				tile6 = await makeTile(0, i),
+				tile7 = await makeTile(1, i),
+				tile8 = await makeTile(2, i),
+				tile9 = await makeTile(3, i),
+				tile10 = await makeTile(4, i),
+				tile11 = await makeTile(5, i),
+				tile12 = await makeTile(6, i)
+			])
+		};
 
-    const buffer = await map.filterType(0).getBufferAsync('image/png');
+			await runAsyncFunctions();
+			            
+            /*let font = await Jimp.loadFont('./fonts/beleren15.fnt');
+            tile.print(font, 5, 5, '[' + i2 + ',' + i + ']', 500, 500);
+            log("\x1b[32m%s\x1b[0m", "DB: Place world map tile at x" + xOffset + " y" + yOffset);*/
+            map.composite(tile1, 0, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+            map.composite(tile2, 100, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+            map.composite(tile3, 200, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+            map.composite(tile4, 300, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+            map.composite(tile5, 400, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+            map.composite(tile6, 500, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+            map.composite(tile7, 600, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+            map.composite(tile8, 700, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+            map.composite(tile9, 800, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+            map.composite(tile10, 900, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+            map.composite(tile11, 1000, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+            map.composite(tile12, 1100, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);		
+			
+        yOffset += 100;
+    }
+	map.resize(600, Jimp.AUTO);
+    const buffer = await map.filterType(0).getBufferAsync('image/jpeg');
     return buffer;
 }
 
@@ -1682,7 +1670,6 @@ module.exports = {
 	getMP,
 	canTournament,
 	getUserID,
-	updateUser,
 	giveChips,
 	hasChips,
 	shuffle,
@@ -1702,5 +1689,6 @@ module.exports = {
 	searchRewards,
 	getDungeonLoot,
 	getDungeonLocName,
+	getDungeonLocation,
 	activateTile
 };

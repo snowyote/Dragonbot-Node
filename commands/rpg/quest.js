@@ -63,11 +63,11 @@ module.exports = class QuestCommand extends Command {
 			if(flagRes[0].quest_in_progress > 0) {
 				const questRes = await Utils.queryDB("SELECT * FROM quests WHERE id="+flagRes[0].quest_in_progress);
 				embedMsg.addField("Current Quest", "**Name:** "+questRes[0].name+"\n**Objectives:** "+questRes[0].description);
-				return msg.embed(embedMsg);
 			} else {
 				embedMsg.addField("No Active Quests", "You don't have any active quests! Explore the world to find one!");
-				return msg.embed(embedMsg);
 			}
+			
+			return msg.embed(embedMsg);
 		}
     };
 }

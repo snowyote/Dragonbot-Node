@@ -1,6 +1,7 @@
 const {Command} = require('discord.js-commando');
 const Utils = require('../../core/utils.js');
 const Discord = require('discord.js');
+const { PerformanceObserver, performance } = require('perf_hooks');
 
 module.exports = class MapCommand extends Command {
     constructor(client) {
@@ -14,6 +15,7 @@ module.exports = class MapCommand extends Command {
     }
 
     async run(msg) {
+		let t0 = performance.now();
 		const userRes = await Utils.queryDB("SELECT * FROM users WHERE discordID="+msg.author.id);
 		let buffer, tiles, coords;
 		if(await Utils.isInDungeon(msg.author.id)) {
@@ -38,6 +40,8 @@ module.exports = class MapCommand extends Command {
 			} else {
 				embedMsg.addField(tiles[0].name, await Utils.RPGOptions(msg.author));
 		}
-		return msg.embed(embedMsg);
+		await msg.embed(embedMsg);
+		let t1 = performance.now();
+		Utils.log("\x1b[45m%s\x1b[0m", "Generating map took " + ((t1 - t0)/1000).toFixed(2) + " seconds!");
     };
 }

@@ -54,6 +54,10 @@ module.exports = class SkillCommand extends Command {
 		if(currentLevel >= 5) skillMax = 12;
 		if(currentLevel >= 10) skillMax = 16;
 		if(currentLevel >= 15) skillMax = 20;
+		if(currentLevel >= 20) skillMax = 24;
+		if(currentLevel >= 30) skillMax = 28;
+		if(currentLevel >= 40) skillMax = 30;
+		if(currentLevel >= 50) skillMax = 33;
 		
 		var maxPoints = 20+((currentLevel-1)*4)
 
