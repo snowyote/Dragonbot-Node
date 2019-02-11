@@ -18,7 +18,9 @@ module.exports = class FishCommand extends Command {
 		if(await Utils.isInBattle(msg.author)) {
 			return msg.say("You're in a battle, finish that before using this command!");
 		}
+		
 		if (this.fishing.has(msg.author.id)) return msg.reply('You are already fishing!');
+		
 		const embedMsg = new Discord.RichEmbed()
 			.setAuthor("World of the House of Dragons", "https://i.imgur.com/CyAb3mV.png")
 			
@@ -27,8 +29,8 @@ module.exports = class FishCommand extends Command {
 			embedMsg.addField("Fishing", "You are now fishing. Type `reel` as soon as something bites!");
 			await msg.embed(embedMsg);
 			let stopFishing = false;
-			let timeUntilFish = Utils.randomIntIn(3000,30000);
-			let fishTime = Utils.randomIntIn(1000,3000);
+			let timeUntilFish = Utils.randomIntIn(2000,20000);
+			let fishTime = Utils.randomIntIn(500,2000);
 			console.log(timeUntilFish);
 			await Utils.delay(timeUntilFish);
 			await msg.embed(Utils.makeRPGEmbed("Something's Biting!", "Type **reel** quickly to catch it!"));
