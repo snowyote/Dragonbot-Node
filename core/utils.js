@@ -102,27 +102,27 @@ async function getMonsterStats(monsterID) {
 
 async function calculateHP(userID) {
     const skillMultiplier = 25;
-    const userRes = await queryDB("SELECT vitality FROM users WHERE discordID=" + userID);
-    let vitality = userRes[0].vitality;
+    const userRes = await queryDB("SELECT vitality, vitalityBonus FROM users WHERE discordID=" + userID);
+    let vitality = userRes[0].vitality + userRes[0].vitalityBonus;
     let baseVitality = 100;
     return baseVitality + (vitality * skillMultiplier);
 }
 
 async function calculateMP(userID) {
     const skillMultiplier = 25;
-    const userRes = await queryDB("SELECT arcana FROM users WHERE discordID=" + userID);
-    let arcana = userRes[0].arcana;
+    const userRes = await queryDB("SELECT arcana, arcanaBonus FROM users WHERE discordID=" + userID);
+    let arcana = userRes[0].arcana + userRes[0].arcanaBonus;
     let baseArcana = 100;
     return baseArcana + (arcana * skillMultiplier);
 }
 
 async function calculateProwess(userID) {
     let skillMultiplier = 5;
-    const userRes = await queryDB("SELECT prowess FROM users WHERE discordID=" + userID);
+    const userRes = await queryDB("SELECT prowess, prowessBonus FROM users WHERE discordID=" + userID);
     let prowess = 0;
 	let calculated = 0;
     if (userRes && userRes.length) {
-		prowess = userRes[0].prowess;
+		prowess = userRes[0].prowess + userRes[0].prowessBonus;
 		for(let i = 1; i <= prowess; i++) {
 			if(i > 10) skillMultiplier = 2.5;
 			if(i > 20) skillMultiplier = 1.25;
@@ -134,11 +134,11 @@ async function calculateProwess(userID) {
 
 async function calculateFortitude(userID) {
     let skillMultiplier = 5;
-    const userRes = await queryDB("SELECT fortitude FROM users WHERE discordID=" + userID);
+    const userRes = await queryDB("SELECT fortitude, fortitudeBonus FROM users WHERE discordID=" + userID);
     let fortitude = 0;
 	let calculated = 0;
     if (userRes && userRes.length) {
-		fortitude = userRes[0].fortitude;
+		fortitude = userRes[0].fortitude + userRes[0].fortitudeBonus;
 		for(let i = 1; i <= fortitude; i++) {
 			if(i > 10) skillMultiplier = 2.5;
 			if(i > 20) skillMultiplier = 1.25;
@@ -150,11 +150,11 @@ async function calculateFortitude(userID) {
 
 async function calculatePrecision(userID) {
     let skillMultiplier = 2.5;
-    const userRes = await queryDB("SELECT precise FROM users WHERE discordID=" + userID);
+    const userRes = await queryDB("SELECT precise, precisionBonus FROM users WHERE discordID=" + userID);
     let precise = 0;
 	let calculated = 0;
     if (userRes && userRes.length) {
-		precise = userRes[0].precise;
+		precise = userRes[0].precise + userRes[0].precisionBonus;
 		for(let i = 1; i <= precise; i++) {
 			if(i > 10) skillMultiplier = 1.25;
 			if(i > 20) skillMultiplier = 0.75;
@@ -166,11 +166,11 @@ async function calculatePrecision(userID) {
 
 async function calculateAgility(userID) {
     let skillMultiplier = 5;
-    const userRes = await queryDB("SELECT agility FROM users WHERE discordID=" + userID);
+    const userRes = await queryDB("SELECT agility, agilityBonus FROM users WHERE discordID=" + userID);
     let agility = 0;
 	let calculated = 0;
     if (userRes && userRes.length) {
-		agility = userRes[0].agility;
+		agility = userRes[0].agility + userRes[0].agilityBonus;
 		for(let i = 1; i <= agility; i++) {
 			if(i > 10) skillMultiplier = 2.5;
 			if(i > 20) skillMultiplier = 1.25;
@@ -182,11 +182,11 @@ async function calculateAgility(userID) {
 
 async function calculateImpact(userID) {
     let skillMultiplier = 2.5;
-    const userRes = await queryDB("SELECT impact FROM users WHERE discordID=" + userID);
+    const userRes = await queryDB("SELECT impact, impactBonus FROM users WHERE discordID=" + userID);
     let impact = 0;
 	let calculated = 0;
     if (userRes && userRes.length) {
-		impact = userRes[0].impact;
+		impact = userRes[0].impact + userRes[0].impactBonus;
 		for(let i = 1; i <= impact; i++) {
 			if(i > 10) skillMultiplier = 1.25;
 			if(i > 20) skillMultiplier = 0.75;
@@ -250,7 +250,7 @@ async function addItem(userID, item) {
     else {
         itemList.push(item);
         await queryDB("UPDATE users SET equipmentList='" + JSON.stringify(itemList) + "' WHERE discordID=" + userID);
-        log("DB: Added item ID " + item);
+        log("\x1b[32m%s\x1b[0m", `Utils: Added item ID ${item} to ${userID}`);
         return true;
     }
 }
@@ -398,7 +398,7 @@ async function removeQuestItem(userID, item) {
         for (var i = 0; i < itemList.length; i++) {
             if (itemList[i] !== item) {
                 newItems.push(itemList[i]);
-            } else log("DB: Removed item ID " + item);
+            } else log("\x1b[32m%s\x1b[0m", `Utils: Removed quest item ID ${item} from ${userID}`);
         }
         await queryDB("UPDATE users SET questItems='" + JSON.stringify(newItems) + "' WHERE discordID=" + userID);
         return true;
@@ -412,7 +412,7 @@ async function addQuestItem(userID, item) {
     else {
         itemList.push(item);
         await queryDB("UPDATE users SET questItems='" + JSON.stringify(itemList) + "' WHERE discordID=" + userID);
-        log("DB: Added item ID " + item);
+        log("\x1b[32m%s\x1b[0m", `Utils: Added quest item ID ${item} to ${userID}`);
         return true;
     }
 }
@@ -470,6 +470,7 @@ async function addLogs(userID, logID, amount) {
     let logList = JSON.parse(userRes[0].logs);
     logList[logID] += amount;
     await queryDB("UPDATE users SET logs='" + JSON.stringify(logList) + "' WHERE discordID=" + userID);
+	log("\x1b[32m%s\x1b[0m", `Utils: Added ${amount} logs of ID ${logID} to ${userID}`);
 }
 
 async function getLogType(logID) {
@@ -492,6 +493,7 @@ async function addGems(userID, gemID, amount) {
     let gemList = JSON.parse(userRes[0].gems);
     gemList[gemID] += amount;
     await queryDB("UPDATE users SET gems='" + JSON.stringify(gemList) + "' WHERE discordID=" + userID);
+	log("\x1b[32m%s\x1b[0m", `Utils: Added ${amount} gems of ID ${gemID} to ${userID}`);
 }
 
 async function addCrate(userID, crateID, amount) {
@@ -499,6 +501,7 @@ async function addCrate(userID, crateID, amount) {
     let crateList = JSON.parse(userRes[0].crate);
     crateList[crateID] += amount;
     await queryDB("UPDATE users SET crate='" + JSON.stringify(crateList) + "' WHERE discordID=" + userID);
+	log("\x1b[32m%s\x1b[0m", `Utils: Added ${amount} crates of ID ${crateID} to ${userID}`);
 }
 
 // --
@@ -704,7 +707,6 @@ async function searchRewards(user) {
             await addLogs(user.id, i, logs[i]);
         }
         if (gems[i] > 0) {
-			console.log("Has gems 2");
             type = await getGemType(i);
             dropStr = dropStr + '**' + gems[i] + '** ' + type.toLowerCase() + '(s) \n';
             await addGems(user.id, i, gems[i]);
@@ -876,14 +878,15 @@ async function getAnyMonster(user) {
     return monsters[randomIndex].id;
 }
 
-async function getRandomMonster(user, local=true, biome=true, any=false, dungeon=false) {
+async function getRandomMonster(user, local, biome, any, dungeon) {
     let biomeName = await getLocBiome(user);
 	let monsterTable = [];
-	if(biome) monsterTable = monsterTable.concat(await getBiomeMonsters(biomeName));
     if(local) monsterTable = monsterTable.concat(await getLocalMonsters(user));
+	if(biome) monsterTable = monsterTable.concat(await getBiomeMonsters(biomeName));
 	if(dungeon) monsterTable = monsterTable.concat(await getDungeonMonsters(user));
 	if(any) return await getAnyMonster();
     let random = randomIntEx(0, monsterTable.length);
+	if(monsterTable.length < 1) return false;
     return monsterTable[random];
 }
 
@@ -1035,7 +1038,7 @@ async function makeTile(x, y, dungeon=false) {
         var marker = tiles[0].marker;
         var biome = tiles[0].biome;
     } else {
-        log("\x1b[31m%s\x1b[0m", "DB: Couldn't find tile at x" + x + " y" + y);
+        //log("\x1b[31m%s\x1b[0m", "DB: Couldn't find tile at x" + x + " y" + y);
         marker = '';
         biome = 'ocean';
 		if(dungeon) biome = 'black';
@@ -1266,7 +1269,7 @@ async function generateDungeonWorldMap() {
             let tile = await makeTile(i2, i, true);
             let font = await Jimp.loadFont('./fonts/beleren15.fnt');
             tile.print(font, 5, 5, '[' + i2 + ',' + i + ']', 500, 500);
-            log("\x1b[32m%s\x1b[0m", "DB: Place world map tile at x" + xOffset + " y" + yOffset);
+            //log("\x1b[32m%s\x1b[0m", "DB: Place world map tile at x" + xOffset + " y" + yOffset);
             map.composite(tile, xOffset, yOffset, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
             xOffset += 100;
         }

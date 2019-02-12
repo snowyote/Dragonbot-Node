@@ -184,7 +184,7 @@ async function updateUser(userID, msg) {
 				
 				await Utils.queryDB("UPDATE achievement_progress SET hgNumber=" + hasHG + ", trNumber=" + hasTR + ", pwNumber=" + hasPW + ", petLevel=" + petLvl + ", ultraRareOwned=" + urCount + ", rareOwned=" + rCount + ", achUnlocked=" + AchJSON.length + ", foodStored=" + foodStored + ", equipCount=" + equipCount + " WHERE id=" + dbUserID);
 				
-				Utils.log("\x1b[36m%s\x1b[0m", "DB: Updated achievement_progress for user ID " + dbUserID);
+				//Utils.log("\x1b[36m%s\x1b[0m", "DB: Updated achievement_progress for user ID " + dbUserID);
 			}
 
 			let achProgRes = await Utils.queryDB("SELECT * FROM achievement_progress WHERE id=" + dbUserID)

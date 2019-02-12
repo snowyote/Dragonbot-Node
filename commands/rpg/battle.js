@@ -22,7 +22,7 @@ module.exports = class BattleCommand extends Command {
 			.setAuthor("World of the House of Dragons", "https://i.imgur.com/CyAb3mV.png")
 			
 		if(await Utils.canUseAction(msg.author, 'battle')) {
-			let monsterToFight = await Utils.getRandomMonster(msg.author, true, false);
+			let monsterToFight = await Utils.getRandomMonster(msg.author, true, false, false, false);
 			if(monsterToFight > 0)
 				await BattleUtils.battle(msg, monsterToFight, this.battles, true);
 			else {

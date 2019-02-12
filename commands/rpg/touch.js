@@ -33,23 +33,30 @@ module.exports = class TouchCommand extends Command {
 				var location = await Utils.getDungeonLocation(msg.author);
 				let x = location[0];
 				let y = location[1];
-				msg.embed(Utils.makeRPGEmbed("Touched "+name, "..."));
 				
 				// Touched the ALTAR OF BONES
 				if(x==7 && y==0) {
-					if(await BattleUtils.battle(msg, 1, this.battles, false, false, true) == false) {
-						return msg.embed(Utils.makeRPGEmbed("The Darkness Lingers", "You could not stop the darkness."));
+					if(await Utils.isInQuest(msg.author) == 3) {
+						if(await BattleUtils.battle(msg, 1, this.battles, false, false, true) == false) {
+							return msg.embed(Utils.makeRPGEmbed("The Darkness Lingers", "You could not stop the darkness."));
+						} else {
+							await Utils.activateTile(msg.author, await Utils.getTileID(msg.author));
+							return msg.embed(Utils.makeRPGEmbed("The Darkness Recedes", "The catacombs have been cleansed of the evil presence!"));
+						}
 					} else {
-						await Utils.activateTile(msg.author, await Utils.getTileID(msg.author));
-						return msg.embed(Utils.makeRPGEmbed("The Darkness Recedes", "The catacombs have been cleansed of the evil presence!"));
+						embedMsg.addField("Touched "+name, "...nothing happens!");
 					}
 				}
 				
 				// Touched the STOLEN GOLD
 				if(x==12 && y==4) {
-					if(await BattleUtils.battle(msg, 2, this.battles, false, false, true) !== false) {
-						await Utils.activateTile(msg.author, await Utils.getTileID(msg.author));
-						return msg.embed(Utils.makeRPGEmbed("Reclaimed Stolen Gold", "You obtained Taposa's stolen gold!"));
+					if(await Utils.isInQuest(msg.author) == 4) {
+						if(await BattleUtils.battle(msg, 2, this.battles, false, false, true) !== false) {
+							await Utils.activateTile(msg.author, await Utils.getTileID(msg.author));
+							return msg.embed(Utils.makeRPGEmbed("Reclaimed Stolen Gold", "You obtained Taposa's stolen gold!"));
+						}
+					} else {
+						embedMsg.addField("Touched "+name, "...nothing happens!");
 					}
 				}
 								

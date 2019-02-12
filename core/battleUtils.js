@@ -2,6 +2,7 @@ const Utils = require("./utils.js");
 const {
     MonsterBattle
 } = require('../structures/battle/monsterBattle.js');
+const { PerformanceObserver, performance } = require('perf_hooks');
 
 async function getMonsterHP(monsterID) {
     const monsterRes = await Utils.queryDB("SELECT health FROM monsters WHERE id=" + monsterID);
@@ -52,7 +53,6 @@ async function randomDrop(user, monsterID) {
         if (dropList.length > 0) {
             let randomDrop = Utils.randomIntEx(0, dropList.length);
 			let drop = dropList[randomDrop];
-			console.log(drop);
 			if(drop.indexOf('-') > -1)
 				return dropArray = drop.split('-');
 			return drop;
@@ -71,7 +71,6 @@ async function randomBossDrop(user, bossID) {
         if (dropList.length > 0) {
             let randomDrop = Utils.randomIntEx(0, dropList.length);
 			let drop = dropList[randomDrop];
-			console.log(drop);
 			if(drop.indexOf('-') > -1)
 				return dropArray = drop.split('-');
 			return drop;
@@ -275,10 +274,8 @@ async function randomEnemyStats(user, monsterID, isElite=false, isUltraElite=fal
 	let yourStatCount = 20+((yourLevel-1)*4);
 	let statCount = monsterStats[0]+monsterStats[1]+monsterStats[2]+monsterStats[3]+monsterStats[4]+Math.floor(monsterStats[5]/25)+Math.floor(monsterStats[6]/25);
 	let adjustedStatCount = statCount - yourStatCount;
-	console.log("XP Debug:\nEnemy Stat Count: "+statCount+"\nYour Stat Count: "+yourStatCount+"\nAdjust Amount :"+adjustedStatCount);
 	monsterStats[8] = ((statCount+(adjustedStatCount*2))*level)*multiplier;
 	if(monsterStats[8] <= 0) monsterStats[8] = 1;
-	console.log("XP Debug: Final XP: "+monsterStats[8]);
 	return monsterStats;
 }
 
@@ -294,14 +291,13 @@ async function bossStats(user, bossID) {
 	let yourStatCount = 20+((yourLevel-1)*4);
 	let statCount = monsterStats[0]+monsterStats[1]+monsterStats[2]+monsterStats[3]+monsterStats[4]+Math.floor(monsterStats[5]/25)+Math.floor(monsterStats[6]/25);
 	let adjustedStatCount = statCount - yourStatCount;
-	console.log("XP Debug:\nEnemy Stat Count: "+statCount+"\nYour Stat Count: "+yourStatCount+"\nAdjust Amount :"+adjustedStatCount);
 	monsterStats[8] = ((statCount+(adjustedStatCount*2))*level)*multiplier;
 	if(monsterStats[8] <= 0) monsterStats[8] = 1;
-	console.log("XP Debug: Final XP: "+monsterStats[8]);
 	return monsterStats;
 }
 
 async function battle(msg, monsterID, battleMap, random=false, tournament=false, isBoss=false) {
+	let t0 = performance.now();
     if (battleMap.has(msg.channel.id)) return msg.reply('Only one battle may be occurring per channel.');
     if (await Utils.isInBattle(msg.author)) return msg.reply('You are already in a battle!');
     battleMap.set(msg.channel.id, new MonsterBattle(msg.author, monsterID));
@@ -488,6 +484,8 @@ async function battle(msg, monsterID, battleMap, random=false, tournament=false,
         } else {
             await msg.say('You cannot do that!');
         }
+		let t1 = performance.now();
+		Utils.log("\x1b[45m%s\x1b[0m", "Battle round took " + ((t1 - t0)/1000).toFixed(2) + " seconds!");
     }
     const {
         winner

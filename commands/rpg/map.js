@@ -21,12 +21,12 @@ module.exports = class MapCommand extends Command {
 		if(await Utils.isInDungeon(msg.author.id)) {
 			coords = JSON.parse(userRes[0].dungeon_location);
 			tiles = await Utils.queryDB("SELECT * FROM locations_dungeon WHERE coords='"+JSON.stringify(coords)+"'");
-			console.log("DB: Generating dungeon map centered at x"+coords[0]+" y"+coords[1]);
+			//console.log("DB: Generating dungeon map centered at x"+coords[0]+" y"+coords[1]);
 			buffer = await Utils.generateDungeonMap(coords[0], coords[1], msg.author);
 		} else {
 			coords = JSON.parse(userRes[0].location);
 			tiles = await Utils.queryDB("SELECT * FROM locations WHERE coords='"+JSON.stringify(coords)+"'");
-			console.log("DB: Generating overworld map centered at x"+coords[0]+" y"+coords[1]);
+			//console.log("DB: Generating overworld map centered at x"+coords[0]+" y"+coords[1]);
 			buffer = await Utils.generateMap(coords[0], coords[1], msg.author);			
 		}
 		
