@@ -2,26 +2,41 @@ const equipment = {
     modifier: [
         broken = {
             name: 'Broken',
-            bonus: 0,
+            bonus: -1,
             rarity: 100
         },
         damaged = {
             name: 'Damaged',
-            bonus: 0.25,
+            bonus: -0.5,
             rarity: 100
         },
         chipped = {
             name: 'Chipped',
-            bonus: 0.5,
+            bonus: -0.25,
             rarity: 100
         },
         inferior = {
             name: 'Inferior',
-            bonus: 0.75,
+            bonus: 0,
             rarity: 100
         },
         sturdy = {
             name: 'Sturdy',
+            bonus: 0.25,
+            rarity: 80
+        },
+        hardened = {
+            name: 'Hardened',
+            bonus: 0.5,
+            rarity: 70
+        },
+        simple = {
+            name: 'Simple',
+            bonus: 0.75,
+            rarity: 60
+        },
+        common = {
+            name: 'Common',
             bonus: 1,
             rarity: 50
         },
@@ -123,7 +138,7 @@ const equipment = {
             bonus: 1.5,
             rarity: 50
         },
-        Gold = {
+        gold = {
             name: 'Gold',
             bonus: 1.75,
             rarity: 40
@@ -176,89 +191,6 @@ const equipment = {
     ],
 
     type: [
-        helm = [
-            cap = {
-                name: 'Cap',
-                type: 'helm',
-                fortitude: 0.25
-            },
-            skull_cap = {
-                name: 'Skull Cap',
-                type: 'helm',
-                fortitude: 0.5
-            },
-            helm = {
-                name: 'Helm',
-                type: 'helm',
-                fortitude: 0.75
-            },
-            full_helm = {
-                name: 'Full Helm',
-                type: 'helm',
-                fortitude: 1
-            },
-            demon_mask = {
-                name: 'Demon Mask',
-                type: 'helm',
-                fortitude: 1.25
-            },
-            horned_helm = {
-                name: 'Horned Helm',
-                type: 'helm',
-                fortitude: 1.5
-            },
-            great_helm = {
-                name: 'Great Helm',
-                type: 'helm',
-                fortitude: 1.75
-            },
-            crown = {
-                name: 'Crown',
-                type: 'helm',
-                fortitude: 2
-            },
-            war_hat = {
-                name: 'War Hat',
-                type: 'helm',
-                fortitude: 2.25
-            },
-            sallet = {
-                name: 'Sallet',
-                type: 'helm',
-                fortitude: 2.5
-            },
-            casque = {
-                name: 'Casque',
-                type: 'helm',
-                fortitude: 2.75
-            },
-            basinet = {
-                name: 'Basinet',
-                type: 'helm',
-                fortitude: 3
-            },
-            winged_helm = {
-                name: 'Winged Helm',
-                type: 'helm',
-                fortitude: 3.25
-            },
-            grand_crown = {
-                name: 'Grand Crown',
-                type: 'helm',
-                fortitude: 3.5
-            },
-            spired_helm = {
-                name: 'Spired Helm',
-                type: 'helm',
-                fortitude: 3.75
-            },
-            accursed_visage = {
-                name: 'Accursed Visage',
-                type: 'helm',
-                fortitude: 4
-            }
-        ],
-
         weapon = [
             dagger = {
                 name: 'Dagger',
@@ -351,103 +283,285 @@ const equipment = {
                 agility: -2
             }
         ],
+		
+        helm = [
+            cap = {
+                name: 'Cap',
+                type: 'helm',
+                fortitude: 0.25
+            },
+            skull_cap = {
+                name: 'Skull Cap',
+                type: 'helm',
+                fortitude: 0.5
+            },
+            helm = {
+                name: 'Helm',
+                type: 'helm',
+                fortitude: 0.75
+            },
+            full_helm = {
+                name: 'Full Helm',
+                type: 'helm',
+                fortitude: 1
+            },
+            demon_mask = {
+                name: 'Demon Mask',
+                type: 'helm',
+                fortitude: 1.25
+            },
+            horned_helm = {
+                name: 'Horned Helm',
+                type: 'helm',
+                fortitude: 1.5
+            },
+            great_helm = {
+                name: 'Great Helm',
+                type: 'helm',
+                fortitude: 1.75
+            },
+            crown = {
+                name: 'Crown',
+                type: 'helm',
+                fortitude: 2
+            },
+            war_hat = {
+                name: 'War Hat',
+                type: 'helm',
+                fortitude: 2.25
+            },
+            sallet = {
+                name: 'Sallet',
+                type: 'helm',
+                fortitude: 2.5
+            },
+            casque = {
+                name: 'Casque',
+                type: 'helm',
+                fortitude: 2.75
+            },
+            basinet = {
+                name: 'Basinet',
+                type: 'helm',
+                fortitude: 3
+            },
+            winged_helm = {
+                name: 'Winged Helm',
+                type: 'helm',
+                fortitude: 3.25
+            },
+            grand_crown = {
+                name: 'Grand Crown',
+                type: 'helm',
+                fortitude: 3.5
+            },
+            spired_helm = {
+                name: 'Spired Helm',
+                type: 'helm',
+                fortitude: 3.75
+            },
+            accursed_visage = {
+                name: 'Accursed Visage',
+                type: 'helm',
+                fortitude: 4
+            }
+        ],
 
-        armor = [
+        chest = [
             shirt = {
                 name: 'Shirt',
-                type: 'armor',
+                type: 'chest',
                 fortitude: 0,
                 rarity: 100,
                 agility: 4
             },
-            padded_armor = {
-                name: 'Padded Armor',
-                type: 'armor',
+            padded_chest = {
+                name: 'Padded chest',
+                type: 'chest',
                 fortitude: 0.25,
                 rarity: 90,
                 agility: 3
             },
-            studded_armor = {
-                name: 'Studded Armor',
-                type: 'armor',
+            studded_chest = {
+                name: 'Studded chest',
+                type: 'chest',
                 fortitude: 0.5,
                 rarity: 80,
                 agility: 2
             },
             ring_mail = {
                 name: 'Ring Mail',
-                type: 'armor',
+                type: 'chest',
                 fortitude: 0.75,
                 rarity: 70,
                 agility: 1
             },
             scale_mail = {
                 name: 'Scale Mail',
-                type: 'armor',
+                type: 'chest',
                 fortitude: 1,
                 rarity: 60
             },
             chainmail = {
                 name: 'Chainmail',
-                type: 'armor',
+                type: 'chest',
                 fortitude: 1.25,
                 rarity: 50
             },
             light_plate = {
                 name: 'Light Plate',
-                type: 'armor',
+                type: 'chest',
                 fortitude: 1.5,
                 rarity: 30
             },
             heavy_plate = {
                 name: 'Heavy Plate',
-                type: 'armor',
+                type: 'chest',
                 fortitude: 1.75,
                 rarity: 25
             },
-            ornate_armor = {
-                name: 'Ornate Armor',
-                type: 'armor',
+            ornate_chest = {
+                name: 'Ornate chest',
+                type: 'chest',
                 fortitude: 2,
                 rarity: 20
             },
             chaos_plate = {
                 name: 'Chaos Plate',
-                type: 'armor',
+                type: 'chest',
                 fortitude: 2.25,
                 rarity: 15
             },
-            ancient_armor = {
-                name: 'Ancient Armor',
-                type: 'armor',
+            ancient_chest = {
+                name: 'Ancient chest',
+                type: 'chest',
                 fortitude: 2.5,
                 rarity: 10
             },
             archon_plate = {
                 name: 'Archon Plate',
-                type: 'armor',
+                type: 'chest',
                 fortitude: 2.75,
                 rarity: 5
             },
             sacred_plate = {
                 name: 'Sacred Plate',
-                type: 'armor',
+                type: 'chest',
                 fortitude: 3,
                 rarity: 3
             },
             kraken_shell = {
                 name: 'Kraken Shell',
-                type: 'armor',
+                type: 'chest',
                 fortitude: 3.5,
                 rarity: 2
             },
             shadow_plate = {
                 name: 'Shadow Plate',
-                type: 'armor',
+                type: 'chest',
                 fortitude: 4,
                 rarity: 1
             }
-        ]
+        ],
+		
+		legs = [
+            shirt = {
+                name: 'Shirt',
+                type: 'chest',
+                fortitude: 0,
+                rarity: 100,
+                agility: 4
+            },
+            padded_chest = {
+                name: 'Padded Chest',
+                type: 'chest',
+                fortitude: 0.25,
+                rarity: 90,
+                agility: 3
+            },
+            studded_chest = {
+                name: 'Studded Chest',
+                type: 'chest',
+                fortitude: 0.5,
+                rarity: 80,
+                agility: 2
+            },
+            ring_mail = {
+                name: 'Ring Mail',
+                type: 'chest',
+                fortitude: 0.75,
+                rarity: 70,
+                agility: 1
+            },
+            scale_mail = {
+                name: 'Scale Mail',
+                type: 'chest',
+                fortitude: 1,
+                rarity: 60
+            },
+            chainmail = {
+                name: 'Chainmail',
+                type: 'chest',
+                fortitude: 1.25,
+                rarity: 50
+            },
+            light_plate = {
+                name: 'Light Plate',
+                type: 'chest',
+                fortitude: 1.5,
+                rarity: 30
+            },
+            heavy_plate = {
+                name: 'Heavy Plate',
+                type: 'chest',
+                fortitude: 1.75,
+                rarity: 25
+            },
+            ornate_chest = {
+                name: 'Ornate chest',
+                type: 'chest',
+                fortitude: 2,
+                rarity: 20
+            },
+            chaos_plate = {
+                name: 'Chaos Plate',
+                type: 'chest',
+                fortitude: 2.25,
+                rarity: 15
+            },
+            ancient_chest = {
+                name: 'Ancient chest',
+                type: 'chest',
+                fortitude: 2.5,
+                rarity: 10
+            },
+            archon_plate = {
+                name: 'Archon Plate',
+                type: 'chest',
+                fortitude: 2.75,
+                rarity: 5
+            },
+            sacred_plate = {
+                name: 'Sacred Plate',
+                type: 'chest',
+                fortitude: 3,
+                rarity: 3
+            },
+            kraken_shell = {
+                name: 'Kraken Shell',
+                type: 'chest',
+                fortitude: 3.5,
+                rarity: 2
+            },
+            shadow_plate = {
+                name: 'Shadow Plate',
+                type: 'chest',
+                fortitude: 4,
+                rarity: 1
+            }
+        ],
+		
+		
     ]
 };
 
