@@ -557,6 +557,8 @@ async function RPGOptions(user) {
     if (actions.includes('ascend')) opt = opt + '**Ascend Stairs** (*!ascend*)\n';
     if (actions.includes('search')) opt = opt + '**Search** (*!search*)\n';
     if (actions.includes('touch')) opt = opt + '**Touch** (*!touch*)\n';
+    if (actions.includes('fly')) opt = opt + '**Fly on Airship** (*!fly*)\n';
+    if (actions.includes('sail')) opt = opt + '**Sail on Boat** (*!sail*)\n';
 
     opt = opt.slice(0, -1);
 	
@@ -837,6 +839,11 @@ async function getLocLevel(user) {
     return level;
 }
 
+async function getLocCalcLevel(user) {
+	let locLevel = await getLocLevel(user);
+	return locLevel * 5
+}
+
 async function canUseAction(user, action) {
 	if(await isInDungeon(user.id)) {
 		let dungeonActions = await getDungeonActions(user);
@@ -884,6 +891,7 @@ async function getRandomMonster(user, local, biome, any, dungeon) {
     if(local) monsterTable = monsterTable.concat(await getLocalMonsters(user));
 	if(biome) monsterTable = monsterTable.concat(await getBiomeMonsters(biomeName));
 	if(dungeon) monsterTable = monsterTable.concat(await getDungeonMonsters(user));
+	log('\x1b[32m%s\x1b[0m', 'DB: Monster table is '+monsterTable);
 	if(any) return await getAnyMonster();
     let random = randomIntEx(0, monsterTable.length);
 	if(monsterTable.length < 1) return false;
@@ -1025,6 +1033,16 @@ async function generateCoasts(x, y) {
     return oceanIndex;
 }
 
+async function hasPath(x, y) {
+	var coords = new Array();
+    coords.push(x);
+    coords.push(y);
+    let path = await queryDB("SELECT path FROM locations WHERE coords='" + JSON.stringify(coords) + "'");
+	let pathStr = path[0].path;
+	if(pathStr.length > 0) return true;
+	else return false;
+}
+
 async function makeTile(x, y, dungeon=false) {
     var coords = new Array();
     coords.push(x);
@@ -1033,31 +1051,53 @@ async function makeTile(x, y, dungeon=false) {
 	if(dungeon) tiles = await queryDB("SELECT * FROM locations_dungeon WHERE coords='" + JSON.stringify(coords) + "'");
     var marker;
     var biome;
+	var path;
 
     if (tiles && tiles.length) {
-        var marker = tiles[0].marker;
-        var biome = tiles[0].biome;
+        marker = tiles[0].marker;
+        biome = tiles[0].biome;
+		path = tiles[0].path;
     } else {
         //log("\x1b[31m%s\x1b[0m", "DB: Couldn't find tile at x" + x + " y" + y);
         marker = '';
         biome = 'ocean';
+		path = '';
 		if(dungeon) biome = 'black';
     }
 
 
     let imgRaw = './img/tiles/' + biome + '.png';
     let imgMarker = './img/tiles/' + marker + '.png';
+	let paths = new Array();
+	if(path.length > 0) {
+		if(path.indexOf(',') > -1) {
+			let pathArray = tiles[0].path.split(',');
+			for(let i = 0; i < pathArray.length; i++) {
+				paths.push(pathArray[i]);
+			}
+		}
+		else paths.push(tiles[0].path);
+	}
+	
     let snowflake = new Date().getTime();
     let imgBG = './img/temp/active_' + snowflake + '.png';
 
     let tpl = await Jimp.read(imgRaw);
     let clone = await tpl.clone().writeAsync(imgBG);
     tpl = await Jimp.read(imgBG);
+	
+    var centerX = tpl.bitmap.width * 0.5;
+    var centerY = tpl.bitmap.height * 0.5;
+	
+	if(paths.length > 0) {
+		for(let pi = 0; pi < paths.length; pi++) {
+			let pathTpl = await Jimp.read('./img/tiles/paths/'+paths[pi]+'.png');
+			tpl.composite(pathTpl, 0, 0, [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
+		}
+	}
 
     if (marker.length > 0) {
         const markerTpl = await Jimp.read(imgMarker);
-        var centerX = tpl.bitmap.width * 0.5;
-        var centerY = tpl.bitmap.height * 0.5;
         tpl.composite(markerTpl, centerX - (markerTpl.bitmap.width * 0.5), centerY - (markerTpl.bitmap.height * 0.5), [Jimp.BLEND_DESTINATION_OVER, 1, 1]);
     }
     //log("\x1b[32m%s\x1b[0m", "DB: Made tile at x"+x+" y"+y);
@@ -1693,5 +1733,7 @@ module.exports = {
 	getDungeonLoot,
 	getDungeonLocName,
 	getDungeonLocation,
-	activateTile
+	activateTile,
+	hasPath,
+	getLocCalcLevel
 };

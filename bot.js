@@ -28,6 +28,7 @@ client.registry
         ['profile', 'Profile Commands'],
         ['casino', 'Casino Commands'],
         ['rpg', 'RPG Commands'],
+        ['quest', 'Quest Commands'],
         ['server', 'Server Commands'],
         ['fun', 'Fun Commands'],
         ['pet', 'Pet Commands']

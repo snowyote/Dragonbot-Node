@@ -82,10 +82,13 @@ module.exports = class TravelCommand extends Command {
 				let t1 = performance.now();
 				Utils.log("\x1b[45m%s\x1b[0m", "Generating map (by travel) took " + ((t1 - t0)/1000).toFixed(2) + " seconds!");
 				let encounterChance = Utils.randomIntIn(1,100);
+				let encounterProbability = 50;
+				if(await Utils.hasPath(movement[0], movement[1]))
+					encounterProbability = 25;
 				let monsterToFight = await Utils.getRandomMonster(msg.author, true, true, false, false);
 				if(locType == "dungeon_location")
 					monsterToFight = await Utils.getRandomMonster(msg.author, true, false, false, true);
-				if(monsterToFight > 0 && encounterChance <= 50 && monsterToFight !== null)
+				if(monsterToFight > 0 && encounterChance <= encounterProbability && monsterToFight !== null)
 					await BattleUtils.battle(msg, monsterToFight, this.battles, true);
 			}
 		} else {

@@ -6,7 +6,7 @@ module.exports = class QuestCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'quest',
-            group: 'rpg',
+            group: 'quest',
             memberName: 'quest',
             description: 'Accept a quest',
             examples: ['quest <id>'],

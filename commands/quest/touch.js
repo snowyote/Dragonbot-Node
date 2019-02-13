@@ -9,7 +9,7 @@ module.exports = class TouchCommand extends Command {
 	constructor(client) {
 		super(client, {
 			name: 'touch',
-			group: 'rpg',
+			group: 'quest',
 			memberName: 'touch',
 			description: 'Touch something',
             examples: ['touch']

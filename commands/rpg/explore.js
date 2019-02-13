@@ -31,7 +31,6 @@ module.exports = class ExploreCommand extends Command {
         Utils.log("\x1b[36m%s\x1b[0m", "DB: Selected user ID " + msg.author.id);
 		var userID = queryRes[0].id;
 		var active = queryRes[0].activePet;
-		if(msg.channel.id == "533381330675957766") {
 			if(active > 0) {
 				let petRes = await Utils.queryDB("SELECT * FROM pets WHERE id="+active);
 				var staminaBoost = petRes[0].staminaBoost;
@@ -85,6 +84,10 @@ module.exports = class ExploreCommand extends Command {
 									case 'Forest':
 										possibleRewards.push('nothing', 'battle', 'stamina', 'food', 'coins', 'quest', 'item', 'keys', 'crates', 'artifacts', 'quest');
 										foodMsg = "hunted an animal in the forest, gaining";
+										break;
+									case 'Mystic':
+										possibleRewards.push('nothing', 'battle', 'stamina', 'food', 'coins', 'quest', 'item', 'keys', 'crates', 'artifacts', 'quest', 'gcrates', 'orbs');
+										foodMsg = "was gifted food by the mystic tree, gaining";
 										break;
 								}
 								
@@ -477,9 +480,5 @@ module.exports = class ExploreCommand extends Command {
 				noticeMsg.addField("Can't Explore", "You don't have any pets to explore with, use `!adopt` to get one!");
 				return msg.embed(noticeMsg);
 			}
-		} else {
-			noticeMsg.addField("Can't Explore", "This can only be used in the exploration channel!");
-			return msg.embed(noticeMsg);
-		}
     };
 }

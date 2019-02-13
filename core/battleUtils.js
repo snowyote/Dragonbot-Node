@@ -228,6 +228,7 @@ async function randomDrops(user, monsterID, min, max, isBoss=false) {
 }
 
 async function randomEnemyStats(user, monsterID, isElite=false, isUltraElite=false) {
+	Utils.log('\x1b[45m%s\x1b[0m', 'DB: Generating monster stats with ID '+monsterID);
 	let level = await Utils.getLocLevel(user);
 	
 	let rVitality = (Utils.randomIntIn(isElite ? 4 : 0, isElite ? 8 : 3)+level)*level;
@@ -245,6 +246,8 @@ async function randomEnemyStats(user, monsterID, isElite=false, isUltraElite=fal
 		randomHealth = randomHealth * 2;
 		randomMagic = randomMagic * 2;
 	}
+	
+	let monsterName = await getMonsterName(monsterID);
 	
 	let multiplier = 1;
 	if(isElite) {
@@ -267,7 +270,6 @@ async function randomEnemyStats(user, monsterID, isElite=false, isUltraElite=fal
 	monsterStats[5] = randomHealth;
 	monsterStats[6] = randomMagic*level;
 	
-	let monsterName = await getMonsterName(monsterID);
 	monsterStats[7] = monsterName;
 	
 	let yourLevel = await Utils.getLevel(user.id);
@@ -485,7 +487,6 @@ async function battle(msg, monsterID, battleMap, random=false, tournament=false,
             await msg.say('You cannot do that!');
         }
 		let t1 = performance.now();
-		Utils.log("\x1b[45m%s\x1b[0m", "Battle round took " + ((t1 - t0)/1000).toFixed(2) + " seconds!");
     }
     const {
         winner

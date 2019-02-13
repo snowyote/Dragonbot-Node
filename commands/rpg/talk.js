@@ -14,6 +14,7 @@ module.exports = class TalkCommand extends Command {
     }
 
     async run(msg) {
+		
 		const embedMsg = new Discord.RichEmbed()
                   .setAuthor("World of the House of Dragons", "https://i.imgur.com/CyAb3mV.png")
 				  
