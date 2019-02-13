@@ -3,114 +3,114 @@ const equipment = {
         broken = {
             name: 'Broken',
             bonus: -1,
-			level_modifier: -5,
+            level_modifier: -5,
             rarity: 100
         },
         damaged = {
             name: 'Damaged',
-			level_modifier: -4,
+            level_modifier: -4,
             bonus: -0.5,
             rarity: 100
         },
         chipped = {
             name: 'Chipped',
-			level_modifier: -3,
+            level_modifier: -3,
             bonus: -0.25,
             rarity: 100
         },
         inferior = {
             name: 'Inferior',
-			level_modifier: -2,
+            level_modifier: -2,
             bonus: 0,
             rarity: 100
         },
         sturdy = {
             name: 'Sturdy',
-			level_modifier: -1,
+            level_modifier: -1,
             bonus: 0.25,
             rarity: 80
         },
         hardened = {
             name: 'Hardened',
-			level_modifier: 0,
+            level_modifier: 0,
             bonus: 0.5,
             rarity: 70
         },
         simple = {
             name: 'Simple',
-			level_modifier: 0,
+            level_modifier: 0,
             bonus: 0.75,
             rarity: 60
         },
         common = {
             name: 'Common',
-			level_modifier: 0,
+            level_modifier: 0,
             bonus: 1,
             rarity: 50
         },
         large = {
             name: 'Large',
-			level_modifier: 0,
+            level_modifier: 0,
             bonus: 1.25,
             rarity: 40
         },
         savage = {
             name: 'Savage',
-			level_modifier: 0,
+            level_modifier: 0,
             bonus: 1.5,
             rarity: 30
         },
         reinforced = {
             name: 'Reinforced',
-			level_modifier: 0,
+            level_modifier: 0,
             bonus: 1.75,
             rarity: 25
         },
         tempered = {
             name: 'Tempered',
-			level_modifier: 1,
+            level_modifier: 1,
             bonus: 2,
             rarity: 20
         },
         ruthless = {
             name: 'Ruthless',
-			level_modifier: 2,
+            level_modifier: 2,
             bonus: 2.25,
             rarity: 15
         },
         demonic = {
             name: 'Demonic',
-			level_modifier: 3,
+            level_modifier: 3,
             bonus: 2.5,
             rarity: 10
         },
         menacing = {
             name: 'Menacing',
-			level_modifier: 4,
+            level_modifier: 4,
             bonus: 2.75,
             rarity: 5
         },
         godly = {
             name: 'Godly',
-			level_modifier: 5,
+            level_modifier: 5,
             bonus: 3,
             rarity: 4
         },
         demonic = {
             name: 'Demonic',
-			level_modifier: 6,
+            level_modifier: 6,
             bonus: 3.25,
             rarity: 3
         },
         mythical = {
             name: 'Mythical',
-			level_modifier: 7,
+            level_modifier: 7,
             bonus: 3.5,
             rarity: 2,
         },
         legendary = {
             name: 'Legendary',
-			level_modifier: 8,
+            level_modifier: 8,
             bonus: 4,
             rarity: 1
         }
@@ -119,109 +119,109 @@ const equipment = {
     material: [
         wood = {
             name: 'Cardboard',
-			level_modifier: -5,
+            level_modifier: -5,
             bonus: 0,
             rarity: 100
         },
         bone = {
             name: 'Bone',
-			level_modifier: -4,
+            level_modifier: -4,
             bonus: 0.125,
             rarity: 100
         },
         leatherbound = {
             name: 'Leatherbound',
-			level_modifier: -3,
+            level_modifier: -3,
             bonus: 0.25,
             rarity: 100
         },
         stone = {
             name: 'Stone',
-			level_modifier: -2,
+            level_modifier: -2,
             bonus: 0.5,
             rarity: 90
         },
         copper = {
             name: 'Copper',
-			level_modifier: -1,
+            level_modifier: -1,
             bonus: 0.75,
             rarity: 80
         },
         iron = {
             name: 'Iron',
-			level_modifier: 0,
+            level_modifier: 0,
             bonus: 1,
             rarity: 70
         },
         steel = {
             name: 'Steel',
-			level_modifier: 0,
+            level_modifier: 0,
             bonus: 1.25,
             rarity: 60
         },
         silver = {
             name: 'Silver',
-			level_modifier: 0,
+            level_modifier: 0,
             bonus: 1.5,
             rarity: 50
         },
         gold = {
             name: 'Gold',
-			level_modifier: 0,
+            level_modifier: 0,
             bonus: 1.75,
             rarity: 40
         },
         crystal = {
             name: 'Crystal',
-			level_modifier: 1,
+            level_modifier: 1,
             bonus: 2,
             rarity: 30
         },
         titanium = {
             name: 'Titanium',
-			level_modifier: 2,
+            level_modifier: 2,
             bonus: 2.25,
             rarity: 25
         },
         mythril = {
             name: 'Mythril',
-			level_modifier: 3,
+            level_modifier: 3,
             bonus: 2.5,
             rarity: 20
         },
         adamantite = {
             name: 'Adamantite',
-			level_modifier: 4,
+            level_modifier: 4,
             bonus: 2.75,
             rarity: 15
         },
         astral = {
             name: 'Astral',
-			level_modifier: 5,
+            level_modifier: 5,
             bonus: 3,
             rarity: 10
         },
         cosmic = {
             name: 'Cosmic',
-			level_modifier: 6,
+            level_modifier: 6,
             bonus: 3.25,
             rarity: 5
         },
         chaotic = {
             name: 'Chaotic',
-			level_modifier: 7,
+            level_modifier: 7,
             bonus: 3.5,
             rarity: 3
         },
         nightmare = {
             name: 'Nightmare',
-			level_modifier: 8,
+            level_modifier: 8,
             bonus: 3.75,
             rarity: 2
         },
         holy = {
             name: 'Holy',
-			level_modifier: 9,
+            level_modifier: 9,
             bonus: 4,
             rarity: 1
         }

@@ -5,31 +5,35 @@ module.exports.Item = class Item {
 
     generateItem(userID) {
         return new Promise((resolve) => {
-            let playerLevel = await Utils.getLevel(userID);
-            const modifierRandom = Math.round(Utils.randomIntIn(0, 100) - (playerLevel / 5));
-            const materialRandom = Math.round(Utils.randomIntIn(0, 100) - (playerLevel / 5));
-            const itemModifiers = items.modifier.filter(itemModifier => itemModifier.rarity >= modifierRandom);
-            const itemMaterials = items.material.filter(itemMaterial => itemMaterial.rarity >= materialRandom);
+                let playerLevel = await Utils.getLevel(userID);
+                const modifierRandom = Math.round(Utils.randomIntIn(0, 100) - (playerLevel / 5));
+                const materialRandom = Math.round(Utils.randomIntIn(0, 100) - (playerLevel / 5));
+                const itemModifiers = items.modifier.filter(itemModifier => itemModifier.rarity >= modifierRandom);
+                const itemMaterials = items.material.filter(itemMaterial => itemMaterial.rarity >= materialRandom);
 
-            const randomModifier = Utils.randomIntEx(0, itemModifiers.length);
-            const randomMaterial = Utils.randomIntEx(0, itemMaterials.length);
+                const randomModifier = Utils.randomIntEx(0, itemModifiers.length);
+                const randomMaterial = Utils.randomIntEx(0, itemMaterials.length);
 
-            let randomEquip = Utils.randomIntEx(0, items.type.length);
-            let randomType = Utils.randomIntEx(0, items.type[randomEquip].length);
-            let itemType = items.type[randomEquip][randomType];
-			
-			if(!itemType.hasOwnProperty('prowess')) itemType.prowess = 0;
-			if(!itemType.hasOwnProperty('fortitude')) itemType.fortitude = 0;
-			if(!itemType.hasOwnProperty('agility')) itemType.agility = 0;
-			if(!itemType.hasOwnProperty('arcana')) itemType.arcana = 0;
-			if(!itemType.hasOwnProperty('vitality')) itemType.vitality = 0;
-			if(!itemType.hasOwnProperty('impact')) itemType.impact = 0;
-			if(!itemType.hasOwnProperty('precision')) itemType.precision = 0;
+                let randomEquip = Utils.randomIntEx(0, items.type.length);
+                let randomType = Utils.randomIntEx(0, items.type[randomEquip].length);
+                let itemType = items.type[randomEquip][randomType];
 
-            let item = {
+                if (!itemType.hasOwnProperty('prowess')) itemType.prowess = 0;
+                if (!itemType.hasOwnProperty('fortitude')) itemType.fortitude = 0;
+                if (!itemType.hasOwnProperty('agility')) itemType.agility = 0;
+                if (!itemType.hasOwnProperty('arcana')) itemType.arcana = 0;
+                if (!itemType.hasOwnProperty('vitality')) itemType.vitality = 0;
+                if (!itemType.hasOwnProperty('impact')) itemType.impact = 0;
+                if (!itemType.hasOwnProperty('precision')) itemType.precision = 0;
+
+                let levelReq = 0 + itemModifiers[randomModifier].level_modifier + itemMaterials[randomMaterial].level_modifier;
+                if (levelReq < 1) levelReq = 1;
+
+                let item = {
                     name: `${itemModifiers[randomModifier].name} ${itemMaterials[randomMaterial].name} ${itemType.name}`,
                     type: itemType.type,
                     bonus: itemModifiers[randomModifier].bonus + itemMaterials[randomMaterial].bonus,
+                    level_requirement: levelReq,
                     prowess: 0 + itemType.prowess,
                     fortitude: 0 + itemType.fortitude,
                     agility: 0 + itemType.agility,
@@ -42,10 +46,10 @@ module.exports.Item = class Item {
 
             return resolve(item);
         });
-    }
-	
-    get items() {
-        return items.type;
-    }
+}
+
+get items() {
+    return items.type;
+}
 
 }
