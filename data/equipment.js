@@ -1,26 +1,61 @@
 const equipment = {
+	rarity: [
+		common = {
+			name: 'Common',
+			level_modifier: 0,
+			level_multiplier: 1,
+			rarity_min: 50,
+			bonus: 0,
+			rarity: 100
+		},
+		magic = {
+			name: 'Magic',
+			level_modifier: 2,
+			level_multiplier: 2,
+			rarity_min: 30,
+			bonus: 0,
+			rarity: 30
+		},
+		rare = {
+			name: 'Rare',
+			level_modifier: 4,
+			level_multiplier: 3,
+			rarity_min: 10,
+			bonus: 2,
+			rarity: 15
+		},
+		unique = {
+			name: 'Unique',
+			level_modifier: 8,
+			level_multiplier: 4,
+			rarity_min: 1,
+			bonus: 4,
+			rarity: 5
+		},
+	],
+	
     modifier: [
         broken = {
             name: 'Broken',
             bonus: -1,
-            level_modifier: -5,
+            level_modifier: -1,
             rarity: 100
         },
         damaged = {
             name: 'Damaged',
-            level_modifier: -4,
+            level_modifier: -1,
             bonus: -0.5,
             rarity: 100
         },
         chipped = {
             name: 'Chipped',
-            level_modifier: -3,
+            level_modifier: -1,
             bonus: -0.25,
             rarity: 100
         },
         inferior = {
             name: 'Inferior',
-            level_modifier: -2,
+            level_modifier: -1,
             bonus: 0,
             rarity: 100
         },
@@ -32,55 +67,55 @@ const equipment = {
         },
         hardened = {
             name: 'Hardened',
-            level_modifier: 0,
+            level_modifier: 1,
             bonus: 0.5,
             rarity: 70
         },
         simple = {
             name: 'Simple',
-            level_modifier: 0,
+            level_modifier: 1,
             bonus: 0.75,
             rarity: 60
         },
         common = {
             name: 'Common',
-            level_modifier: 0,
+            level_modifier: 1,
             bonus: 1,
             rarity: 50
         },
         large = {
             name: 'Large',
-            level_modifier: 0,
+            level_modifier: 2,
             bonus: 1.25,
             rarity: 40
         },
         savage = {
             name: 'Savage',
-            level_modifier: 0,
+            level_modifier: 2,
             bonus: 1.5,
             rarity: 30
         },
         reinforced = {
             name: 'Reinforced',
-            level_modifier: 0,
+            level_modifier: 2,
             bonus: 1.75,
             rarity: 25
         },
         tempered = {
             name: 'Tempered',
-            level_modifier: 1,
+            level_modifier: 3,
             bonus: 2,
             rarity: 20
         },
         ruthless = {
             name: 'Ruthless',
-            level_modifier: 2,
+            level_modifier: 3,
             bonus: 2.25,
             rarity: 15
         },
         demonic = {
             name: 'Demonic',
-            level_modifier: 3,
+            level_modifier: 4,
             bonus: 2.5,
             rarity: 10
         },
@@ -116,28 +151,199 @@ const equipment = {
         }
     ],
 
+    suffix: [
+        readiness = {
+            name: 'of Readiness',
+            level_modifier: 1,
+            rarity: 100,
+            agility: 1
+        },
+        alacrity = {
+            name: 'of Alacrity',
+            level_modifier: 2,
+            rarity: 75,
+            agility: 1.5
+        },
+        swiftness = {
+            name: 'of Swiftness',
+            level_modifier: 3,
+            rarity: 50,
+            agility: 2
+        },
+        quickness = {
+            name: 'of Quickness',
+            level_modifier: 4,
+            rarity: 25,
+            agility: 2.5
+        },
+        thorns = {
+            name: 'of Thorns',
+            level_modifier: 1,
+            rarity: 100,
+            prowess: 1
+        },
+        spikes = {
+            name: 'of Spikes',
+            level_modifier: 2,
+            rarity: 75,
+            prowess: 1.5
+        },
+        razors = {
+            name: 'of Razors',
+            level_modifier: 3,
+            rarity: 50,
+            prowess: 2
+        },
+        blades = {
+            name: 'of Blades',
+            level_modifier: 4,
+            rarity: 25,
+            prowess: 2.5
+        },
+        fox = {
+            name: 'of the Fox',
+            level_modifier: 1,
+            rarity: 100,
+            vitality: 1
+        },
+        wolf = {
+            name: 'of the Wolf',
+            level_modifier: 2,
+            rarity: 75,
+            vitality: 2
+        },
+        tiger = {
+            name: 'of the Tiger',
+            level_modifier: 3,
+            rarity: 50,
+            vitality: 3
+        },
+        colossus = {
+            name: 'of the Colossus',
+            level_modifier: 4,
+            rarity: 25,
+            vitality: 4
+        },
+        energy = {
+            name: 'of Energy',
+            level_modifier: 1,
+            rarity: 100,
+            arcana: 1
+        },
+        mind = {
+            name: 'of Mind',
+            level_modifier: 2,
+            rarity: 75,
+            arcana: 2
+        },
+        brilliance = {
+            name: 'of Brilliance',
+            level_modifier: 3,
+            rarity: 50,
+            arcana: 3
+        },
+        enlightenment = {
+            name: 'of Enlightenment',
+            level_modifier: 4,
+            rarity: 25,
+            arcana: 4
+        },
+        warding = {
+            name: 'of Warding',
+            level_modifier: 1,
+            rarity: 100,
+            fortitude: 1
+        },
+        sentinel = {
+            name: 'of the Sentinel',
+            level_modifier: 2,
+            rarity: 75,
+            fortitude: 1.5
+        },
+        guarding = {
+            name: 'of Guarding',
+            level_modifier: 3,
+            rarity: 50,
+            fortitude: 2
+        },
+        negation = {
+            name: 'of Negation',
+            level_modifier: 4,
+            rarity: 25,
+            fortitude: 2.5
+        },
+        maiming = {
+            name: 'of Maiming',
+            level_modifier: 1,
+            rarity: 100,
+            impact: 1
+        },
+        slaying = {
+            name: 'of Slaying',
+            level_modifier: 2,
+            rarity: 75,
+            impact: 1.5
+        },
+        gore = {
+            name: 'of Gore',
+            level_modifier: 3,
+            rarity: 50,
+            impact: 2
+        },
+        evisceration = {
+            name: 'of Evisceration',
+            level_modifier: 4,
+            rarity: 25,
+            impact: 2.5
+        },
+        worth = {
+            name: 'of Worth',
+            level_modifier: 1,
+            rarity: 100,
+            precision: 1
+        },
+        measure = {
+            name: 'of Measure',
+            level_modifier: 2,
+            rarity: 75,
+            precision: 1.5
+        },
+        excellence = {
+            name: 'of Excellence',
+            level_modifier: 3,
+            rarity: 50,
+            precision: 2
+        },
+        transcendence = {
+            name: 'of Transcendence',
+            level_modifier: 4,
+            rarity: 25,
+            precision: 2.5
+        }
+    ],
+
     material: [
         wood = {
-            name: 'Cardboard',
-            level_modifier: -5,
+            name: 'Wooden',
+            level_modifier: -1,
             bonus: 0,
             rarity: 100
         },
         bone = {
             name: 'Bone',
-            level_modifier: -4,
+            level_modifier: -1,
             bonus: 0.125,
             rarity: 100
         },
         leatherbound = {
             name: 'Leatherbound',
-            level_modifier: -3,
+            level_modifier: -1,
             bonus: 0.25,
             rarity: 100
         },
         stone = {
             name: 'Stone',
-            level_modifier: -2,
+            level_modifier: -1,
             bonus: 0.5,
             rarity: 90
         },
@@ -149,73 +355,73 @@ const equipment = {
         },
         iron = {
             name: 'Iron',
-            level_modifier: 0,
+            level_modifier: 1,
             bonus: 1,
             rarity: 70
         },
         steel = {
             name: 'Steel',
-            level_modifier: 0,
+            level_modifier: 2,
             bonus: 1.25,
             rarity: 60
         },
         silver = {
             name: 'Silver',
-            level_modifier: 0,
+            level_modifier: 3,
             bonus: 1.5,
             rarity: 50
         },
         gold = {
             name: 'Gold',
-            level_modifier: 0,
+            level_modifier: 4,
             bonus: 1.75,
             rarity: 40
         },
         crystal = {
             name: 'Crystal',
-            level_modifier: 1,
+            level_modifier: 5,
             bonus: 2,
             rarity: 30
         },
         titanium = {
             name: 'Titanium',
-            level_modifier: 2,
+            level_modifier: 6,
             bonus: 2.25,
             rarity: 25
         },
         mythril = {
             name: 'Mythril',
-            level_modifier: 3,
+            level_modifier: 7,
             bonus: 2.5,
             rarity: 20
         },
         adamantite = {
             name: 'Adamantite',
-            level_modifier: 4,
+            level_modifier: 8,
             bonus: 2.75,
             rarity: 15
         },
         astral = {
             name: 'Astral',
-            level_modifier: 5,
+            level_modifier: 8,
             bonus: 3,
             rarity: 10
         },
         cosmic = {
             name: 'Cosmic',
-            level_modifier: 6,
+            level_modifier: 8,
             bonus: 3.25,
             rarity: 5
         },
         chaotic = {
             name: 'Chaotic',
-            level_modifier: 7,
+            level_modifier: 9,
             bonus: 3.5,
             rarity: 3
         },
         nightmare = {
             name: 'Nightmare',
-            level_modifier: 8,
+            level_modifier: 9,
             bonus: 3.75,
             rarity: 2
         },
@@ -534,7 +740,7 @@ const equipment = {
                 rarity: 25
             },
             ornate_chest = {
-                name: 'Ornate chest',
+                name: 'Ornate Chest',
                 type: 'chest',
                 fortitude: 2,
                 rarity: 20
@@ -546,7 +752,7 @@ const equipment = {
                 rarity: 15
             },
             ancient_chest = {
-                name: 'Ancient chest',
+                name: 'Ancient Chest',
                 type: 'chest',
                 fortitude: 2.5,
                 rarity: 10
