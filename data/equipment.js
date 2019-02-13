@@ -284,6 +284,66 @@ const equipment = {
             }
         ],
 
+        shield = [
+            buckler = {
+                name: 'Buckler',
+                type: 'shield',
+                rarity: 100,
+                fortitude: 0.25
+            },
+            small_shield = {
+                name: 'Small Shield',
+                type: 'shield',
+                rarity: 80,
+                fortitude: 0.5
+            },
+            large_shield = {
+                name: 'Large Shield',
+                type: 'shield',
+                rarity: 60,
+                fortitude: 0.75
+            },
+            kite_shield = {
+                name: 'Kite Shield',
+                type: 'shield',
+                rarity: 40,
+                fortitude: 1
+            },
+            spiked_shield = {
+                name: 'Spiked Shield',
+                type: 'shield',
+                fortitude: 1.25,
+                rarity: 20,
+                prowess: 0.5
+            },
+            tower_shield = {
+                name: 'Tower Shield',
+                type: 'shield',
+                rarity: 15,
+                fortitude: 1.5
+            },
+            barbed_shield = {
+                name: 'Barbed Shield',
+                type: 'shield',
+                rarity: 10,
+                fortitude: 1.75,
+                prowess: 1
+            },
+            pavise = {
+                name: 'Pavise',
+                type: 'shield',
+                rarity: 5,
+                fortitude: 2
+            },
+            aegis = {
+                name: 'Aegis',
+                type: 'shield',
+                rarity: 1,
+                fortitude: 2.5,
+                prowess: 1.5
+            },
+        ],
+
         helm = [
             cap = {
                 name: 'Cap',
